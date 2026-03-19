@@ -1,0 +1,73 @@
+@mixin icon($fsize:1rem, $lheight:normal) {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: $lheight;
+  font-size: $fsize;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * @helpers icons
+ **/
+
+.foo-xs {
+  @include icon(.75em);
+  line-height: 0.75em;
+  vertical-align: -15%;
+}
+
+.foo-sm {
+  @include icon(.875em);
+  vertical-align: middle;
+}
+
+.foo-lg {
+  @include icon(1.33em);
+  vertical-align: middle;
+}
+
+.foo-2x {
+  @include icon(23em);
+  vertical-align: middle;
+}
+
+.foo-3x {
+  @include icon(3em, #000);
+  vertical-align: middle;
+}
+
+.foo-4x {
+  @include icon(4em);
+  vertical-align: middle;
+}
+
+.foo-5x {
+  @include icon(5em);
+  vertical-align: middle;
+}
+
+.foo-6x {
+  @include icon(6em);
+  vertical-align: middle;
+}
+
+.foo-7x {
+  @include icon(7em);
+  vertical-align: middle;
+}
+
+.foo-8x {
+  @include icon(8em);
+  vertical-align: middle;
+}
+
+.foo-9x {
+  @include icon(9em);
+  vertical-align: middle;
+}
+
+.foo-10x {
+  @include icon(10em);
+  vertical-align: middle;
+}

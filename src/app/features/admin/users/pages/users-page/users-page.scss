@@ -1,0 +1,118 @@
+// Avatar inicial
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-light, #e8f5f0);
+  color: var(--accent, #1e3a5f);
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// Header de la tabla
+.table-users-header th {
+  background: #f8fafc;
+  color: #5a7a9a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e8eef5;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+// Filas
+.table-users-row td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.table-users-row:last-child td {
+  border-bottom: none;
+}
+
+.table-users-row:hover td {
+  background: #f8fbff;
+}
+
+// Rol badges
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  i {
+    font-size: 0.8rem;
+  }
+
+}
+
+.role-super_admin {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+// Usuario
+.role-user {
+  background-color: #cff4fc;
+  color: #052c65;
+}
+
+.role-admin_colegio {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.role-tesorero {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.role-apoderado {
+  background: #e8f5f0;
+  color: #1a7f5a;
+}
+
+// Status dot
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+
+  &.active {
+    background: #1a7f5a;
+  }
+
+  &.inactive {
+    background: #9ca3af;
+  }
+}
+
+// Botones de acción
+.btn-icon {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #f0f4f8;
+    border-color: #dde3ef;
+  }
+}

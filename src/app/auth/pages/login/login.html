@@ -1,0 +1,98 @@
+<div class="container mt-5">
+	<div class="row justify-content-center">
+		<div class="col-md-4">
+			<div class="card shadow">
+				<div class="card-body p-4">
+
+					<h4 class="text-center mb-4">Iniciar sesión</h4>
+
+					<!-- Botones OAuth -->
+					<div class="d-grid gap-2 mb-3">
+						<button type="button" class="btn btn-outline-danger" (click)="onGoogleLogin()">
+							<i class="bi bi-google me-2"></i>Continuar con Google
+						</button>
+						<button type="button" class="btn btn-outline-primary" (click)="onFacebookLogin()">
+							<i class="bi bi-facebook me-2"></i>Continuar con Facebook
+						</button>
+					</div>
+
+					<div class="d-flex align-items-center mb-3">
+						<hr class="flex-grow-1">
+						<span class="mx-2 text-muted small">o</span>
+						<hr class="flex-grow-1">
+					</div>
+
+					<!-- Formulario reactivo -->
+					<form [formGroup]="loginForm" (ngSubmit)="login()">
+
+						<!-- Email -->
+						<div class="mb-3">
+							<label class="form-label">Email</label>
+							<input type="email" class="form-control" formControlName="email" autocomplete="email"
+								[class.is-invalid]="email.invalid && email.touched" placeholder="correo@ejemplo.com">
+							@if (email.touched && email.hasError('required')) {
+							<div class="invalid-feedback">El email es requerido</div>
+							}
+							@if (email.touched && email.hasError('email')) {
+							<div class="invalid-feedback">Ingresa un email válido</div>
+							}
+						</div>
+
+						<!-- Password -->
+						<div class="mb-3">
+							<label class="form-label">Contraseña</label>
+							<div class="input-group">
+								<input [type]="showPassword() ? 'text' : 'password'" class="form-control" formControlName="password"
+									autocomplete="current-password" [class.is-invalid]="password.invalid && password.touched"
+									placeholder="••••••••">
+								<button type="button" class="btn btn-outline-secondary" (click)="togglePassword()" tabindex="-1">
+									<i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
+								</button>
+								@if (password.touched && password.hasError('required')) {
+								<div class="invalid-feedback">La contraseña es requerida</div>
+								}
+								@if (password.touched && password.hasError('minlength')) {
+								<div class="invalid-feedback">Mínimo 6 caracteres</div>
+								}
+							</div>
+							<div class="text-end mt-1">
+								<a routerLink="/forgot-password" class="small text-decoration-none">
+									¿Olvidaste tu contraseña?
+								</a>
+							</div>
+						</div>
+
+						<!-- Error general -->
+						@if (errorMessage()) {
+						<div class="alert alert-danger py-2 small">
+							{{ errorMessage() }}
+						</div>
+						}
+
+						<!-- Submit -->
+						<div class="d-grid mb-3">
+							<button type="submit" class="btn btn-primary" [disabled]="loading()">
+								@if (loading()) {
+								<span class="spinner-border spinner-border-sm me-2"></span>
+								Ingresando...
+								} @else {
+								Ingresar
+								}
+							</button>
+						</div>
+
+					</form>
+
+					<!-- Registro -->
+					<div class="text-center small">
+						¿No tienes cuenta?
+						<a routerLink="/register" class="text-decoration-none">
+							Regístrate
+						</a>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

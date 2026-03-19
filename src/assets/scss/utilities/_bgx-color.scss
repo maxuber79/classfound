@@ -1,0 +1,54 @@
+ @use '../abstracts'as *;
+ @use '../base'as *;
+ @use 'sass:color';
+ @use 'sass:list';
+
+ // --- helper para contraste legible (YIQ simple) ---
+ @function yiq-contrast($color, $dark: #212529, $light: #fff) {
+   @if (type-of($color) !=color) {
+     @return $light;
+   }
+
+   $r: red($color);
+   $g: green($color);
+   $b: blue($color);
+   $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+   @return if($yiq >=150, $dark, $light);
+ }
+
+ // --- genera utilidades con prefijo propio (no choca con Bootstrap) ---
+ @mixin generate-bg-utils($map, $prefix: 'bgx', $use-important: true) {
+   $imp: if($use-important, '!important', null);
+
+   @each $name,
+   $value in $map {
+
+     // Fondo sólido y texto con contraste automático
+     .#{$prefix}-#{$name} {
+       --#{$prefix}-#{$name}: #{$value};
+       background-color: var(--#{$prefix}-#{$name}) #{$imp};
+       color: yiq-contrast($value) #{$imp};
+     }
+
+     // Sólo color de texto (por si lo quieres separado)
+     .#{$prefix}-text-#{$name} {
+       color: #{$value} #{$imp};
+     }
+
+     // Sólo borde (útil para chips, cards, etc.)
+     .#{$prefix}-border-#{$name} {
+       border-color: #{$value} #{$imp};
+     }
+
+     // Variante "soft": mezcla 15% con blanco
+     .#{$prefix}-#{$name}-soft {
+       $soft: mix(#fff, $value, 85%);
+       background-color: $soft #{$imp};
+       color: yiq-contrast($soft) #{$imp};
+     }
+   }
+ }
+
+ // Usa el mixin (elige tu prefijo)
+ // @include generate-bg-utils($bg-color-map, 'bg-cedyp'); // ejemplo con bg-cedyp-...
+ //@include generate-bg-utils($bg-color-map, 'bgx'); // genera .bgx-primary, etc.

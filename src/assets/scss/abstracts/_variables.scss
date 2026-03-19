@@ -1,0 +1,43 @@
+/*========================================
+=            Variables Tipografía         =
+========================================*/
+$font-base: null;
+$name-btn: null; // Nombre de clase de botón
+$font-buttons: Arial,
+Helvetica,
+sans-serif; // Fuente botones
+$font-size: null; // Tamaño base
+$font-dark: #1A2B23; // Color fuente oscuro
+$font-white: #ffffff; // Color fuente claro
+$font-weight: 400; // Peso fuente normal
+$font-muted: #6B85A0; // Color fuente muted
+$line-height: 1rem; // Altura línea base
+$title-size: 4rem; // Tamaño títulos principales
+$subtitle-size: 2rem; // Tamaño subtítulos
+$spacing: -0.25rem; // Espaciado entre letras
+
+/*===========================================
+=        Variables Layout y Medidas        =
+===========================================*/
+
+$padding: 0.375rem 1.7rem; // Padding botones 16px 7px
+$b-radius: 3.125rem; // Bordes redondeados botones
+$card-radius: 1rem; // Bordes redondeados cards
+$card-padding: 1.5rem; // Espaciado interno cards
+$btn-width: auto; // Ancho automático botones
+$icon-margin: 3.6rem; // Margen iconos
+$icon-margin-sm: 2rem; // Margen iconos pequeños
+$input-placeholder-color: #c9c8c8; // Color placeholder inputs
+$border-color: #CED4DA; // Color borde inputs
+$input-padding-y: 1.125rem; // Padding vertical inputs
+$input-padding-x: 1.375rem; // Padding horizontal inputs
+$input-line-height: 1; // Line-height inputs
+$input-padding-y-xs: 0.5rem; // Padding vertical XS
+$input-padding-x-xs: 0.75rem; // Padding horizontal XS
+
+
+$bg-lightgray: #f0f2f8; // Fondo gris claro
+$bg-darkgray: #2B2B2B; // Fondo gris oscuro
+$card-radius-sm: 0.5rem; // Bordes redondeados cards pequeños
+$card-radius-md: 0.75rem;
+$card-radius-xl: 1.125rem; // Bordes redondeados cards medianos

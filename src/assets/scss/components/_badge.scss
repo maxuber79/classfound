@@ -1,0 +1,82 @@
+@use '../abstracts'as *;
+@use 'sass:color';
+@use 'sass:list'; // Para list.nth
+@use 'sass:meta'; // Para meta.type-of
+
+// ============================================================
+// 🏷️ Componente: BADGE (Webmain)
+// Descripción: Insignias visuales para estados, categorías o tags.
+// Convención: .wm-badge--filled-{type} / .wm-badge--outline-{type}
+// ============================================================
+
+.wm-badge {
+  font-family: $font-base, sans-serif;
+  font-weight: 500;
+  font-size: 0.625rem;
+  line-height: 1;
+  padding: 0.276rem 0.512rem;
+  border-radius: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+
+  &--pill {
+    border-radius: 10rem;
+  }
+}
+
+// 🎨 Generador dinámico según mapa de colores
+@each $type,
+$pair in $badge-color-map {
+  $bg-color: list.nth($pair, 1);
+  $text-color: list.nth($pair, 2);
+  $safe-bg: if(meta.type-of($bg-color)=='color', $bg-color, #999);
+  $border-color: $safe-bg;
+  $hover-color: color.mix($safe-bg, #fff, $weight: 80%);
+
+  // ✅ Versión con fondo sólido
+  .wm-badge--filled-#{$type} {
+    @extend .wm-badge;
+    background-color: $safe-bg;
+    color: $text-color;
+
+    &:hover {
+      background-color: color.scale($safe-bg, $lightness: 10%);
+      color: $text-color;
+    }
+  }
+
+  // 🪶 Versión con borde (outline)
+  .wm-badge--outline-#{$type} {
+    @extend .wm-badge;
+    background-color: transparent;
+    color: $safe-bg;
+    border: 1px solid $border-color;
+
+    &:hover {
+      background-color: $hover-color;
+      color: $text-color;
+    }
+  }
+
+  // 🌑 Dark mode
+  body.dark-mode {
+    .wm-badge--filled-#{$type} {
+      background-color: color.adjust($safe-bg, $lightness: 20%);
+      color: color.adjust($text-color, $lightness: 25%);
+    }
+
+    .wm-badge--outline-#{$type} {
+      color: color.adjust($safe-bg, $lightness: 15%);
+      border-color: color.adjust($safe-bg, $lightness: 15%);
+
+      &:hover {
+        background-color: color.mix($safe-bg, #000, $weight: 40%);
+        color: color.adjust($text-color, $lightness: 25%);
+      }
+    }
+  }
+}

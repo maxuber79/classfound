@@ -1,0 +1,64 @@
+@use 'sass:math';
+@use 'sass:meta'; // Agregado para meta.type-of
+@use 'variables'as *;
+
+// ============================================================
+// 📏 Generador de tamaños de fuente
+// ============================================================
+$sizes: (5, 7, 10, 12, 15, 20, 25, 30, 40, 50);
+
+@each $size in $sizes {
+  .f-size-#{$size} {
+    font-size: math.div($size, 10) * 1rem;
+  }
+}
+
+// ============================================================
+// 🛠️ Mixin: Clases utilitarias de color
+// ============================================================
+@mixin generate-utility-classes($colors) {
+
+  // Verificación de tipo moderna
+  @if meta.type-of($colors)=='map' {
+
+    @each $name,
+    $color in $colors {
+      .bg-#{$name} {
+        background-color: #{$color} !important;
+      }
+
+      .text-#{$name} {
+        color: #{$color} !important;
+      }
+    }
+  }
+}
+
+// ============================================================
+// 🔘 Mixin: Tamaños de Botón
+// ============================================================
+@mixin size-btn($py, $px, $fsize, $lh, $radius: null) {
+  padding: $py $px !important;
+  font-size: $fsize !important;
+  line-height: $lh !important;
+
+  @if $radius {
+    border-radius: $radius !important;
+  }
+}
+
+// ============================================================
+// 📢 Mixin: Variantes de Callout
+// ============================================================
+@mixin callout-variant($border, $background, $text) {
+  // Usamos meta.type-of para validar si es un color válido
+  $border-color: if(meta.type-of($border)=='color', $border, #eee);
+
+  border-left-color: $border-color;
+  background-color: $background;
+  color: $text;
+
+  h4 {
+    color: $text;
+  }
+}

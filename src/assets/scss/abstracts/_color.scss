@@ -1,0 +1,116 @@
+/*===========================================
+=            Variables de Colores            =
+===========================================*/
+
+// Colores Principales
+$primary: #1e3a5f;
+$primary-dark: #162a44;
+$primary-light: #E8F2FC;
+$primary-action: #2563eb;
+
+$secondary: #1a7f5a;
+$secondary-dark: #14532d;
+$secondary-light: #E2F5EF;
+
+$tertiary: #164478;
+$tertiary-dark: #0f2a3b;
+$tertiary-light: #3a5f8f;
+
+$accent: #FFC107;
+$accent-dark: #FFB300;
+$accent-light: #FFF8E1;
+
+$success: #10b981;
+$success-dark: #0f766e;
+$success-light: #6ee7b7;
+
+$warning: #fbbf24;
+$warning-dark: #d97706;
+$warning-light: #fde68a;
+
+$danger: #ef4444;
+$danger-dark: #b91c1c;
+$danger-light: #fca5a5;
+
+
+$info: #6366f1;
+$info-dark: #4338ca;
+$info-light: #a5b4fc;
+
+$getstarted: #2563eb;
+$getstarted-dark: #1d4ed8;
+$getstarted-light: #93c5fd;
+
+// Otros Colores Complementarios
+$black: #000000; // Negro
+$white: #ffffff; // Blanco
+
+$light: #ebf1f6;
+$dark: #1f2937;
+
+$theme-colors: ("primary": $primary,
+  "secondary": $secondary,
+  "tertiary": $tertiary,
+  "accent": $accent,
+  "success": $success,
+  "danger": $danger,
+  "info": $info,
+  "warning": $warning,
+  "white":$white,
+  "getstarted": $getstarted);
+// Mapa para botones personalizados
+$btn-color-map: ("primary": ($primary, $white),
+  "secondary": ($secondary, $white),
+  "accent": ($accent, $white),
+  "light": ($light, $dark),
+  "dark": ($dark, $white),
+  "success": ($success, $white),
+  "warning": ($warning, $dark),
+  "danger": ($danger, $white),
+  "info": ($info, $white),
+  "white": ($white, $dark),
+  "getstarted": ($getstarted, $white));
+
+$table-color-map: ("primary": ($primary, $white),
+  "secondary": ($secondary, $white),
+  "accent": ($accent, $white),
+  "light": ($light, $dark),
+  "dark": ($dark, $white),
+  "success": ($success, $white),
+  "warning": ($warning, $dark),
+  "danger": ($danger, $white),
+  "info": ($info, $white),
+  "getstarted": ($getstarted, $white));
+
+$badge-color-map: ("primary": ($primary, $white),
+  "secondary": ($secondary, $white),
+  "accent": ($accent, $white),
+  "light": ($light, $dark),
+  "dark": ($dark, $white),
+  "success": ($success, $white),
+  "warning": ($warning, $dark),
+  "danger": ($danger, $white),
+  "info": ($info, $white),
+  "getstarted": ($getstarted, $white));
+$callout-color-map: ("primary": (#9ec5fe, #cfe2ff, #0a58ca),
+  "secondary": (#d0d0d0, #f0f0f0, #333333),
+  "accent": (#f78fb3, #fddde6, #a83256),
+  "light": (#e9ecef, #f8f9fa, #6c757d),
+  "dark": (#343a40, #212529, #ffffff),
+  "success": (#a3cfbb, #d1e7dd, #146c43),
+  "warning": (#ffe69c, #fff3cd, #997404),
+  "danger": (#f1aeb5, #f8d7da, #b02a37),
+  "info": (#9eeaf9, #cff4fc, #087990),
+  "code": (#ffe69c, #fff3cd, #997404),
+  "default": (#e9ecef, #f8f9fa, #6c757d));
+$card-color-map: ("primary": ($primary, $white),
+  "secondary": ($secondary, $white),
+  "accent": ($accent, $white),
+  "light": ($light, $dark),
+  "dark": ($dark, $white),
+  "success": ($success, $white),
+  "warning": ($warning, $dark),
+  "danger": ($danger, $white),
+  "info": ($info, $white),
+  "white": ($white, $dark),
+  "getstarted": ($getstarted, $white));

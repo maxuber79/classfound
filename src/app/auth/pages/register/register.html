@@ -1,0 +1,88 @@
+<div class="container mt-5">
+	<div class="row justify-content-center">
+		<div class="col-md-4">
+			<div class="card shadow">
+				<div class="card-body p-4">
+
+					<h4 class="text-center mb-4">Crear cuenta</h4>
+
+					<form [formGroup]="registerForm" (ngSubmit)="register()">
+
+						<!-- Email -->
+						<div class="mb-3">
+							<label class="form-label">Email</label>
+							<input type="email" class="form-control" formControlName="email" autocomplete="email"
+								[class.is-invalid]="email.invalid && email.touched" placeholder="correo@ejemplo.com">
+							@if (email.touched && email.hasError('required')) {
+							<div class="invalid-feedback">El email es requerido</div>
+							}
+							@if (email.touched && email.hasError('email')) {
+							<div class="invalid-feedback">Ingresa un email válido</div>
+							}
+						</div>
+
+						<!-- Password -->
+						<div class="mb-3">
+							<label class="form-label">Contraseña</label>
+							<div class="input-group">
+								<input [type]="showPassword() ? 'text' : 'password'" class="form-control" formControlName="password"
+									autocomplete="new-password" [class.is-invalid]="password.invalid && password.touched"
+									placeholder="••••••••">
+								<button type="button" class="btn btn-outline-secondary" (click)="togglePassword()" tabindex="-1">
+									<i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
+								</button>
+								@if (password.touched && password.hasError('required')) {
+								<div class="invalid-feedback">La contraseña es requerida</div>
+								}
+								@if (password.touched && password.hasError('minlength')) {
+								<div class="invalid-feedback">Mínimo 6 caracteres</div>
+								}
+							</div>
+						</div>
+
+						<!-- Confirm Password -->
+						<div class="mb-3">
+							<label class="form-label">Confirmar contraseña</label>
+							<div class="input-group">
+								<input [type]="showConfirm() ? 'text' : 'password'" class="form-control"
+									formControlName="confirmPassword" autocomplete="new-password"
+									[class.is-invalid]="confirmPassword.touched && registerForm.hasError('passwordMismatch')"
+									placeholder="••••••••">
+								<button type="button" class="btn btn-outline-secondary" (click)="toggleConfirm()" tabindex="-1">
+									<i class="bi" [class.bi-eye]="!showConfirm()" [class.bi-eye-slash]="showConfirm()"></i>
+								</button>
+								@if (confirmPassword.touched && registerForm.hasError('passwordMismatch')) {
+								<div class="invalid-feedback">Las contraseñas no coinciden</div>
+								}
+							</div>
+						</div>
+
+						<!-- Error general -->
+						@if (errorMessage()) {
+						<div class="alert alert-danger py-2 small">{{ errorMessage() }}</div>
+						}
+
+						<!-- Submit -->
+						<div class="d-grid mb-3">
+							<button type="submit" class="btn btn-primary" [disabled]="loading()">
+								@if (loading()) {
+								<span class="spinner-border spinner-border-sm me-2"></span>
+								Registrando...
+								} @else {
+								Crear cuenta
+								}
+							</button>
+						</div>
+
+					</form>
+
+					<div class="text-center small">
+						¿Ya tienes cuenta?
+						<a routerLink="/login" class="text-decoration-none">Inicia sesión</a>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

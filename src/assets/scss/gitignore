@@ -1,0 +1,30 @@
+# Node
+node_modules/
+npm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+backup/
+prepros.config
+
+# Build / dist
+dist/
+build/
+*.map
+
+# Sass
+.sass-cache/
+.cache/
+*.css.map
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Prepros / otros
+.prepros/
+.prepros-cache/

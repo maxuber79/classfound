@@ -1,0 +1,177 @@
+/*
+ * @Help para maquetar
+ * Aplicación: aplicar al elemento HTML como un ID o Class
+ **/
+@mixin border_help($color:#000000) {
+  border-width: 1px;
+  border-style: dashed;
+  border-color: $color;
+}
+
+// Mapa de colores asociados a las clases
+$border-colors: ("1": #000,
+  "2": red,
+  "3": deeppink,
+  "4": lime);
+
+// Generación automática de clases
+@each $key,
+$color in $border-colors {
+
+  .border-#{$key},
+  #border-#{$key} {
+    @include border_help($color);
+  }
+}
+
+/*============================================
+=         Iconos SVG para Hamburguesa       =
+============================================*/
+
+$hamburger-icon-white: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='white' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+$hamburger-icon-black: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(33, 37, 41, 0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+
+/*
+ * @Help para maquetar
+ * Aplicación: Se aplica en el mismo documento scss para ubicar elementos
+ **/
+
+@mixin border-debug($color, $label, $position: left) {
+  border: 1px dashed $color;
+  position: relative; // para que el ::before se ubique dentro
+
+  &::before {
+    content: $label;
+    position: absolute;
+    top: 0;
+    #{$position}: 0; // interpolación: puede ser left o right
+    z-index: 9999;
+    background-color: $color;
+    color: #fff;
+    padding: .2rem .4rem;
+    font-weight: normal;
+    font-size: .75rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+}
+
+.border-1 {
+  @include border-debug(#000, 'div parent', left);
+}
+
+.border-2 {
+  @include border-debug(red, 'div child', right);
+}
+
+.border-3 {
+  @include border-debug(deeppink, 'div child', left);
+}
+
+/* ==========================================================================
+  _debug.scss — utilidades de depuración responsiva
+  Autor: Claudio (WEBMAIN) — Mantención: Sara (chat)
+  Versión: 1.0
+  Propósito:
+    Visualizar rápidamente en qué rango de viewport estás, pintando un fondo
+    translúcido y una etiqueta (badge) con el rango activo.
+
+  ¿Cómo se usa?
+    1) Importa este archivo en tu bundle SCSS.
+    2) Activa la depuración:
+       - Opción A (global):   $debug-rwd-enabled: true !default;
+       - Opción B (runtime):  agrega el atributo data-debug="rwd" al <html> o body.
+    3) Agrega la clase .debug-rwd al bloque que quieras inspeccionar.
+       <div class="debug-rwd">…</div>
+
+  Notas:
+    - Mobile-first. Rango definido por min/max para mostrar la etiqueta exacta.
+    - No afecta al layout: solo bordes/fondos/etiqueta ::before.
+    - Seguro para producción si $debug-rwd-enabled queda en false (no emite CSS).
+========================================================================== */
+
+/* ---------- Toggle global (compilación) ---------- */
+$debug-rwd-enabled: true !default;
+
+/* ---------- Mixins helpers ---------- */
+@function _dbg-get($map, $key, $fallback: null) {
+  @return if(map-has-key($map, $key), map-get($map, $key), $fallback);
+}
+
+@mixin _dbg-badge($label, $bg, $fg) {
+  position: relative;
+  outline: 1px dashed rgba(0, 0, 0, .25);
+  background: color-mix(in oklab, #fff 88%, #000 12%);
+
+  &::before {
+    content: $label;
+    position: absolute;
+    inset: 0 auto auto 0;
+    transform: translate3d(0, 0, 0);
+    padding: .5rem .6rem;
+    font: 600 12px/1.1 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: $fg;
+    background: $bg;
+    border-bottom-right-radius: .4rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* borde de apoyo del color del rango */
+  border: 1px dashed color-mix(in oklab, $bg 70%, #fff 30%);
+  background-image: linear-gradient(0deg,
+    color-mix(in oklab, $bg 8%, #fff 92%),
+    color-mix(in oklab, $bg 6%, #fff 94%));
+}
+
+/* ---------- Definición de rangos (min/max + label + colores) ---------- */
+$debug-ranges: ("280-320": (min: 280px, max: 320px, label: "280px – 320px", bg: indigo, fg: #fff),
+  "321-480": (min: 321px, max: 480px, label: "321px – 480px", bg: yellow, fg: #222),
+  "481-768": (min: 481px, max: 768px, label: "481px – 768px", bg: cyan, fg: #003),
+  "769-980": (min: 769px, max: 980px, label: "769px – 980px", bg: tomato, fg: #fff),
+  "981-1399":(min: 981px, max:1399px, label: "981px – 1399px", bg: #77f995, fg: #053),
+  "1400+": (min:1400px, max: null, label: "min-width 1400px", bg: deeppink, fg: #fff));
+
+/* ---------- Emisión condicional ---------- */
+@if $debug-rwd-enabled {
+
+  /* Activación por atributo (útil en prod): <html data-debug="rwd"> */
+  :root[data-debug="rwd"] .debug-rwd,
+  .debug-rwd {
+
+    /* loop de rangos */
+    @each $name,
+    $cfg in $debug-ranges {
+      $min: _dbg-get($cfg, min);
+      $max: _dbg-get($cfg, max);
+      $label: _dbg-get($cfg, label, $name);
+      $bg: _dbg-get($cfg, bg, #000);
+      $fg: _dbg-get($cfg, fg, #fff);
+
+      @if $min !=null and $max !=null {
+        @media only screen and (min-width: $min) and (max-width: $max) {
+          @include _dbg-badge($label, $bg, $fg);
+        }
+      }
+
+      @else if $min !=null and $max==null {
+        @media only screen and (min-width: $min) {
+          @include _dbg-badge($label, $bg, $fg);
+        }
+      }
+    }
+  }
+}
+
+/* ---------- Extras opcionales de utilidad ---------- */
+/* Fuerza posición relativa para contenedores que no la tengan */
+.debug-rwd {
+  position: relative;
+}
+
+/* Atajo para activar/desactivar en tiempo de ejecución con una clase root */
+.debug-off .debug-rwd {
+  outline: none;
+  background: none;
+}

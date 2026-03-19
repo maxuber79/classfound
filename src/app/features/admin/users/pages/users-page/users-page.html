@@ -1,0 +1,344 @@
+<div class="container-fluid px-4 py-4">
+
+	<!-- Header -->
+	<div class="d-flex justify-content-between align-items-start mb-4">
+		<div>
+			<h4 class="fw-bold mb-1">Administración de Usuarios</h4>
+			<p class="text-muted mb-0 small">Listado de usuarios registrados en el sistema</p>
+		</div>
+		<!-- <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal"
+			data-bs-target="#createUserModal">
+			<i class="bi bi-person-plus-fill"></i>
+			Crear usuario
+		</button> -->
+		<button type="submit" class="btn btn-primary" [disabled]="loading()" type="button" data-bs-toggle="modal"
+			data-bs-target="#createUserModal">
+			@if (!loading()) {
+			<i class="bi bi-person-plus-fill"></i>
+			<span>Crear usuario</span>
+			} @else {
+			<span class="d-flex align-items-center gap-2">
+				<span class="spinner-border spinner-border-sm"></span>
+				Creando...
+			</span>
+			}
+		</button>
+	</div>
+
+	<!-- Card contenedor -->
+	<div class="card border-0 shadow-sm">
+
+		<!-- Toolbar: buscador + filtros -->
+		<div class="card-header bg-white border-bottom py-3">
+			<div class="row g-2 align-items-center">
+				<div class="col-12 col-md-5">
+					<div class="input-group input-group-sm">
+						<span class="input-group-text bg-light border-end-0">
+							<i class="bi bi-search text-muted"></i>
+						</span>
+						<input type="text" class="form-control border-start-0 bg-light" placeholder="Buscar por nombre o correo...">
+					</div>
+				</div>
+				<div class="col-6 col-md-3">
+					<select class="form-select form-select-sm bg-light">
+						<option value="">Todos los roles</option>
+						<option value="super_admin">Super Admin</option>
+						<option value="admin_colegio">Admin Colegio</option>
+						<option value="tesorero">Tesorero</option>
+						<option value="apoderado">Apoderado</option>
+					</select>
+				</div>
+				<div class="col-6 col-md-2">
+					<select class="form-select form-select-sm bg-light">
+						<option value="">Todos los estados</option>
+						<option value="true">Activo</option>
+						<option value="false">Inactivo</option>
+					</select>
+				</div>
+				<div class="col-12 col-md-2 text-md-end">
+					<span class="text-muted small">{{ users.length }} usuario(s)</span>
+				</div>
+			</div>
+		</div>
+
+		@if (users.length > 0) {
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead>
+					<tr class="table-users-header">
+						<th class="ps-4">Usuario</th>
+						<th>Rol</th>
+						<th>Estado</th>
+						<th>Creado</th>
+						<th class="text-center pe-4">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (user of users; track user.id) {
+					<tr class="table-users-row">
+
+						<!-- Usuario: avatar + nombre + email -->
+						<td class="ps-4">
+							<div class="d-flex align-items-center gap-3">
+								<div class="user-avatar">
+									{{ (user.full_name || user.email).charAt(0).toUpperCase() }}
+								</div>
+								<div>
+									<div class="fw-semibold text-dark lh-sm">
+										{{ user.full_name || 'Sin nombre' }}
+									</div>
+									<div class="text-muted small">{{ user.email }}</div>
+								</div>
+							</div>
+						</td>
+
+						<!-- Rol -->
+						<td>
+							<span class="role-badge role-{{ user.global_role }}">
+								<i class="bi {{ getRoleIcon(user.global_role) }} me-1"></i>
+								{{ getRoleLabel(user.global_role) }}
+							</span>
+						</td>
+						<!-- <td>
+							<select class="form-select form-select-sm" [value]="user.global_role"
+								(change)="onRoleChange(user, $event)">
+
+								<option value="super_admin">Super Admin</option>
+								<option value="user">Usuario</option>
+							</select>
+						</td> -->
+
+						<!-- Estado -->
+						<td>
+							@if (user.is_active) {
+							<span class="d-flex align-items-center gap-1 text-success small fw-semibold">
+								<span class="status-dot active"></span> Activo
+							</span>
+							} @else {
+							<span class="d-flex align-items-center gap-1 text-secondary small fw-semibold">
+								<span class="status-dot inactive"></span> Inactivo
+							</span>
+							}
+						</td>
+
+						<!-- Fecha -->
+						<td class="text-muted small">
+							{{ user.created_at | date:'dd MMM yyyy' }}
+						</td>
+
+						<!-- Acciones -->
+						<td class="text-center pe-4">
+							<div class="d-flex justify-content-center gap-1">
+								<!-- Boton ver detalle -->
+								<button class="btn btn-sm btn-icon" title="Ver detalle">
+									<i class="bi bi-eye text-primary"></i>
+								</button>
+
+								<!-- Boton editar el perfil -->
+								<button class="btn btn-sm btn-icon" title="Editar" type="button" (click)="openEditUserModal(user)"
+									data-bs-toggle="modal" data-bs-target="#editUserModal">
+									<i class="bi bi-pencil text-warning"></i>
+								</button>
+
+								<!-- Boton cambiar estado -->
+								<button class="btn btn-sm btn-icon" (click)="toggleStatus(user)"
+									[title]="user.is_active ? 'Deshabilitar' : 'Activar'">
+
+									<i class="bi"
+										[ngClass]="user.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'">
+									</i>
+								</button>
+							</div>
+						</td>
+
+					</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Footer: paginación -->
+		<div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3">
+			<span class="text-muted small">Mostrando {{ users.length }} de {{ users.length }} usuarios</span>
+			<nav>
+				<ul class="pagination pagination-sm mb-0">
+					<li class="page-item disabled"><a class="page-link" href="#">‹</a></li>
+					<li class="page-item active"><a class="page-link" href="#">1</a></li>
+					<li class="page-item disabled"><a class="page-link" href="#">›</a></li>
+				</ul>
+			</nav>
+		</div>
+
+		} @else {
+		<div class="card-body text-center py-5">
+			<i class="bi bi-people display-4 text-muted opacity-50"></i>
+			<p class="text-muted mt-3 mb-0">No hay usuarios para mostrar</p>
+			<button class="btn btn-primary btn-sm mt-3">
+				<i class="bi bi-person-plus-fill me-1"></i> Crear primer usuario
+			</button>
+		</div>
+		}
+
+	</div>
+</div>
+<!-- MODALES DEL COMPONENTE -->
+
+<!-- modal crear usuario -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+
+			<!-- HEADER -->
+			<div class="modal-header">
+				<h5 class="modal-title" id="createUserModalLabel">
+					Crear nuevo usuario
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+
+			<!-- BODY -->
+			<div class="modal-body">
+
+				<form [formGroup]="createUserForm" (ngSubmit)="onSubmitCreateUser()">
+
+					<div class="mb-3">
+						<label class="form-label">Nombre completo</label>
+						<input type="text" class="form-control" formControlName="full_name" placeholder="Ej: Juan Pérez">
+
+						@if (createUserForm.get('full_name')?.touched && createUserForm.get('full_name')?.invalid) {
+						<small class="text-danger">Debes ingresar un nombre válido.</small>
+						}
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Correo</label>
+						<input type="email" class="form-control" formControlName="email" placeholder="correo@email.com">
+
+						@if (createUserForm.get('email')?.touched && createUserForm.get('email')?.invalid) {
+						<small class="text-danger">Debes ingresar un correo válido.</small>
+						}
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Contraseña temporal</label>
+						<input type="password" class="form-control" formControlName="password" autocomplete="new-password">
+
+						@if (createUserForm.get('password')?.touched && createUserForm.get('password')?.invalid) {
+						<small class="text-danger">La contraseña debe tener al menos 6 caracteres.</small>
+						}
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Rol</label>
+						<select class="form-select" formControlName="global_role">
+							<option value="user">Usuario</option>
+							<option value="super_admin">Super Admin</option>
+						</select>
+					</div>
+
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" formControlName="is_active" id="isActiveSwitch">
+						<label class="form-check-label" for="isActiveSwitch">
+							Activo
+						</label>
+					</div>
+
+					<div class="modal-footer px-0 pb-0 mt-4">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+							Cancelar
+						</button>
+						<button type="submit" class="btn btn-primary d-flex align-items-center gap-2"
+							[disabled]="createUserForm.invalid || isCreatingUser">
+							@if (isCreatingUser) {
+							<span class="spinner-border spinner-border-sm"></span>
+							}
+
+							<span>
+								{{ isCreatingUser ? 'Creando...' : 'Crear usuario' }}
+							</span>
+						</button>
+					</div>
+				</form>
+
+			</div>
+
+			<!-- FOOTER -->
+			<!-- <div class="modal-footer">
+				<button class="btn btn-secondary" data-bs-dismiss="modal">
+					Cancelar
+				</button>
+				<button class="btn btn-primary">
+					Crear usuario
+				</button>
+			</div> -->
+
+		</div>
+	</div>
+</div>
+<!-- modal editar perfil -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title" id="editUserModalLabel">
+					Editar usuario
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+
+			<div class="modal-body">
+				<form [formGroup]="editUserForm" (ngSubmit)="onSubmitEditUser()">
+
+					<div class="mb-3">
+						<label class="form-label">Nombre completo</label>
+						<input type="text" class="form-control" formControlName="full_name" placeholder="Ej: Juan Pérez">
+
+						@if (editUserForm.get('full_name')?.touched && editUserForm.get('full_name')?.invalid) {
+						<small class="text-danger">Debes ingresar un nombre válido.</small>
+						}
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Correo</label>
+						<input type="email" class="form-control" formControlName="email">
+						<small class="text-muted">El correo no se puede editar por ahora.</small>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Rol</label>
+						<select class="form-select" formControlName="global_role">
+							<option value="user">Usuario</option>
+							<option value="super_admin">Super Admin</option>
+						</select>
+					</div>
+
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" formControlName="is_active" id="editIsActiveSwitch">
+						<label class="form-check-label" for="editIsActiveSwitch">
+							Activo
+						</label>
+					</div>
+
+					<div class="modal-footer px-0 pb-0 mt-4">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+							Cancelar
+						</button>
+
+						<button type="submit" class="btn btn-warning d-flex align-items-center gap-2"
+							[disabled]="editUserForm.invalid || isEditingUser">
+							@if (isEditingUser) {
+							<span class="spinner-border spinner-border-sm"></span>
+							}
+
+							<span>
+								{{ isEditingUser ? 'Guardando...' : 'Guardar cambios' }}
+							</span>
+						</button>
+					</div>
+				</form>
+			</div>
+
+		</div>
+	</div>
+</div>

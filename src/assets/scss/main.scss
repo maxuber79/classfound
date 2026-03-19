@@ -1,0 +1,10 @@
+// ✅ Orden recomendado
+@use 'abstracts'as *; // Variables y mixins disponibles en todos lados
+@use 'base';
+@use 'layout';
+@use 'components';
+@use 'pages';
+@use 'utilities';
+// Si hay vendors o themes
+@use 'vendors';
+@use 'themes';

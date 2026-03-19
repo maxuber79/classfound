@@ -1,0 +1,45 @@
+@use '../abstracts'as *;
+@use 'sass:color';
+
+/*
+* @Pattern reutilizable
+* Ej:
+* <div class="row stretch-group">
+**/
+.stretch-card {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.stretch-card>.card {
+  width: 100%;
+  min-width: 100%;
+}
+
+// Variables para controlar la alineación
+$stretch-alignment: stretch !default;
+$stretch-justify: flex-start !default;
+
+// Mixin reutilizable
+@mixin stretch-container($align: $stretch-alignment, $justify: $stretch-justify) {
+  display: flex;
+  align-items: $align;
+  justify-content: $justify;
+  flex-wrap: wrap;
+}
+
+@mixin stretch-item {
+  width: 100%;
+  min-width: 100%;
+  flex: 1 1 auto; // Para que crezca y ocupe espacio
+}
+
+// Aplicación genérica
+.stretch-group {
+  @include stretch-container();
+
+  >* {
+    @include stretch-item;
+  }
+}

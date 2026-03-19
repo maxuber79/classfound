@@ -1,0 +1,62 @@
+// Mixin único para ancho y alto
+@mixin dimension($property, $value) {
+  #{$property}: $value;
+
+  @media (max-width: 640px) {
+    @if $property==width {
+      width: 100%;
+    }
+
+    @else {
+      height: auto;
+    }
+  }
+}
+
+// Lista de valores en porcentaje con unidad incluida
+$size-values: 10%,
+15%,
+20%,
+25%,
+30%,
+35%,
+40%,
+45%,
+50%,
+55%,
+60%,
+65%,
+70%,
+75%,
+80%,
+85%,
+90%,
+95%,
+100%;
+
+// Generar clases de ancho (.wx-*)
+@each $size in $size-values {
+  .wx-#{str-slice(#{$size},
+  1,
+  -2)
+}
+
+  {
+  // Elimina el "%" del nombre de la clase
+  @include dimension(width, $size);
+}
+}
+
+// Generar clases de alto (.hv-*)
+@each $size in $size-values {
+  .hv-#{str-slice(#{$size},
+  1,
+  -2)
+}
+
+  {
+  // Elimina el "%" del nombre de la clase
+  @include dimension(height, $size);
+}
+}
+

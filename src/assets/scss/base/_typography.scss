@@ -1,0 +1,173 @@
+@use '../abstracts'as *;
+@use "sass:map";
+@use 'sass:color';
+@use 'sass:list';
+@use 'sass:meta'; // Agregado para meta.type-of
+
+// 🏗 Variables base
+$fonts: (primary: null,
+  secondary: null);
+
+// 🛠️ Mixin para asignar familia según tipo
+@mixin font-family($key) {
+  // Uso de map.get (sintaxis moderna)
+  $font: map.get($fonts, $key);
+
+  @if $font==null {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  @else if $key==secondary {
+    font-family: #{$font},
+    "Segoe UI",
+    Poppins,
+    system-ui,
+    -apple-system,
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    "Liberation Sans",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
+  }
+
+  @else {
+    font-family: #{$font},
+    Arial,
+    Helvetica,
+    sans-serif;
+  }
+}
+
+// 🖌 Generador dinámico
+@each $name,
+$value in $fonts {
+  .font-#{$name} {
+    @include font-family($name);
+    margin: 0;
+  }
+
+  .title-#{$name} {
+    margin: 0 0 1.5rem 0;
+  }
+
+  .subtitle-#{$name} {
+    letter-spacing: -0.125rem;
+  }
+}
+
+// Ejemplo de un párrafo genérico
+p.wrapp-farrafo {
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3rem;
+}
+
+// 1) Mapa de fuentes
+$fontName: (geist: "Geist",
+  calsans: "Cal Sans",
+  inter: "Inter",
+  neue: "Neue Haas Grotesk Display Pro"
+);
+
+// 2) Generador de fuentes específicas
+@each $name,
+$value in $fontName {
+  .font-#{$name} {
+    font-family: #{$value},
+    Arial,
+    Helvetica,
+    "Segoe UI",
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji",
+    sans-serif;
+  }
+
+  .title-#{$name} {
+    margin: 0 0 1.5rem 0;
+  }
+
+  .subtitle-#{$name} {
+    letter-spacing: -0.125rem;
+  }
+}
+
+// Factores de escala y Breakpoints
+$fs-tablet-scale: 0.85;
+$fs-mobile-scale: 0.80;
+$breakpoints: (sm: 480px,
+  md: 768px);
+
+// 1) Mapa de tamaños de fuente
+$font-sizes: (80: 5rem,
+  75: 4.688rem,
+  70: 4.375rem,
+  65: 4.063rem,
+  60: 3.75rem,
+  55: 3.438rem,
+  50: 3.125rem,
+  45: 2.813rem,
+  40: 2.5rem,
+  35: 2.188rem,
+  30: 1.875rem,
+  25: 1.6rem,
+  20: 1.25rem,
+  19: 1.188rem,
+  16: 1rem,
+  14: .875rem,
+  12: .75rem);
+
+// 2) Generador de clases de tamaño
+@each $name,
+$size in $font-sizes {
+  .fsx-#{$name} {
+    font-size: $size !important;
+    line-height: 100%;
+  }
+}
+
+// Clases con breakpoint (responsive)
+@each $break,
+$bp in $breakpoints {
+  @media (max-width: $bp) {
+
+    @each $name,
+    $size in $font-sizes {
+      .fsx-#{$break}-#{$name} {
+        font-size: $size !important;
+        line-height: 100% !important;
+      }
+    }
+  }
+}
+
+// Utilitarias de color de texto
+// Validación usando meta.type-of
+@if meta.type-of($theme-colors) !='map' {
+  @error '$theme-colors debe ser un map. Recibí #{meta.type-of($theme-colors)}: #{$theme-colors}';
+}
+
+@each $name,
+$value in $theme-colors {
+  .text--#{$name} {
+    color: #{$value} !important;
+  }
+
+  .text--hover-#{$name}:hover {
+    color: #{$value};
+  }
+
+  a.link--#{$name} {
+    color: #{$value};
+
+    &:hover,
+    &:focus {
+      color: #{$value};
+    }
+  }
+}

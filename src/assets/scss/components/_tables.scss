@@ -1,0 +1,201 @@
+/*
+* @Tables 
+**/
+@use '../abstracts'as *;
+@use 'sass:color';
+@use 'sass:list';
+@use 'sass:meta';
+
+.table {
+  margin-bottom: 0;
+  background-color: transparent;
+
+  thead {
+    th {
+      border-top: 0;
+      border-bottom-width: 1px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      border-color: $dark;
+    }
+  }
+
+  th,
+  td {
+    vertical-align: middle;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 1.125rem 1.375rem;
+  }
+
+  tbody {
+    td {
+      color: $dark;
+      font-size: 0.875rem;
+
+      .badge {
+        margin-bottom: 0;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      img {
+        width: 36px;
+        height: 36px;
+        border-radius: 100%;
+      }
+    }
+  }
+
+  &.table-borderless {
+    border: none;
+
+    tr,
+    td,
+    th {
+      border: none;
+    }
+  }
+
+  // 🌗 Modo oscuro
+  body.dark-mode & {
+    background-color: inherit;
+
+    thead {
+      tr {
+        th {
+          background-color: inherit;
+          border-bottom: 2px solid #fff;
+          color: $white;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        td {
+          color: $white;
+          background-color: inherit;
+        }
+      }
+    }
+  }
+}
+
+@each $type,
+$pair in $table-color-map {
+  $bg-color: list.nth($pair, 1);
+  $text-color: list.nth($pair, 2);
+  $safe-bg: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+  $header-color: color.adjust($safe-bg, $lightness: -10%);
+  $hover-color: color.mix($safe-bg, #fff, $weight: 85%); // hover claro
+  $hover-dark: color.mix($safe-bg, #000, $weight: 65%); // hover oscuro
+
+  // Tabla con fondo por tipo
+  .table-#{$type} {
+    thead {
+      th {
+        background-color: $bg-color;
+        color: $text-color;
+        font-weight: 700;
+        font-size: 0.875rem;
+      }
+    }
+
+    tbody {
+      tr {
+        td {
+          $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+          background-color: rgba($real-color, 0.05);
+          color: $bg-color;
+          transition: background-color 0.2s ease;
+        }
+
+        &:hover td {
+          background-color: $hover-color;
+          color: $text-color;
+        }
+      }
+    }
+
+    // 🌗 Dark Mode
+    body.dark-mode & {
+      thead {
+        th {
+          background-color: $bg-color;
+          color: $text-color;
+        }
+      }
+
+      tbody {
+        tr {
+          td {
+            $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+            background-color: rgba($real-color, 0.15);
+            color: color.adjust($real-color, $lightness: 20%);
+            transition: background-color 0.2s ease;
+          }
+
+          &:hover td {
+            background-color: $hover-dark;
+            color: $text-color;
+          }
+        }
+      }
+    }
+  }
+
+  // Tabla estilo "light"
+  .table-light-#{$type} {
+    thead {
+      th {
+        $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+        background-color: color.adjust($real-color, $lightness: 40%);
+        color: color.adjust($real-color, $lightness: -35%);
+      }
+    }
+
+    tbody {
+      tr {
+        td {
+          $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+          background-color: rgba($real-color, 0.03);
+          color: color.adjust($real-color, $lightness: -25%);
+          transition: background-color 0.2s ease;
+        }
+
+        &:hover td {
+          $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+          background-color: color.mix($real-color, #fff, $weight: 90%);
+          color: $text-color;
+        }
+      }
+    }
+
+    // 🌗 Dark mode
+    body.dark-mode & {
+      thead th {
+        $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+        background-color: rgba($real-color, 0.3);
+        color: $text-color;
+      }
+
+      tbody tr {
+        td {
+          $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+          background-color: rgba($real-color, 0.1);
+          color: color.adjust($real-color, $lightness: 10%);
+          transition: background-color 0.2s ease;
+        }
+
+        &:hover td {
+          $real-color: if(meta.type-of($bg-color)=='color', $bg-color, #ffffff);
+          background-color: color.mix($real-color, #000, $weight: 65%);
+          color: $text-color;
+        }
+      }
+    }
+  }
+}

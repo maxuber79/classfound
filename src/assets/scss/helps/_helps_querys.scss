@@ -1,0 +1,157 @@
+/* @media [not | only] screen [and] (expression) {...} */
+
+/* Custom, iPhone Retina */
+@media only screen and (min-width: 280px) and (max-width: 320px) {
+  .test {
+    background-color: rgba(76, 0, 130, .2);
+    border: 1px dashed indigo;
+
+    &::before {
+      content: '280px - 320px';
+      font-size: 12px;
+      background: indigo;
+      padding: 8px;
+      color: #fff;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+
+}
+
+/*Hasta smartphones de 480px*/
+@media only screen and (min-width: 321px) and (max-width: 480px) {
+  .test {
+    background-color: rgba(255, 255, 0, .2);
+    border: 1px dashed yellow;
+
+    &::before {
+      content: '321px - 480px';
+      font-size: 12px;
+      background: yellow;
+      padding: 8px;
+      color: #444;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+}
+
+/* de Smartphones a Tablets */
+@media only screen and (min-width: 481px) and (max-width: 768px) {
+  .test {
+    background-color: rgba(0, 255, 255, .2);
+    border: 1px dashed cyan;
+
+    &::before {
+      content: '481px - 768px';
+      font-size: 12px;
+      background: cyan;
+      padding: 8px;
+      color: #fff;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+}
+
+/* de Tablets a pantallas de desktops */
+@media only screen and (min-width: 769px) and (max-width: 980px) {
+  .test {
+    background-color: rgba(255, 99, 71, .2);
+    border: 1px dashed tomato;
+
+    &::before {
+      content: '769px - 980px';
+      font-size: 12px;
+      background: tomato;
+      padding: 8px;
+      color: #fff;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+}
+
+/* Pantallas anchas (desktops) */
+@media only screen and (min-width: 981px) and (max-width: 1399px) {
+  .test {
+    background-color: rgba(119, 249, 149, .2);
+    border: 1px dashed #77f995;
+
+    &::before {
+      content: '981px - 1399px';
+      font-size: 12px;
+      background: #77f995;
+      padding: 8px;
+      color: #fff;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+}
+
+@media only screen and (min-width: 1400px) {
+  .test {
+    background-color: rgba(255, 20, 145, .2);
+    border: 1px dashed deeppink;
+
+    &::before {
+      content: 'min-width 1400px';
+      font-size: 12px;
+      background: deeppink;
+      padding: 8px;
+      color: #fff;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+}
+
+/* 
+  ##Device = Desktops
+  ##Screen = 1281px to higher resolution desktops
+*/
+
+@media (min-width: 1281px) {}
+
+/* 
+	##Device = Laptops, Desktops
+	##Screen = B/w 1025px to 1280px
+  */
+
+@media (min-width: 1025px) and (max-width: 1280px) {}
+
+/* 
+	##Device = Tablets, Ipads (portrait)
+	##Screen = B/w 768px to 1024px
+  */
+
+@media (min-width: 768px) and (max-width: 1024px) {}
+
+/* 
+	##Device = Tablets, Ipads (landscape)
+	##Screen = B/w 768px to 1024px
+  */
+
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {}
+
+/* 
+	##Device = Low Resolution Tablets, Mobiles (Landscape)
+	##Screen = B/w 481px to 767px
+  */
+
+@media (min-width: 481px) and (max-width: 767px) {}
+
+/* 
+	##Device = Most of the Smartphones Mobiles (Portrait)
+	##Screen = B/w 320px to 479px
+  */
+
+@media (min-width: 320px) and (max-width: 480px) {}

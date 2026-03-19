@@ -1,0 +1,5 @@
+@forward 'reset';
+@forward 'font-google'; // ✅ aquí cargas las fuentes
+@forward 'typography';
+//@forward 'global';
+@forward 'icons';

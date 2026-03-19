@@ -1,0 +1,34 @@
+{
+	"name": "webmain-scss-starter",
+	"version": "1.1.0",
+	"description": "Framework SCSS modular basado en arquitectura 7-1 con namespace wm-, tokens de diseño, dark mode y componentes reutilizables (Webmain).",
+	"private": false,
+	"scripts": {
+		"dev": "sass --watch main.scss:main.css --style=expanded",
+		"build": "sass main.scss:main-dist.css --style=compressed --no-source-map"
+	},
+	"keywords": [
+		"scss",
+		"sass",
+		"webmain",
+		"frontend",
+		"framework",
+		"modular",
+		"7-1",
+		"design-tokens",
+		"dark-mode"
+	],
+	"author": "Claudio — WEBMAIN",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/maxuber79/clean-project-sass.git"
+	},
+	"bugs": {
+		"url": "https://github.com/maxuber79/clean-project-sass/issues"
+	},
+	"homepage": "https://github.com/maxuber79/clean-project-sass#readme",
+	"devDependencies": {
+		"sass": "^1.77.0"
+	}
+}
