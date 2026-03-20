@@ -32,6 +32,10 @@ interface CreateUserRequest {
   email: string;
   password: string;
   full_name: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  avatar_url?: string;
   global_role: string;
   is_active?: boolean;
   course_id?: string | null;
@@ -96,6 +100,10 @@ Deno.serve(async (req: Request) => {
     const email = body?.email?.trim();
     const password = body?.password?.trim();
     const fullName = body?.full_name?.trim();
+		const firstName = body?.first_name?.trim() || null;
+		const lastName = body?.last_name?.trim() || null;
+		const phone = body?.phone?.trim() || null;
+		const avatarUrl = body?.avatar_url?.trim() || null;
     const globalRole = body?.global_role?.trim();
     const isActive = body?.is_active ?? true;
     const courseId = body?.course_id ?? null;
@@ -149,7 +157,11 @@ Deno.serve(async (req: Request) => {
         {
           id: userId,
           full_name: fullName,
-          email,
+          email, 
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+          avatar_url: avatarUrl,
           global_role: globalRole,
           is_active: isActive
         },
@@ -205,12 +217,16 @@ Deno.serve(async (req: Request) => {
       message: "Usuario creado correctamente.",
       user: {
         id: userId,
-        email,
-        full_name: fullName,
-        global_role: globalRole,
-        is_active: isActive,
-        course_id: courseId,
-        course_role: courseRole
+				email,
+				full_name: fullName,
+				first_name: firstName,
+				last_name: lastName,
+				phone,
+				avatar_url: avatarUrl,
+				global_role: globalRole,
+				is_active: isActive,
+				course_id: courseId,
+				course_role: courseRole
       }
     });
   } catch (err) {
