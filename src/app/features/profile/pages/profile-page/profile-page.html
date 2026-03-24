@@ -1,0 +1,183 @@
+<div class="container-fluid px-4 py-4">
+
+	<!-- Header -->
+	<div class="mb-4">
+		<h4 class="fw-bold mb-1">Mi Perfil</h4>
+		<p class="text-muted mb-0 small">Administra tu información personal</p>
+	</div>
+
+	<!-- Estado de carga -->
+	@if (loading()) {
+	<div class="text-center py-5">
+		<div class="spinner-border text-primary" role="status"></div>
+		<p class="text-muted mt-2 small">Cargando perfil...</p>
+	</div>
+	}
+
+	@if (!loading()) {
+	<div class="row g-4">
+
+		<!-- Columna izquierda: avatar + info estática -->
+		<div class="col-12 col-md-4">
+			<div class="card border-0 shadow-sm text-center p-4">
+
+				<!-- Avatar: imagen si hay URL, inicial si no -->
+				@if (profile?.avatar_url) {
+				<img [src]="profile?.avatar_url" [alt]="profile?.full_name || 'Avatar'" class="mx-auto mb-3 rounded-circle"
+					style="width: 100px; height: 100px; object-fit: cover;" (error)="onAvatarError($event)">
+				} @else {
+				<div class="mx-auto mb-3 user-avatar-lg">
+					{{ getInitial() }}
+				</div>
+				}
+
+				<h6 class="fw-bold mb-1">{{ profile?.full_name || 'Sin nombre' }}</h6>
+				<p class="text-muted small mb-3">{{ profile?.email }}</p>
+
+				<hr class="my-3">
+
+				<div class="text-start">
+					<div class="mb-2">
+						<span class="text-muted small d-block">Miembro desde</span>
+						<span class="small fw-semibold">{{ profile?.created_at | date:'dd MMM yyyy' }}</span>
+					</div>
+					<div class="mb-2">
+						<span class="text-muted small d-block">Última actualización</span>
+						<span class="small fw-semibold">{{ profile?.updated_at | date:'dd MMM yyyy, HH:mm' }}</span>
+					</div>
+				</div>
+
+				<div class="alert alert-light border mt-3 mb-0 text-start small text-muted">
+					<i class="bi bi-info-circle me-1"></i>
+					Pega la URL de tu foto de perfil (Gmail, LinkedIn, etc.) en el campo de la derecha.
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Columna derecha: formulario -->
+		<div class="col-12 col-md-8">
+			<div class="card border-0 shadow-sm p-4">
+
+				<!-- Título + badge de modo -->
+				<div class="d-flex align-items-center justify-content-between mb-4">
+					<h6 class="fw-semibold mb-0">Información personal</h6>
+					@if (isViewMode) {
+					<span class="badge bg-secondary-subtle text-secondary">
+						<i class="bi bi-eye me-1"></i> Solo lectura
+					</span>
+					} @else {
+					<span class="badge bg-warning-subtle text-warning">
+						<i class="bi bi-pencil me-1"></i> Editando
+					</span>
+					}
+				</div>
+
+				<!-- Mensajes de feedback -->
+				@if (successMessage()) {
+				<div class="alert alert-success d-flex align-items-center gap-2 py-2">
+					<i class="bi bi-check-circle-fill"></i>
+					{{ successMessage() }}
+				</div>
+				}
+				@if (errorMessage()) {
+				<div class="alert alert-danger d-flex align-items-center gap-2 py-2">
+					<i class="bi bi-exclamation-triangle-fill"></i>
+					{{ errorMessage() }}
+				</div>
+				}
+
+				<form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+					<div class="row g-3">
+
+						<!-- Nombre -->
+						<div class="col-md-6">
+							<label class="form-label">Nombre <span class="text-danger">*</span></label>
+							<input type="text" class="form-control" formControlName="first_name" placeholder="Ej: Juan">
+							@if (profileForm.get('first_name')?.touched && profileForm.get('first_name')?.invalid) {
+							<small class="text-danger">Debes ingresar un nombre válido.</small>
+							}
+						</div>
+
+						<!-- Apellido -->
+						<div class="col-md-6">
+							<label class="form-label">Apellido <span class="text-danger">*</span></label>
+							<input type="text" class="form-control" formControlName="last_name" placeholder="Ej: Pérez">
+							@if (profileForm.get('last_name')?.touched && profileForm.get('last_name')?.invalid) {
+							<small class="text-danger">Debes ingresar un apellido válido.</small>
+							}
+						</div>
+
+						<!-- Correo (siempre solo lectura) -->
+						<div class="col-12">
+							<label class="form-label">Correo electrónico</label>
+							<input type="email" class="form-control bg-light" [value]="profile?.email || ''" readonly>
+							<small class="text-muted">El correo no se puede modificar desde aquí.</small>
+						</div>
+
+						<!-- Teléfono -->
+						<div class="col-md-6">
+							<label class="form-label">Teléfono</label>
+							<input type="text" class="form-control" formControlName="phone" placeholder="Ej: +56 9 1234 5678">
+						</div>
+
+						<!-- Avatar URL con preview en tiempo real -->
+						<div class="col-md-6">
+							<label class="form-label">
+								URL de foto de perfil
+								<span class="text-muted small">(opcional)</span>
+							</label>
+							<div class="input-group">
+								@if (avatarPreview) {
+								<span class="input-group-text p-1">
+									<img [src]="avatarPreview" alt="preview" class="rounded-circle"
+										style="width: 28px; height: 28px; object-fit: cover;" (error)="onPreviewError($event)">
+								</span>
+								}
+								<input type="text" class="form-control" formControlName="avatar_url" placeholder="https://..."
+									(input)="onAvatarUrlInput()">
+							</div>
+							<small class="text-muted">
+								Puedes usar la URL de tu foto de Gmail, LinkedIn u otra red social.
+							</small>
+						</div>
+
+					</div>
+
+					<!-- Footer: botones cambian según el modo -->
+					<div class="d-flex justify-content-end gap-2 mt-4">
+
+						@if (isViewMode) {
+						<!-- Modo ver → botón Editar -->
+						<button type="button" class="btn btn-warning d-flex align-items-center gap-2" (click)="enableEditMode()">
+							<i class="bi bi-pencil"></i>
+							Editar perfil
+						</button>
+						} @else {
+						<!-- Modo editar → botón Cancelar + Guardar -->
+						<button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+							Cancelar
+						</button>
+						<button type="submit" class="btn btn-primary d-flex align-items-center gap-2"
+							[disabled]="profileForm.invalid || saving()">
+							@if (saving()) {
+							<span class="spinner-border spinner-border-sm"></span>
+							Guardando...
+							} @else {
+							<i class="bi bi-floppy"></i>
+							Guardar cambios
+							}
+						</button>
+						}
+
+					</div>
+
+				</form>
+			</div>
+		</div>
+
+	</div>
+	}
+
+</div>

@@ -102,7 +102,8 @@
 		<aside class="dashboard-sidebar" [class.expanded]="sidebarExpanded()">
 			<nav class="sidebar-nav">
 				@for (item of navItems; track item.label) {
-				<button class="sidebar-item" [class.active]="item.active" (click)="setActive(item)" [title]="item.label">
+				<button class="sidebar-item" [class.active]="isRouteActive(item.route)" (click)="navigateTo(item)"
+					[title]="item.label">
 					<i class="bi {{ item.icon }} sidebar-icon"></i>
 					@if (sidebarExpanded()) {
 					<span class="sidebar-label">{{ item.label }}</span>
@@ -112,13 +113,9 @@
 			</nav>
 		</aside>
 
-		<!-- CONTENIDO PRINCIPAL -->
+		<!-- CONTENIDO PRINCIPAL — router-outlet renderiza las rutas hijas aquí -->
 		<main class="dashboard-main">
-			<!-- Aquí van los componentes -->
-			<div class="content-placeholder">
-				<i class="bi bi-grid-1x2 display-4 text-muted opacity-25"></i>
-				<p class="text-muted mt-3">Selecciona una opción del menú</p>
-			</div>
+			<router-outlet />
 		</main>
 
 	</div>

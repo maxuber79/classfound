@@ -1,60 +1,45 @@
-import { Component, OnInit, OnDestroy, inject, signal } from "@angular/core";
-import { CommonModule, DatePipe, NgClass } from "@angular/common";
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
-
-import { AdminUsersService } from "../../services/admin-users.service";
-import { AdminUser } from "../../models/admin-user.interface";
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from "rxjs";
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { CommonModule, DatePipe, NgClass } from '@angular/common';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { AdminUsersService } from '../../services/admin-users.service';
+import { AdminUser } from '../../models/admin-user.interface';
 
 declare var bootstrap: any;
 const DEBUG = true;
 
 @Component({
-  selector: "app-users-page",
+  selector: 'app-users-page',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    DatePipe,
-    NgClass,
-    CommonModule,
-    FormsModule,
-    RouterLink,
-  ],
-  templateUrl: "./users-page.html",
-  styleUrl: "./users-page.scss",
+  imports: [ReactiveFormsModule, FormsModule, DatePipe, NgClass, CommonModule],
+  templateUrl: './users-page.html',
+  styleUrl: './users-page.scss',
 })
-export class UsersPage implements OnInit {
-  //Formulario para creación de usuario (futuro)
+export class UsersPage implements OnInit, OnDestroy {
+
   private readonly fb = inject(FormBuilder);
   private readonly adminUsersService = inject(AdminUsersService);
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
 
-  // ─── Estado de carga ────────────────────────────────────────────────────────
+  // ─── Estado de carga ─────────────────────────────────────────────────────────
   readonly loading = signal(false);
 
-  // ─── Lista de usuarios ───────────────────────────────────────────────────────
+  // ─── Lista de usuarios ────────────────────────────────────────────────────────
   users: AdminUser[] = [];
 
-  // ─── Filtros ─────────────────────────────────────────────────────────────────
-  searchTerm: string = "";
-  selectedRole: string = "";
-  selectedStatus: string = "";
+  // ─── Filtros ──────────────────────────────────────────────────────────────────
+  searchTerm: string = '';
+  selectedRole: string = '';
+  selectedStatus: string = '';
 
-  // ─── Paginación ──────────────────────────────────────────────────────────────
+  // ─── Paginación ───────────────────────────────────────────────────────────────
   currentPage: number = 1;
   pageSize: number = 5;
   totalUsers: number = 0;
   readonly pageSizeOptions: number[] = [5, 10, 25, 50];
 
-  // ─── Formularios ─────────────────────────────────────────────────────────────
+  // ─── Formularios ──────────────────────────────────────────────────────────────
   createUserForm!: FormGroup;
   isCreatingUser: boolean = false;
 
@@ -62,16 +47,10 @@ export class UsersPage implements OnInit {
   editUserForm!: FormGroup;
   isEditingUser: boolean = false;
 
-  /* users: AdminUser[] = [];
-	createUserForm!: FormGroup;
-	isCreatingUser: boolean = false;
+  // ─── Modo del modal de usuario (ver / editar) ─────────────────────────────────
+  isViewMode: boolean = true;
 
-	//Estados del usuario al editar
-	selectedUser: AdminUser | null = null;
-	editUserForm!: FormGroup;
-	isEditingUser: boolean = false; */
-
-  // ─── Computed ────────────────────────────────────────────────────────────────
+  // ─── Computed ─────────────────────────────────────────────────────────────────
 
   /**
    * Retorna el número total de páginas según el total de usuarios y pageSize.
@@ -106,15 +85,21 @@ export class UsersPage implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  // ─── Lifecycle ───────────────────────────────────────────────────────────────
+  /**
+   * Retorna true si hay algún filtro activo.
+   * @returns {boolean}
+   */
+  get hasActiveFilters(): boolean {
+    return !!(this.searchTerm || this.selectedRole || this.selectedStatus);
+  }
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
   /**
-   * Hook de inicialización del componente.
-   * Se ejecuta una vez al cargar la vista y dispara la carga de usuarios.
+   * Hook de inicialización. Configura formularios, debounce de búsqueda y carga inicial.
    */
   async ngOnInit(): Promise<void> {
-    if (DEBUG) console.log("📄 [UsersPage][ngOnInit] Inicializando...");
-
+    if (DEBUG) console.log('📄 [UsersPage][ngOnInit] Inicializando...');
     this.initCreateUserForm();
     this.initEditUserForm();
     this.setupSearchDebounce();
@@ -125,106 +110,85 @@ export class UsersPage implements OnInit {
    * Hook de destrucción. Limpia subscripciones para evitar memory leaks.
    */
   ngOnDestroy(): void {
-    if (DEBUG)
-      console.log("🧹 [UsersPage][ngOnDestroy] Limpiando subscripciones");
+    if (DEBUG) console.log('🧹 [UsersPage][ngOnDestroy] Limpiando subscripciones');
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  // ─── Setup ───────────────────────────────────────────────────────────────────
+  // ─── Setup ────────────────────────────────────────────────────────────────────
 
   /**
    * Configura el debounce del campo de búsqueda.
    * Espera 400ms después del último keystroke antes de ejecutar la búsqueda.
    */
   private setupSearchDebounce(): void {
-    if (DEBUG)
-      console.log(
-        "⏱️ [UsersPage][setupSearchDebounce] Configurando debounce...",
-      );
-
-    this.searchSubject
-      .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((term) => {
-        if (DEBUG) console.log("🔍 [UsersPage][searchDebounce] Término:", term);
-        this.searchTerm = term;
-        this.currentPage = 1;
-        this.loadUsers();
-      });
+    if (DEBUG) console.log('⏱️ [UsersPage][setupSearchDebounce] Configurando debounce...');
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      if (DEBUG) console.log('🔍 [UsersPage][searchDebounce] Término:', term);
+      this.searchTerm = term;
+      this.currentPage = 1;
+      this.loadUsers();
+    });
   }
 
   /**
    * Inicializa el formulario reactivo para creación de usuarios.
-   *
-   * @returns {void}
    */
   initCreateUserForm(): void {
     if (DEBUG) console.log('🧩 [UsersPage][initCreateUserForm] Inicializando...');
-
     this.createUserForm = this.fb.group({
-      first_name: ["", [Validators.required, Validators.minLength(2)]],
-      last_name: ["", [Validators.required, Validators.minLength(2)]],
-      phone: [""],
-      email: ["", [Validators.required, Validators.email]],
-      password: ["", [Validators.required, Validators.minLength(6)]],
-      global_role: ["user", [Validators.required]],
-      is_active: [true],
+      first_name:  ['', [Validators.required, Validators.minLength(2)]],
+      last_name:   ['', [Validators.required, Validators.minLength(2)]],
+      phone:       [''],
+      email:       ['', [Validators.required, Validators.email]],
+      password:    ['', [Validators.required, Validators.minLength(6)]],
+      global_role: ['user', [Validators.required]],
+      is_active:   [true],
     });
-
-     if (DEBUG) console.log(
-      "✅ [UsersPage][initCreateUserForm] Formulario creado:",
-      this.createUserForm.value,
-    );
+    if (DEBUG) console.log('✅ [UsersPage][initCreateUserForm] Formulario creado:', this.createUserForm.value);
   }
 
   /**
-   * Inicializa el formulario reactivo para edición de usuarios.
-   *
-   * @returns {void}
+   * Inicializa el formulario reactivo para edición/visualización de usuarios.
+   * El email siempre queda deshabilitado — no es editable.
    */
   initEditUserForm(): void {
     if (DEBUG) console.log('🧩 [UsersPage][initEditUserForm] Inicializando...');
-
     this.editUserForm = this.fb.group({
-      id: [""],
-      first_name: ["", [Validators.required, Validators.minLength(2)]],
-      last_name: ["", [Validators.required, Validators.minLength(2)]],
-      phone: [""],
-      email: [{ value: "", disabled: true }],
-      global_role: ["user", [Validators.required]],
-      is_active: [true],
+      id:          [''],
+      first_name:  ['', [Validators.required, Validators.minLength(2)]],
+      last_name:   ['', [Validators.required, Validators.minLength(2)]],
+      phone:       [''],
+      email:       [{ value: '', disabled: true }],
+      global_role: ['user', [Validators.required]],
+      is_active:   [true],
     });
-
-    if (DEBUG) console.log(
-      "✅ [UsersPage][initEditUserForm] Formulario de edición creado:",
-      this.editUserForm.getRawValue(),
-    );
+    if (DEBUG) console.log('✅ [UsersPage][initEditUserForm] Formulario creado:', this.editUserForm.getRawValue());
   }
 
-
-	// ─── Carga de datos ──────────────────────────────────────────────────────────
+  // ─── Carga de datos ───────────────────────────────────────────────────────────
 
   /**
-   * Carga la lista de usuarios desde el servicio de administración.
+   * Carga la lista paginada de usuarios aplicando filtros activos.
    * @returns {Promise<void>}
    */
   async loadUsers(): Promise<void> {
-     if (DEBUG) console.log('📥 [UsersPage][loadUsers] page:', this.currentPage, '| pageSize:', this.pageSize, '| search:', this.searchTerm, '| role:', this.selectedRole, '| status:', this.selectedStatus);
-
+    if (DEBUG) console.log('📥 [UsersPage][loadUsers] page:', this.currentPage, '| pageSize:', this.pageSize, '| search:', this.searchTerm, '| role:', this.selectedRole, '| status:', this.selectedStatus);
     this.loading.set(true);
-
     try {
-     const result = await this.adminUsersService.getUsers({
-        search: this.searchTerm,
-        role: this.selectedRole,
-        status: this.selectedStatus,
-        page: this.currentPage,
-        pageSize: this.pageSize
+      const result = await this.adminUsersService.getUsers({
+        search:   this.searchTerm,
+        role:     this.selectedRole,
+        status:   this.selectedStatus,
+        page:     this.currentPage,
+        pageSize: this.pageSize,
       });
-
       this.users = result.users;
       this.totalUsers = result.total;
-
       if (DEBUG) console.log('🟢 [UsersPage][loadUsers] Cargados:', this.users.length, '| Total:', this.totalUsers);
     } catch (error) {
       console.error('🔴 [UsersPage][loadUsers] Error:', error);
@@ -233,9 +197,9 @@ export class UsersPage implements OnInit {
     }
   }
 
-	// ─── Handlers de filtros ─────────────────────────────────────────────────────
+  // ─── Handlers de filtros ──────────────────────────────────────────────────────
 
-	/**
+  /**
    * Emite el término de búsqueda al subject con debounce.
    * @param {string} term Texto ingresado en el campo de búsqueda.
    */
@@ -244,9 +208,8 @@ export class UsersPage implements OnInit {
     this.searchSubject.next(term);
   }
 
-	/**
-   * Maneja el cambio del filtro de rol.
-   * Resetea la página y recarga.
+  /**
+   * Maneja el cambio del filtro de rol. Resetea la página y recarga.
    */
   onRoleFilterChange(): void {
     if (DEBUG) console.log('🎭 [UsersPage][onRoleFilterChange] rol:', this.selectedRole);
@@ -254,9 +217,8 @@ export class UsersPage implements OnInit {
     this.loadUsers();
   }
 
-	/**
-   * Maneja el cambio del filtro de estado.
-   * Resetea la página y recarga.
+  /**
+   * Maneja el cambio del filtro de estado. Resetea la página y recarga.
    */
   onStatusFilterChange(): void {
     if (DEBUG) console.log('🔘 [UsersPage][onStatusFilterChange] estado:', this.selectedStatus);
@@ -264,7 +226,7 @@ export class UsersPage implements OnInit {
     this.loadUsers();
   }
 
-	/**
+  /**
    * Limpia todos los filtros activos y recarga desde la página 1.
    */
   clearFilters(): void {
@@ -276,32 +238,21 @@ export class UsersPage implements OnInit {
     this.loadUsers();
   }
 
-	/**
-   * Retorna true si hay algún filtro activo.
-   * @returns {boolean}
-   */
-  get hasActiveFilters(): boolean {
-    return !!(this.searchTerm || this.selectedRole || this.selectedStatus);
-  }
+  // ─── Paginación ───────────────────────────────────────────────────────────────
 
-  // ─── Paginación ──────────────────────────────────────────────────────────────
-
-	/**
+  /**
    * Navega a una página específica si está dentro del rango válido.
    * @param {number} page Número de página destino.
    */
   goToPage(page: number): void {
     if (DEBUG) console.log('📄 [UsersPage][goToPage] página:', page);
-
     if (page < 1 || page > this.totalPages) return;
-
     this.currentPage = page;
     this.loadUsers();
   }
 
-	/**
-   * Maneja el cambio del selector de registros por página.
-   * Resetea a página 1 al cambiar el tamaño.
+  /**
+   * Maneja el cambio del selector de registros por página. Resetea a página 1.
    */
   onPageSizeChange(): void {
     if (DEBUG) console.log('📏 [UsersPage][onPageSizeChange] pageSize:', this.pageSize);
@@ -309,62 +260,105 @@ export class UsersPage implements OnInit {
     this.loadUsers();
   }
 
-	 // ─── Modal editar ────────────────────────────────────────────────────────────
+  // ─── Modal usuario (ver / editar) ─────────────────────────────────────────────
+
   /**
-   * Abre el modal de edición y carga los datos del usuario seleccionado.
-   *
-   * @param {AdminUser} user Usuario a editar.
-   * @returns {void}
+   * Carga los datos del usuario seleccionado en el formulario del modal.
+   * Método privado compartido por openViewUserModal y openEditUserModal.
+   * @param {AdminUser} user Usuario a cargar.
    */
-  openEditUserModal(user: AdminUser): void {
-    if (DEBUG) console.log('✏️ [UsersPage][openEditUserModal] usuario:', user);
-
+  private loadUserIntoForm(user: AdminUser): void {
     this.selectedUser = user;
-
     this.editUserForm.patchValue({
-      id: user.id,
-      first_name: (user as any).first_name || "",
-      last_name: (user as any).last_name || "",
-      phone: (user as any).phone || "",
-      email: user.email,
+      id:          user.id,
+      first_name:  (user as any).first_name || '',
+      last_name:   (user as any).last_name  || '',
+      phone:       (user as any).phone      || '',
+      email:       user.email,
       global_role: user.global_role,
-      is_active: user.is_active,
+      is_active:   user.is_active,
     });
-
-    if (DEBUG) console.log('🧾 [UsersPage][openEditUserModal] Formulario:', this.editUserForm.getRawValue());
+    if (DEBUG) console.log('🧾 [UsersPage][loadUserIntoForm] Formulario:', this.editUserForm.getRawValue());
   }
 
   /**
-   * Envía la edición del usuario seleccionado.
-   *
+   * Abre el modal en modo visualización (campos deshabilitados).
+   * @param {AdminUser} user Usuario a visualizar.
+   */
+  openViewUserModal(user: AdminUser): void {
+    if (DEBUG) console.log('👁️ [UsersPage][openViewUserModal] usuario:', user);
+    this.isViewMode = true;
+    this.loadUserIntoForm(user);
+    this.editUserForm.disable();
+    this.openUserModal();
+  }
+
+  /**
+   * Abre el modal directamente en modo edición (campos habilitados).
+   * @param {AdminUser} user Usuario a editar.
+   */
+  openEditUserModal(user: AdminUser): void {
+    if (DEBUG) console.log('✏️ [UsersPage][openEditUserModal] usuario:', user);
+    this.isViewMode = false;
+    this.loadUserIntoForm(user);
+    this.editUserForm.enable();
+    this.editUserForm.get('email')?.disable(); // email nunca editable
+    this.openUserModal();
+  }
+
+  /**
+   * Cambia desde modo visualización a modo edición habilitando los campos del formulario.
+   */
+  enableEditMode(): void {
+    if (DEBUG) console.log('🛠️ [UsersPage][enableEditMode] Activando edición');
+    this.isViewMode = false;
+    this.editUserForm.enable();
+    this.editUserForm.get('email')?.disable();
+  }
+
+  /**
+   * Instancia y muestra el modal de usuario.
+   * Método privado compartido por openViewUserModal y openEditUserModal.
+   */
+  private openUserModal(): void {
+    const modalElement = document.getElementById('userModal');
+    if (!modalElement) return;
+    const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+    modalInstance.show();
+  }
+
+  /**
+   * Cierra el modal de usuario y resetea el modo a visualización.
+   */
+  closeUserModal(): void {
+    const modalElement = document.getElementById('userModal');
+    if (!modalElement) return;
+    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+    if (modalInstance) modalInstance.hide();
+    this.isViewMode = true;
+    if (DEBUG) console.log('🪟 [UsersPage][closeUserModal] Modal cerrado');
+  }
+
+  /**
+   * Envía los cambios del formulario de edición al servicio.
+   * Solo se ejecuta si el formulario es válido y está en modo edición.
    * @returns {Promise<void>}
    */
   async onSubmitEditUser(): Promise<void> {
     if (DEBUG) console.log('🚀 [UsersPage][onSubmitEditUser] Guardando...');
-
     if (this.editUserForm.invalid) {
-      console.warn("⚠️ [UsersPage][onSubmitEditUser] Formulario inválido");
+      console.warn('⚠️ [UsersPage][onSubmitEditUser] Formulario inválido');
       this.editUserForm.markAllAsTouched();
       return;
     }
-
     this.isEditingUser = true;
-
     try {
       const raw = this.editUserForm.getRawValue();
-
-      const payload = {
-        ...raw,
-        full_name: `${raw.first_name} ${raw.last_name}`.trim(),
-      };
-
+      const payload = { ...raw, full_name: `${raw.first_name} ${raw.last_name}`.trim() };
       if (DEBUG) console.log('📦 [UsersPage][onSubmitEditUser] Payload:', payload);
-
       await this.adminUsersService.updateUserProfile(payload);
-
       if (DEBUG) console.log('✅ [UsersPage][onSubmitEditUser] Actualizado correctamente');
-
-      this.closeEditUserModal();
+      this.closeUserModal();
       await this.loadUsers();
     } catch (error) {
       console.error('🔴 [UsersPage][onSubmitEditUser] Error:', error);
@@ -373,65 +367,30 @@ export class UsersPage implements OnInit {
     }
   }
 
-	/**
-   * Cierra el modal de edición de usuario.
-   *
-   * @returns {void}
-   */
-  closeEditUserModal(): void {
-     const modalElement = document.getElementById('editUserModal');
-    if (!modalElement) return;
-    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-    if (modalInstance) modalInstance.hide();
-    if (DEBUG) console.log('🪟 [UsersPage][closeEditUserModal] Modal cerrado');
-  }
+  // ─── Modal crear usuario ──────────────────────────────────────────────────────
 
   /**
-   * Maneja el submit del formulario de creación.
-   *
-   * IMPORTANTE:
-   * Por ahora solo valida y muestra trazabilidad en consola.
-   * La conexión real con backend seguro / Edge Function se hará después.
-   *
+   * Envía el formulario de creación de usuario al servicio.
    * @returns {Promise<void>}
    */
   async onSubmitCreateUser(): Promise<void> {
-   if (DEBUG) console.log('🚀 [UsersPage][onSubmitCreateUser] Enviando...');
-
+    if (DEBUG) console.log('🚀 [UsersPage][onSubmitCreateUser] Enviando...');
     if (this.createUserForm.invalid) {
-      console.warn("⚠️ [UsersPage][onSubmitCreateUser] Formulario inválido");
+      console.warn('⚠️ [UsersPage][onSubmitCreateUser] Formulario inválido');
       this.createUserForm.markAllAsTouched();
       return;
     }
-
     this.loading.set(true);
     this.isCreatingUser = true;
-
     try {
       const raw = this.createUserForm.getRawValue();
-
-      const payload = {
-        ...raw,
-        full_name: `${raw.first_name} ${raw.last_name}`.trim(),
-      };
-
+      const payload = { ...raw, full_name: `${raw.first_name} ${raw.last_name}`.trim() };
       if (DEBUG) console.log('📦 [UsersPage][onSubmitCreateUser] Payload:', payload);
-
       await this.adminUsersService.createUser(payload);
-
       if (DEBUG) console.log('✅ [UsersPage][onSubmitCreateUser] Usuario creado');
-
-      this.createUserForm.reset({
-        first_name: "",
-        last_name: "",
-        phone: "",
-        email: "",
-        password: "",
-        global_role: "user",
-        is_active: true,
-      });
-
+      this.createUserForm.reset({ first_name: '', last_name: '', phone: '', email: '', password: '', global_role: 'user', is_active: true });
       this.closeCreateUserModal();
+      this.currentPage = 1;
       await this.loadUsers();
     } catch (error) {
       console.error('🔴 [UsersPage][onSubmitCreateUser] Error:', error);
@@ -441,37 +400,30 @@ export class UsersPage implements OnInit {
     }
   }
 
-  
-
   /**
    * Cierra el modal de creación de usuario.
    */
   closeCreateUserModal(): void {
-   const modalEl = document.getElementById('createUserModal');
+    const modalEl = document.getElementById('createUserModal');
     if (!modalEl) return;
     const modal = bootstrap.Modal.getInstance(modalEl);
     if (modal) modal.hide();
     if (DEBUG) console.log('🪟 [UsersPage][closeCreateUserModal] Modal cerrado');
   }
 
-	// ─── Toggle estado ───────────────────────────────────────────────────────────
+  // ─── Toggle estado ────────────────────────────────────────────────────────────
 
-	/**
-   * Cambia el estado activo/inactivo de un usuario desde la UI.
-   *
-   * Si el usuario está activo, solicita confirmación antes de deshabilitarlo.
-   *
-   * @param {AdminUser} user Usuario seleccionado
+  /**
+   * Cambia el estado activo/inactivo de un usuario con confirmación si va a desactivar.
+   * @param {AdminUser} user Usuario seleccionado.
    * @returns {Promise<void>}
    */
   async toggleStatus(user: AdminUser): Promise<void> {
     if (DEBUG) console.log('🧠 [UsersPage][toggleStatus] usuario:', user.email);
-
     if (user.is_active) {
       const confirmed = window.confirm(`¿Seguro que deseas desactivar a "${user.full_name || user.email}"?`);
       if (!confirmed) return;
     }
-
     try {
       await this.adminUsersService.toggleUserStatus(user.id, user.is_active);
       if (DEBUG) console.log('🔄 [UsersPage][toggleStatus] Refrescando lista...');
@@ -481,69 +433,34 @@ export class UsersPage implements OnInit {
     }
   }
 
-	// ─── Helpers ─────────────────────────────────────────────────────────────────
+  // ─── Helpers ──────────────────────────────────────────────────────────────────
 
   /**
-   * Retorna el label legible del rol global del usuario.
-   *
-   * @param {string} role Rol global del usuario.
-   * @returns {string} Texto legible del rol.
+   * Retorna el label legible del rol global.
+   * @param {string} role Rol del usuario.
+   * @returns {string}
    */
   getRoleLabel(role: string): string {
-    const labels: Record<string, string> = {
-      super_admin: "Super Admin",
-      user: "Usuario",
-    };
-
+    const labels: Record<string, string> = { super_admin: 'Super Admin', user: 'Usuario' };
     return labels[role] ?? role;
   }
 
   /**
-   * Retorna el ícono Bootstrap correspondiente al rol global.
-   *
-   * @param {string} role Rol global del usuario.
-   * @returns {string} Clase del ícono Bootstrap.
+   * Retorna la clase del ícono Bootstrap según el rol.
+   * @param {string} role Rol del usuario.
+   * @returns {string}
    */
   getRoleIcon(role: string): string {
-    const icons: Record<string, string> = {
-      super_admin: "bi-shield-fill",
-      user: "bi-person",
-    };
-
-    return icons[role] ?? "bi-person";
+    const icons: Record<string, string> = { super_admin: 'bi-shield-fill', user: 'bi-person' };
+    return icons[role] ?? 'bi-person';
   }
 
   /**
    * Retorna la inicial del nombre o email del usuario para el avatar.
-   * @param user Usuario del que se extrae la inicial
+   * @param {AdminUser} user Usuario.
+   * @returns {string}
    */
   getInitial(user: AdminUser): string {
     return (user.full_name || user.email).charAt(0).toUpperCase();
-  }
-
-  
-
-  /**
-   * Maneja el cambio de rol desde la UI.
-   *
-   * @param {AdminUser} user Usuario seleccionado
-   * @param {Event} event Evento del select
-   */
-  async onRoleChange(user: AdminUser, event: Event): Promise<void> {
-    const select = event.target as HTMLSelectElement;
-    const newRole = select.value;
-
-    console.log("🎭 [UsersPage][onRoleChange] Cambio detectado");
-    console.log("👉 Usuario:", user.email);
-    console.log("👉 Nuevo rol:", newRole);
-
-    try {
-      await this.adminUsersService.updateUserRole(user.id, newRole);
-
-      console.log("🔄 Refrescando lista...");
-      await this.loadUsers();
-    } catch (error) {
-      console.error("❌ Error al cambiar rol:", error);
-    }
   }
 }

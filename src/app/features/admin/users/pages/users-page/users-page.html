@@ -117,9 +117,7 @@
 									{{ (user.full_name || user.email).charAt(0).toUpperCase() }}
 								</div>
 								<div>
-									<div class="fw-semibold text-dark lh-sm">
-										{{ user.full_name || 'Sin nombre' }}
-									</div>
+									<div class="fw-semibold text-dark lh-sm">{{ user.full_name || 'Sin nombre' }}</div>
 									<div class="text-muted small">{{ user.email }}</div>
 								</div>
 							</div>
@@ -147,25 +145,24 @@
 						</td>
 
 						<!-- Fecha -->
-						<td class="text-muted small">
-							{{ user.created_at | date:'dd MMM yyyy' }}
-						</td>
+						<td class="text-muted small">{{ user.created_at | date:'dd MMM yyyy' }}</td>
 
 						<!-- Acciones -->
 						<td class="text-center pe-4">
 							<div class="d-flex justify-content-center gap-1">
-								<button class="btn btn-sm btn-icon" title="Ver detalle">
+								<!-- Ver detalle -->
+								<button class="btn btn-sm btn-icon" title="Ver detalle" type="button" (click)="openViewUserModal(user)">
 									<i class="bi bi-eye text-primary"></i>
 								</button>
-								<button class="btn btn-sm btn-icon" title="Editar" type="button" (click)="openEditUserModal(user)"
-									data-bs-toggle="modal" data-bs-target="#editUserModal">
+								<!-- Editar -->
+								<button class="btn btn-sm btn-icon" title="Editar" type="button" (click)="openEditUserModal(user)">
 									<i class="bi bi-pencil text-warning"></i>
 								</button>
-								<button class="btn btn-sm btn-icon" (click)="toggleStatus(user)"
+								<!-- Activar / Desactivar -->
+								<button class="btn btn-sm btn-icon" type="button" (click)="toggleStatus(user)"
 									[title]="user.is_active ? 'Deshabilitar' : 'Activar'">
 									<i class="bi"
-										[ngClass]="user.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'">
-									</i>
+										[ngClass]="user.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'"></i>
 								</button>
 							</div>
 						</td>
@@ -178,38 +175,26 @@
 
 		<!-- Footer: info + paginación -->
 		<div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
-
-			<!-- Info registros -->
 			<span class="text-muted small">
 				Mostrando <strong>{{ fromRecord }}–{{ toRecord }}</strong> de <strong>{{ totalUsers }}</strong> usuario(s)
 			</span>
-
-			<!-- Paginación -->
 			@if (totalPages > 1) {
 			<nav>
 				<ul class="pagination pagination-sm mb-0">
-
-					<!-- Anterior -->
 					<li class="page-item" [class.disabled]="currentPage === 1">
 						<a class="page-link" (click)="goToPage(currentPage - 1)" role="button">‹</a>
 					</li>
-
-					<!-- Páginas -->
 					@for (page of pages; track page) {
 					<li class="page-item" [class.active]="page === currentPage">
 						<a class="page-link" (click)="goToPage(page)" role="button">{{ page }}</a>
 					</li>
 					}
-
-					<!-- Siguiente -->
 					<li class="page-item" [class.disabled]="currentPage === totalPages">
 						<a class="page-link" (click)="goToPage(currentPage + 1)" role="button">›</a>
 					</li>
-
 				</ul>
 			</nav>
 			}
-
 		</div>
 		}
 
@@ -233,6 +218,7 @@
 
 	</div>
 </div>
+
 
 <!-- ─── MODAL CREAR USUARIO ──────────────────────────────────────────────────── -->
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
@@ -305,41 +291,61 @@
 	</div>
 </div>
 
-<!-- ─── MODAL EDITAR USUARIO ─────────────────────────────────────────────────── -->
-<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+
+<!-- ─── MODAL VER / EDITAR USUARIO ───────────────────────────────────────────── -->
+<!--
+  Un solo modal con dos modos controlados por isViewMode:
+  - isViewMode = true  → campos deshabilitados, botón "Editar" en footer
+  - isViewMode = false → campos habilitados, botón "Guardar cambios" en footer
+-->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered">
 		<div class="modal-content">
+
+			<!-- HEADER: título cambia según el modo -->
 			<div class="modal-header">
-				<h5 class="modal-title" id="editUserModalLabel">Editar usuario</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				<h5 class="modal-title" id="userModalLabel">
+					@if (isViewMode) {
+					<i class="bi bi-person-circle me-2 text-primary"></i> Detalle del usuario
+					} @else {
+					<i class="bi bi-pencil-square me-2 text-warning"></i> Editar usuario
+					}
+				</h5>
+				<button type="button" class="btn-close" (click)="closeUserModal()"></button>
 			</div>
+
+			<!-- BODY -->
 			<div class="modal-body">
 				<form [formGroup]="editUserForm" (ngSubmit)="onSubmitEditUser()">
+
 					<div class="row g-3">
 						<div class="col-md-6">
 							<label class="form-label">Nombre</label>
 							<input type="text" class="form-control" formControlName="first_name" placeholder="Ej: Juan">
-							@if (editUserForm.get('first_name')?.touched && editUserForm.get('first_name')?.invalid) {
+							@if (!isViewMode && editUserForm.get('first_name')?.touched && editUserForm.get('first_name')?.invalid) {
 							<small class="text-danger">Debes ingresar un nombre válido.</small>
 							}
 						</div>
 						<div class="col-md-6">
 							<label class="form-label">Apellido</label>
 							<input type="text" class="form-control" formControlName="last_name" placeholder="Ej: Pérez">
-							@if (editUserForm.get('last_name')?.touched && editUserForm.get('last_name')?.invalid) {
+							@if (!isViewMode && editUserForm.get('last_name')?.touched && editUserForm.get('last_name')?.invalid) {
 							<small class="text-danger">Debes ingresar un apellido válido.</small>
 							}
 						</div>
 					</div>
+
 					<div class="mb-3 mt-3">
 						<label class="form-label">Teléfono</label>
 						<input type="text" class="form-control" formControlName="phone" placeholder="Ej: +56 9 1234 5678">
 					</div>
+
 					<div class="mb-3">
 						<label class="form-label">Correo</label>
 						<input type="email" class="form-control bg-light" formControlName="email" readonly>
-						<small class="text-muted">El correo no se puede editar por ahora.</small>
+						<small class="text-muted">El correo no se puede editar.</small>
 					</div>
+
 					<div class="mb-3">
 						<label class="form-label">Rol</label>
 						<select class="form-select" formControlName="global_role">
@@ -347,12 +353,25 @@
 							<option value="super_admin">Super Admin</option>
 						</select>
 					</div>
+
 					<div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" formControlName="is_active" id="editIsActiveSwitch">
 						<label class="form-check-label" for="editIsActiveSwitch">Activo</label>
 					</div>
+
+					<!-- FOOTER: botones cambian según el modo -->
 					<div class="modal-footer px-0 pb-0 mt-4">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+						<button type="button" class="btn btn-secondary" (click)="closeUserModal()">
+							Cerrar
+						</button>
+
+						@if (isViewMode) {
+						<!-- Modo ver → botón para pasar a edición -->
+						<button type="button" class="btn btn-warning" (click)="enableEditMode()">
+							<i class="bi bi-pencil me-1"></i> Editar
+						</button>
+						} @else {
+						<!-- Modo editar → botón para guardar -->
 						<button type="submit" class="btn btn-warning d-flex align-items-center gap-2"
 							[disabled]="editUserForm.invalid || isEditingUser">
 							@if (isEditingUser) {
@@ -360,9 +379,12 @@
 							}
 							{{ isEditingUser ? 'Guardando...' : 'Guardar cambios' }}
 						</button>
+						}
 					</div>
+
 				</form>
 			</div>
+
 		</div>
 	</div>
 </div>
