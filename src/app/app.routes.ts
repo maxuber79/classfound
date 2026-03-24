@@ -1,16 +1,16 @@
 import { Routes } from '@angular/router';
 
-
-
-//Importar componentes de las páginas
+// Auth pages
 import { Login } from './auth/pages/login/login';
-import { Dashboard } from './features/dashboard/pages/dashboard/dashboard';
 import { Register } from './auth/pages/register/register';
 import { ForgotPassword } from './auth/pages/forgot-password/forgot-password';
 import { ResetPassword } from './auth/pages/reset-password/reset-password';
+// Dashboard layout
+import { Dashboard } from './features/dashboard/pages/dashboard/dashboard';
+import { DashboardHome } from './features/dashboard/pages/dashboard-home/dashboard-home';
+// Módulos actuales
 import { UsersPage } from './features/admin/users/pages/users-page/users-page';
 import { ProfilePage }    from './features/profile/pages/profile-page/profile-page';
-
 //Importar guard de autenticación
 import { authGuard } from './auth/guards/auth.guard';
 import { loginGuard } from './auth/guards/login.guard';
@@ -24,11 +24,16 @@ export const routes: Routes = [
   { path: 'dashboard',
 		component: Dashboard,
 		canActivate: [authGuard],
-	 	children: [
-      { path: '',            pathMatch: 'full', redirectTo: 'admin/users' },
+	 	children: [			
+      { path: 'home', loadComponent: () => import('./features/dashboard/pages/dashboard-home/dashboard-home').then(m => m.DashboardHome)},
+      { path: '', pathMatch: 'full', redirectTo: 'home' },
       { path: 'admin/users', component: UsersPage   },
       { path: 'profile',     component: ProfilePage },
-      // Aquí agregarás más rutas hijas: reportes, calendario, etc.
+			//{ path: 'courses', loadComponent: () => import('./features/courses/pages/courses-page/courses-page.component').then(m => m.CoursesPageComponent)},
+      //{ path: 'categories', loadComponent: () => import('./features/categories/pages/categories-page/categories-page.component').then(m => m.CategoriesPageComponent)},
+      //{ path: 'transactions', loadComponent: () => import('./features/transactions/pages/transactions-page/transactions-page.component').then(m => m.TransactionsPageComponent)}, 
+      //{ path: 'receipts', loadComponent: () => import('./features/receipts/pages/receipts-page/receipts-page.component').then(m => m.ReceiptsPageComponent)},
+      //{ path: 'reports', loadComponent: () => import('./features/reports/pages/reports-page/reports-page.component').then(m => m.ReportsPageComponent)},// Aquí agregarás más rutas hijas: reportes, calendario, etc.
     ]
 	},
 	//{ path: 'admin/users', component: UsersPage, canActivate: [authGuard] },

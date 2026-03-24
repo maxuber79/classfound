@@ -1,0 +1,12 @@
+.dashboard-home {
+  padding: 1rem;
+
+  .card {
+    border-radius: 12px;
+    transition: 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+  }
+}

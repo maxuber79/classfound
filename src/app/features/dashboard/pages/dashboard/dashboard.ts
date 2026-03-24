@@ -41,13 +41,19 @@ export class Dashboard {
    * La propiedad `route` es relativa a /dashboard/.
    */
   readonly navItems: NavItem[] = [
-    { icon: 'bi-grid-1x2',   label: 'Dashboard',     route: 'home'         },
-    { icon: 'bi-people',     label: 'Usuarios',       route: 'admin/users'  },
-    { icon: 'bi-bar-chart',  label: 'Reportes',       route: 'reportes'     },
-    { icon: 'bi-calendar3',  label: 'Calendario',     route: 'calendario'   },
-    { icon: 'bi-folder',     label: 'Documentos',     route: 'documentos'   },
-    { icon: 'bi-gear',       label: 'Configuración',  route: 'configuracion'},
-  ];
+  { icon: 'bi-house',         label: 'Inicio',        route: 'home' },
+  { icon: 'bi-people',        label: 'Usuarios',      route: 'admin/users' },
+  { icon: 'bi-person-circle', label: 'Mi perfil',     route: 'profile' },
+
+  { icon: 'bi-building',      label: 'Colegios',      route: 'schools' },
+  { icon: 'bi-mortarboard',   label: 'Cursos',        route: 'courses' },
+  { icon: 'bi-tags',          label: 'Categorías',    route: 'categories' },
+
+  { icon: 'bi-cash-stack',    label: 'Transacciones', route: 'transactions' },
+  { icon: 'bi-receipt',       label: 'Comprobantes',  route: 'receipts' },
+
+  { icon: 'bi-bar-chart',     label: 'Reportes',      route: 'reports' }
+];
 
   readonly notifications: Notification[] = [
     { id: 1, icon: 'bi-person-plus',         iconColor: 'text-primary', title: 'Nuevo usuario registrado',  description: 'usuario@ejemplo.cl se unió al sistema', time: 'Hace 5 min',   unread: true  },
@@ -90,23 +96,25 @@ export class Dashboard {
   }
 
   /**
-   * Verifica si la ruta hija está activa comparando con la URL actual.
-   * Se usa para marcar visualmente el item del sidebar correspondiente.
-   * @param {string} route Ruta hija relativa (ej: 'admin/users').
-   * @returns {boolean}
-   */
-  isRouteActive(route: string): boolean {
-    return this.router.url.includes(`/dashboard/${route}`);
-  }
+	 * Verifica si la ruta hija está activa comparando con la URL actual.
+	 * @param {string} route Ruta hija relativa.
+	 * @returns {boolean}
+	 */
+	isRouteActive(route: string): boolean {
+		const currentUrl = this.router.url;
+		const targetUrl = `/dashboard/${route}`;
+
+		return currentUrl === targetUrl || currentUrl.startsWith(`${targetUrl}/`);
+	}
 
   /**
    * Navega a la ruta hija correspondiente al item del sidebar seleccionado.
    * @param {NavItem} item Item del menú clickeado.
    */
   navigateTo(item: NavItem): void {
-    if (DEBUG) console.log('🧭 [Dashboard][navigateTo] Navegando a:', item.route);
-    this.router.navigate(['/dashboard', item.route]);
-  }
+		if (DEBUG) console.log('🧭 [Dashboard][navigateTo] Navegando a:', item.route);
+		this.router.navigateByUrl(`/dashboard/${item.route}`);
+	}
 
   /**
    * Maneja el click en una notificación.
