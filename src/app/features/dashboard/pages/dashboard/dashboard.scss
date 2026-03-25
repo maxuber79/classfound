@@ -2,10 +2,10 @@
 $nav-height: 60px;
 $sidebar-expanded: 230px;
 $sidebar-collapsed: 64px;
-$nav-bg: #1e1e2e;
-$sidebar-bg: #16161f;
+$nav-bg: #0f172a;
+$sidebar-bg: #1e2d45;
 $main-bg: #f4f5fb;
-$accent: #4f46e5;
+$accent: #2563eb;
 $accent-light: #eef2ff;
 $text-nav: #e2e2f0;
 $text-muted-custom: #9999bb;
@@ -255,12 +255,13 @@ $transition: 0.25s ease;
   border-radius: 10px;
   border: none;
   background: transparent;
-  color: $text-muted-custom;
+  color: $text-nav;
   cursor: pointer;
   white-space: nowrap;
   width: 100%;
   transition: background $transition, color $transition;
   text-align: left;
+  text-decoration: none;
 
   &:hover {
     background: rgba(255, 255, 255, 0.07);

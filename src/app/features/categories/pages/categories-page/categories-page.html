@@ -1,0 +1,325 @@
+<div class="container-fluid px-4 py-4">
+
+	<!-- Header -->
+	<div class="d-flex justify-content-between align-items-start mb-4">
+		<div>
+			<h4 class="fw-bold mb-1">Categorías</h4>
+			<p class="text-muted mb-0 small">Administra las categorías de ingresos y egresos del sistema</p>
+		</div>
+		<button class="btn btn-primary btn-sm mt-3" (click)="openCreateModal()">
+			<i class="bi bi-plus-circle me-1"></i> Crear primera categoría
+		</button>
+	</div>
+
+	<!-- Error -->
+	@if (errorMessage) {
+	<div class="alert alert-danger d-flex align-items-center gap-2">
+		<i class="bi bi-exclamation-triangle-fill"></i>
+		{{ errorMessage }}
+	</div>
+	}
+
+	<!-- Card contenedor -->
+	<div class="card border-0 shadow-sm">
+
+		<!-- Toolbar: buscador + filtros -->
+		<div class="card-header bg-white border-bottom py-3">
+			<div class="row g-2 align-items-center">
+
+				<!-- Buscador -->
+				<div class="col-12 col-md-5">
+					<div class="input-group input-group-sm">
+						<span class="input-group-text bg-light border-end-0">
+							<i class="bi bi-search text-muted"></i>
+						</span>
+						<input type="text" class="form-control border-start-0 bg-light" placeholder="Buscar por nombre..."
+							[(ngModel)]="searchTerm" (input)="onSearchInput()">
+						@if (searchTerm) {
+						<button class="btn btn-outline-secondary btn-sm" type="button" (click)="clearFilters()">
+							<i class="bi bi-x"></i>
+						</button>
+						}
+					</div>
+				</div>
+
+				<!-- Filtro tipo -->
+				<div class="col-6 col-md-2">
+					<select class="form-select form-select-sm bg-light" [(ngModel)]="selectedType"
+						(change)="onTypeFilterChange()">
+						<option value="">Todos los tipos</option>
+						<option value="income">Ingreso</option>
+						<option value="expense">Egreso</option>
+					</select>
+				</div>
+
+				<!-- Filtro estado -->
+				<div class="col-6 col-md-2">
+					<select class="form-select form-select-sm bg-light" [(ngModel)]="selectedStatus"
+						(change)="onStatusFilterChange()">
+						<option value="">Todos los estados</option>
+						<option value="true">Activa</option>
+						<option value="false">Inactiva</option>
+					</select>
+				</div>
+
+				<!-- Registros por página -->
+				<div class="col-6 col-md-2">
+					<select class="form-select form-select-sm bg-light" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+						@for (size of pageSizeOptions; track size) {
+						<option [value]="size">{{ size }} por página</option>
+						}
+					</select>
+				</div>
+
+				<!-- Contador + limpiar -->
+				<div class="col-6 col-md-1 text-end">
+					<span class="badge bg-primary rounded-pill">{{ totalFiltered }}</span>
+					@if (hasActiveFilters) {
+					<button class="btn btn-link btn-sm text-muted p-0 ms-1" (click)="clearFilters()" title="Limpiar filtros">
+						<i class="bi bi-funnel-fill text-warning"></i>
+					</button>
+					}
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Estado de carga -->
+		@if (loading()) {
+		<div class="text-center py-5">
+			<div class="spinner-border text-primary" role="status"></div>
+			<p class="text-muted mt-2 small">Cargando categorías...</p>
+		</div>
+		}
+
+		<!-- Tabla -->
+		@if (!loading() && pagedCategories.length > 0) {
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead>
+					<tr class="table-users-header">
+						<th class="ps-4">Nombre</th>
+						<th>Tipo</th>
+						<th>Estado</th>
+						<th>Fecha creación</th>
+						<th class="text-center pe-4">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (category of pagedCategories; track category.id) {
+					<tr class="table-users-row">
+
+						<!-- Nombre -->
+						<td class="ps-4">
+							<div class="d-flex align-items-center gap-2">
+								<!-- Ícono según tipo -->
+								<div class="category-icon" [class.category-icon-income]="category.type === 'income'"
+									[class.category-icon-expense]="category.type === 'expense'">
+									<i class="bi"
+										[ngClass]="category.type === 'income' ? 'bi-arrow-down-circle' : 'bi-arrow-up-circle'"></i>
+								</div>
+								<span class="fw-semibold text-dark">{{ category.name }}</span>
+							</div>
+						</td>
+
+						<!-- Tipo -->
+						<td>
+							<!-- <span class="role-badge" [ngClass]="getTypeBadgeClass(category.type)">
+								<i class="bi me-1"
+									[ngClass]="category.type === 'income' ? 'bi-arrow-down-circle' : 'bi-arrow-up-circle'"></i>
+								{{ getTypeLabel(category.type) }}
+							</span> -->
+							<span class="badge d-inline-flex align-items-center gap-1" [ngClass]="getTypeBadgeClass(category.type)">
+								<i class="bi" [ngClass]="getTypeIcon(category.type)"></i>
+								{{ getTypeLabel(category.type) }}
+							</span>
+						</td>
+
+						<!-- Estado -->
+						<td>
+							<!-- @if (category.is_active) {
+							<span class="d-flex align-items-center gap-1 text-success small fw-semibold">
+								<span class="status-dot active"></span> Activa
+							</span>
+							} @else {
+							<span class="d-flex align-items-center gap-1 text-secondary small fw-semibold">
+								<span class="status-dot inactive"></span> Inactiva
+							</span>
+							} -->
+							<span class="badge" [ngClass]="category.is_active ? 'bg-success' : 'bg-secondary'">
+								{{ category.is_active ? 'Activa' : 'Inactiva' }}
+							</span>
+						</td>
+
+						<!-- Fecha -->
+						<td class="text-muted small">
+							{{ category.created_at | date:'dd MMM yyyy' }}
+						</td>
+
+						<!-- Acciones -->
+						<td class="text-center pe-4">
+							<div class="d-flex justify-content-center gap-1">
+								<button class="btn btn-sm btn-icon" title="Ver detalle" (click)="openViewModal(category)">
+									<i class="bi bi-eye text-primary"></i>
+								</button>
+
+								<button class="btn btn-sm btn-icon" title="Editar" (click)="openEditModal(category)">
+									<i class="bi bi-pencil text-warning"></i>
+								</button>
+
+								<button class="btn btn-sm btn-icon" [title]="category.is_active ? 'Desactivar' : 'Activar'"
+									(click)="toggleCategoryStatus(category)">
+									<i class="bi"
+										[ngClass]="category.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'">
+									</i>
+								</button>
+							</div>
+						</td>
+
+					</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Footer: info + paginación -->
+		<div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+
+			<span class="text-muted small">
+				Mostrando <strong>{{ fromRecord }}–{{ toRecord }}</strong> de <strong>{{ totalFiltered }}</strong> categoría(s)
+			</span>
+
+			@if (totalPages > 1) {
+			<nav>
+				<ul class="pagination pagination-sm mb-0">
+					<li class="page-item" [class.disabled]="currentPage === 1">
+						<a class="page-link" (click)="goToPage(currentPage - 1)" role="button">‹</a>
+					</li>
+					@for (page of pages; track page) {
+					<li class="page-item" [class.active]="page === currentPage">
+						<a class="page-link" (click)="goToPage(page)" role="button">{{ page }}</a>
+					</li>
+					}
+					<li class="page-item" [class.disabled]="currentPage === totalPages">
+						<a class="page-link" (click)="goToPage(currentPage + 1)" role="button">›</a>
+					</li>
+				</ul>
+			</nav>
+			}
+
+		</div>
+		}
+
+		<!-- Empty state -->
+		@if (!loading() && pagedCategories.length === 0) {
+		<div class="card-body text-center py-5">
+			<i class="bi bi-tag display-4 text-muted opacity-50"></i>
+			@if (hasActiveFilters) {
+			<p class="text-muted mt-3 mb-0">No se encontraron categorías con los filtros aplicados.</p>
+			<button class="btn btn-outline-secondary btn-sm mt-3" (click)="clearFilters()">
+				<i class="bi bi-x-circle me-1"></i> Limpiar filtros
+			</button>
+			} @else {
+			<p class="text-muted mt-3 mb-0">No hay categorías registradas todavía.</p>
+			<button class="btn btn-primary btn-sm mt-3">
+				<i class="bi bi-plus-circle me-1"></i> Crear primera categoría
+			</button>
+			}
+		</div>
+		}
+
+	</div>
+</div>
+
+<!-- Modal: Crear categoría -->
+<div #categoryModal class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content border-0 shadow">
+
+			<form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+				<div class="modal-header">
+					<h5 class="modal-title fw-bold" id="categoryModalLabel">
+						@if (mode === 'create') { Nueva categoría }
+						@if (mode === 'edit') { Editar categoría }
+						@if (mode === 'view') { Detalle categoría }
+					</h5>
+					<button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+				</div>
+				<div class="modal-body">
+					@if (errorMessage) {
+					<div class="alert alert-danger py-2 small">
+						{{ errorMessage }}
+					</div>
+					}
+					<div class="mb-3">
+						<label for="categoryType" class="form-label fw-semibold">Tipo</label>
+						<select id="categoryType" class="form-select" formControlName="type">
+							<option value="income">Ingreso</option>
+							<option value="expense">Egreso</option>
+						</select>
+					</div>
+					<div class="mb-3 position-relative">
+						<label for="categoryName" class="form-label fw-semibold">Nombre</label>
+
+						<input id="categoryName" type="text" class="form-control" formControlName="name"
+							[class.is-invalid]="isFieldInvalid('name')" placeholder="Ej: Cuota mensual" autocomplete="off"
+							(input)="onCategoryNameInput()" (focus)="onCategoryNameFocus()" (blur)="onCategoryNameBlur()">
+
+						@if (isFieldInvalid('name')) {
+						<div class="invalid-feedback">
+							El nombre es obligatorio.
+						</div>
+						}
+
+						@if (showSuggestions && filteredSuggestions.length > 0) {
+						<div class="suggestions-dropdown shadow-sm">
+							@for (suggestion of filteredSuggestions; track suggestion) {
+							<button type="button" class="suggestion-item" (mousedown)="selectSuggestion(suggestion)">
+								{{ suggestion }}
+							</button>
+							}
+						</div>
+						}
+					</div>
+					<div class="form-check form-switch">
+						<input id="categoryActive" class="form-check-input" type="checkbox" formControlName="is_active">
+						<label class="form-check-label" for="categoryActive">
+							Categoría activa
+						</label>
+					</div>
+				</div>
+				<div class="modal-footer">
+
+
+
+					<button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="saving()">
+						@if (mode === 'view') {
+						Cerrar
+						} @else {
+						Cancelar
+						}
+					</button>
+
+					@if (mode !== 'view') {
+					<button type="submit" class="btn btn-primary" [disabled]="saving()">
+						@if (saving()) {
+						<span class="spinner-border spinner-border-sm me-2"></span>
+						}
+
+						@if (mode === 'create') {
+						Guardar categoría
+						}
+
+						@if (mode === 'edit') {
+						Guardar cambios
+						}
+					</button>
+					}
+
+				</div>
+			</form>
+
+		</div>
+	</div>
+</div>

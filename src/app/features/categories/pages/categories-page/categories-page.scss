@@ -1,0 +1,38 @@
+.categories-page {
+  h2 {
+    font-weight: 700;
+  }
+
+  .table {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 1056;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.suggestion-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  background: #fff;
+  text-align: left;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}

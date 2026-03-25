@@ -7,7 +7,8 @@ const DEBUG = true;
 interface NavItem {
   icon: string;
   label: string;
-  route: string; // Ruta hija relativa al dashboard
+  route: string;
+  exact?: boolean;
 }
 
 interface Notification {
@@ -23,7 +24,7 @@ interface Notification {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterOutlet ],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -41,24 +42,45 @@ export class Dashboard {
    * La propiedad `route` es relativa a /dashboard/.
    */
   readonly navItems: NavItem[] = [
-  { icon: 'bi-house',         label: 'Inicio',        route: 'home' },
-  { icon: 'bi-people',        label: 'Usuarios',      route: 'admin/users' },
-  { icon: 'bi-person-circle', label: 'Mi perfil',     route: 'profile' },
-
-  { icon: 'bi-building',      label: 'Colegios',      route: 'schools' },
-  { icon: 'bi-mortarboard',   label: 'Cursos',        route: 'courses' },
-  { icon: 'bi-tags',          label: 'Categorías',    route: 'categories' },
-
-  { icon: 'bi-cash-stack',    label: 'Transacciones', route: 'transactions' },
-  { icon: 'bi-receipt',       label: 'Comprobantes',  route: 'receipts' },
-
-  { icon: 'bi-bar-chart',     label: 'Reportes',      route: 'reports' }
-];
+    { icon: 'bi-house',         label: 'Inicio',        route: 'home', exact: true },
+    { icon: 'bi-people',        label: 'Usuarios',      route: 'admin/users' },
+    { icon: 'bi-person-circle', label: 'Mi perfil',     route: 'profile', exact: true },
+    { icon: 'bi-building',      label: 'Colegios',      route: 'schools', exact: true },
+    { icon: 'bi-mortarboard',   label: 'Cursos',        route: 'courses', exact: true },
+    { icon: 'bi-tags',          label: 'Categorías',    route: 'categories', exact: true },
+    { icon: 'bi-cash-stack',    label: 'Transacciones', route: 'transactions', exact: true },
+    { icon: 'bi-receipt',       label: 'Comprobantes',  route: 'receipts', exact: true },
+    { icon: 'bi-bar-chart',     label: 'Reportes',      route: 'reports', exact: true },
+  ];
 
   readonly notifications: Notification[] = [
-    { id: 1, icon: 'bi-person-plus',         iconColor: 'text-primary', title: 'Nuevo usuario registrado',  description: 'usuario@ejemplo.cl se unió al sistema', time: 'Hace 5 min',   unread: true  },
-    { id: 2, icon: 'bi-file-earmark-check',  iconColor: 'text-success', title: 'Reporte generado',          description: 'El reporte mensual está listo',         time: 'Hace 1 hora',  unread: true  },
-    { id: 3, icon: 'bi-exclamation-triangle',iconColor: 'text-warning', title: 'Alerta del sistema',        description: 'Espacio en disco al 80%',               time: 'Hace 3 horas', unread: false },
+    {
+      id: 1,
+      icon: 'bi-person-plus',
+      iconColor: 'text-primary',
+      title: 'Nuevo usuario registrado',
+      description: 'usuario@ejemplo.cl se unió al sistema',
+      time: 'Hace 5 min',
+      unread: true
+    },
+    {
+      id: 2,
+      icon: 'bi-file-earmark-check',
+      iconColor: 'text-success',
+      title: 'Reporte generado',
+      description: 'El reporte mensual está listo',
+      time: 'Hace 1 hora',
+      unread: true
+    },
+    {
+      id: 3,
+      icon: 'bi-exclamation-triangle',
+      iconColor: 'text-warning',
+      title: 'Alerta del sistema',
+      description: 'Espacio en disco al 80%',
+      time: 'Hace 3 horas',
+      unread: false
+    },
   ];
 
   /**
@@ -94,6 +116,8 @@ export class Dashboard {
     this.profileOpen.update(v => !v);
     if (this.notificationsOpen()) this.notificationsOpen.set(false);
   }
+
+	 
 
   /**
 	 * Verifica si la ruta hija está activa comparando con la URL actual.

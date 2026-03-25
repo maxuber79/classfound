@@ -6,7 +6,7 @@
 		<!-- Izquierda: sandwich + logo -->
 		<div class="d-flex align-items-center gap-3">
 			<div class="nav-brand d-flex align-items-center gap-2">
-				<img src="https://placehold.co/32x32/4f46e5/ffffff?text=L" alt="Logo" class="nav-logo">
+				<img src="https://placehold.co/32x32/2563eb/ffffff?text=L" alt="Logo" class="nav-logo">
 				<span class="nav-brand-text">Cl@ssdFund</span>
 			</div>
 			<button class="btn btn-nav-icon" (click)="toggleSidebar()" title="Menú">
@@ -102,13 +102,14 @@
 		<aside class="dashboard-sidebar" [class.expanded]="sidebarExpanded()">
 			<nav class="sidebar-nav">
 				@for (item of navItems; track item.label) {
-				<button class="sidebar-item" [class.active]="isRouteActive(item.route)" (click)="navigateTo(item)"
-					[title]="item.label">
+				<a class="sidebar-item" [routerLink]="'/dashboard/' + item.route" routerLinkActive="active"
+					[routerLinkActiveOptions]="{ exact: item.exact ?? false }" [title]="item.label">
 					<i class="bi {{ item.icon }} sidebar-icon"></i>
+
 					@if (sidebarExpanded()) {
 					<span class="sidebar-label">{{ item.label }}</span>
 					}
-				</button>
+				</a>
 				}
 			</nav>
 		</aside>
