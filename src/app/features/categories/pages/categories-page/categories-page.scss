@@ -1,3 +1,34 @@
+// ─── Variables del sistema de diseño ─────────────────────────────────────────
+$primary: #1e3a5f;
+$primary-dark: #162a44;
+$primary-light: #E8F2FC;
+$primary-action: #2563eb;
+
+$secondary: #1a7f5a;
+$secondary-dark: #14532d;
+$secondary-light:#E2F5EF;
+
+$tertiary: #164478;
+$tertiary-dark: #0f2a3b;
+$tertiary-light: #3a5f8f;
+
+$accent: #FFC107;
+$accent-dark: #FFB300;
+$accent-light: #FFF8E1;
+
+$success: #10b981;
+$success-dark: #0f766e;
+$success-light: #6ee7b7;
+
+$warning: #fbbf24;
+$warning-dark: #d97706;
+$warning-light: #fde68a;
+
+$danger: #ef4444;
+$danger-dark: #b91c1c;
+$danger-light: #fca5a5;
+
+// ─── Base categorías ──────────────────────────────────────────────────────────
 .categories-page {
   h2 {
     font-weight: 700;
@@ -10,6 +41,7 @@
   }
 }
 
+// ─── Sugerencias de nombre ────────────────────────────────────────────────────
 .suggestions-dropdown {
   position: absolute;
   top: calc(100% + 0.35rem);
@@ -34,5 +66,129 @@
 
   &:hover {
     background-color: #f8f9fa;
+  }
+}
+
+// ─── Badge de tipo (columna Tipo) ─────────────────────────────────────────────
+// Clase base compartida — NO mezclar con .badge de Bootstrap
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+
+  // Ingreso: fondo verde claro, texto verde oscuro
+  &--income {
+    background: rgba($success, 0.12);
+    color: $success-dark;
+  }
+
+  // Egreso: fondo naranja/warning claro, texto warning oscuro
+  &--expense {
+    background: rgba($warning, 0.15);
+    color: $warning-dark;
+  }
+}
+
+// ─── Badge de estado (columna Estado) ────────────────────────────────────────
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+
+  // Activa: fondo verde claro, texto verde oscuro
+  &--active {
+    background: rgba($success, 0.12);
+    color: $success-dark;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: $success;
+    }
+  }
+
+  // Inactiva: fondo gris claro, texto gris oscuro
+  &--inactive {
+    background: rgba(#6c757d, 0.12);
+    color: #495057;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #adb5bd;
+    }
+  }
+}
+
+// ─── Ícono circular en columna Nombre ────────────────────────────────────────
+.category-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+
+  &-income {
+    background: rgba($success, 0.12);
+    color: $success-dark;
+  }
+
+  &-expense {
+    background: rgba($warning, 0.15);
+    color: $warning-dark;
+  }
+}
+
+// ─── Category type selector (modal) ──────────────────────────────────────────
+.category-type-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6c757d;
+  transition: all 0.15s ease;
+  user-select: none;
+
+  &:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+  }
+
+  &--active-income {
+    border-color: $success;
+    background: rgba($success, 0.08);
+    color: $success-dark;
+  }
+
+  &--active-expense {
+    border-color: $warning;
+    background: rgba($warning, 0.08);
+    color: $warning-dark;
   }
 }

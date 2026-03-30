@@ -1,0 +1,22 @@
+.toast {
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+}
+
+.toast-fade {
+  animation: toastFadeIn 0.35s ease-out;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,11 +1,219 @@
-.transactions-page {
-  h2 {
-    font-weight: 700;
+// ─── Variables del sistema de diseño ─────────────────────────────────────────
+$primary: #1e3a5f;
+$primary-dark: #162a44;
+$primary-light: #E8F2FC;
+$primary-action: #2563eb;
+
+$secondary: #1a7f5a;
+$secondary-dark: #14532d;
+$secondary-light:#E2F5EF;
+
+$tertiary: #164478;
+$tertiary-dark: #0f2a3b;
+$tertiary-light: #3a5f8f;
+
+$accent: #FFC107;
+$accent-dark: #FFB300;
+$accent-light: #FFF8E1;
+
+$success: #10b981;
+$success-dark: #0f766e;
+$success-light: #6ee7b7;
+
+$warning: #fbbf24;
+$warning-dark: #d97706;
+$warning-light: #fde68a;
+
+$danger: #ef4444;
+$danger-dark: #b91c1c;
+$danger-light: #fca5a5;
+
+// ─── Mixin base para variantes de summary-card ───────────────────────────────
+// Genera border-top + icon background/color + amount color
+@mixin card-variant($color, $color-light, $amount-color: null) {
+  border-top: 4px solid $color;
+
+  .summary-card__icon {
+    background: rgba($color, 0.12);
+    color: $color;
   }
 
-  .table {
-    background: #fff;
+  @if $amount-color {
+    .summary-card__amount {
+      color: $amount-color;
+    }
+  }
+}
+
+// ─── Summary Card ─────────────────────────────────────────────────────────────
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+  border-top: 4px solid transparent; // base — sobreescrito por variantes
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  // ─── Elementos internos ─────────────────────────────────────────────────────
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
-    overflow: hidden;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+  }
+
+  &__amount {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1a1a2e;
+  }
+
+  &__sub {
+    font-size: 0.72rem;
+    color: #9ca3af;
+  }
+
+  // ─── Variantes semánticas (transacciones) ────────────────────────────────────
+
+  &--positive {
+    @include card-variant($success, $success-light, $success);
+  }
+
+  &--negative {
+    @include card-variant($danger, $danger-light, $danger);
+  }
+
+  &--income {
+    @include card-variant($success, $success-light);
+  }
+
+  &--expense {
+    @include card-variant($danger, $danger-light);
+  }
+
+  // ─── Variantes Bootstrap-like ────────────────────────────────────────────────
+
+  &--primary {
+    @include card-variant($primary-action, $primary-light);
+  }
+
+  &--secondary {
+    @include card-variant($secondary, $secondary-light);
+  }
+
+  &--success {
+    @include card-variant($success, $success-light, $success-dark);
+  }
+
+  &--warning {
+    @include card-variant($warning, $warning-light, $warning-dark);
+  }
+
+  &--danger {
+    @include card-variant($danger, $danger-light, $danger-dark);
+  }
+
+  &--info {
+    @include card-variant($tertiary, $primary-light);
+  }
+
+  &--accent {
+    @include card-variant($accent, $accent-light, $accent-dark);
+  }
+
+  &--get-started {
+    @include card-variant($primary, $primary-light);
+    background: linear-gradient(135deg, $primary-light 0%, #fff 100%);
+
+    .summary-card__label {
+      color: $primary;
+    }
+  }
+}
+
+// ─── Transaction type badge (tabla) ──────────────────────────────────────────
+
+.transaction-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--income {
+    background: rgba($success, 0.1);
+    color: $success-dark;
+  }
+
+  &--expense {
+    background: rgba($danger, 0.1);
+    color: $danger-dark;
+  }
+}
+
+// ─── Transaction type selector (modal) ───────────────────────────────────────
+
+.transaction-type-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6c757d;
+  transition: all 0.15s ease;
+  user-select: none;
+
+  &:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+  }
+
+  &--active-income {
+    border-color: $success;
+    background: rgba($success, 0.08);
+    color: $success-dark;
+  }
+
+  &--active-expense {
+    border-color: $danger;
+    background: rgba($danger, 0.08);
+    color: $danger-dark;
   }
 }

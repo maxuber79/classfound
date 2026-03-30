@@ -1,65 +1,529 @@
-<div class="transactions-page container-fluid py-3">
-	<div class="d-flex justify-content-between align-items-center mb-4">
-		<div>
-			<h2 class="mb-1">Transacciones</h2>
-			<p class="text-muted mb-0">
-				Administra los movimientos de ingresos y egresos del sistema.
-			</p>
-		</div>
+<div class="container-fluid px-4 py-4 border-1">
 
-		<button class="btn btn-primary" type="button" disabled>
-			<i class="bi bi-plus-circle me-2"></i>
+	<!-- Header -->
+	<div class="d-flex justify-content-between align-items-start mb-4">
+		<div>
+			<h4 class="fw-bold mb-1">Transacciones</h4>
+			<p class="text-muted mb-0 small">Historial de ingresos y egresos del sistema</p>
+		</div>
+		<button class="btn btn-primary" type="button" (click)="openCreateModal()">
+			<i class="bi bi-plus-circle me-1"></i>
 			Nueva transacción
 		</button>
 	</div>
 
-	@if (loading()) {
-	<div class="alert alert-info">
-		Cargando transacciones...
-	</div>
-	}
-
+	<!-- Error -->
 	@if (errorMessage) {
-	<div class="alert alert-danger">
+	<div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+		<i class="bi bi-exclamation-triangle-fill"></i>
 		{{ errorMessage }}
 	</div>
 	}
 
-	@if (!loading() && transactions.length === 0) {
-	<div class="alert alert-warning">
-		No hay transacciones registradas todavía.
+	<!-- ─── Tarjetas de resumen ──────────────────────────────────────────────── -->
+	@if (!loading()) {
+	<div class="row g-3 mb-4">
+
+		<!-- Balance general -->
+		<div class="col-12 col-md-4">
+			<div class="summary-card" [class.summary-card--positive]="isBalancePositive"
+				[class.summary-card--negative]="!isBalancePositive">
+				<div class="summary-card__icon">
+					<i class="bi" [ngClass]="isBalancePositive ? 'bi-wallet2' : 'bi-exclamation-circle'"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Balance general</span>
+					<span class="summary-card__amount">{{ formatAmount(balance) }}</span>
+					<span class="summary-card__sub">{{ incomeCount + expenseCount }} transacciones en total</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Total ingresos -->
+		<div class="col-12 col-md-4">
+			<div class="summary-card summary-card--income">
+				<div class="summary-card__icon">
+					<i class="bi bi-arrow-down-circle-fill"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Total ingresos</span>
+					<span class="summary-card__amount">{{ formatAmount(totalIncome) }}</span>
+					<span class="summary-card__sub">{{ incomeCount }} movimientos</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Total egresos -->
+		<div class="col-12 col-md-4">
+			<div class="summary-card summary-card--expense">
+				<div class="summary-card__icon">
+					<i class="bi bi-arrow-up-circle-fill"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Total egresos</span>
+					<span class="summary-card__amount">{{ formatAmount(totalExpense) }}</span>
+					<span class="summary-card__sub">{{ expenseCount }} movimientos</span>
+				</div>
+			</div>
+		</div>
+
 	</div>
 	}
 
-	@if (!loading() && transactions.length > 0) {
-	<div class="table-responsive">
-		<table class="table table-hover align-middle">
-			<thead class="table-light">
-				<tr>
-					<th>Categoría</th>
-					<th>Tipo</th>
-					<th>Monto</th>
-					<th>Fecha</th>
-					<th>Descripción</th>
-				</tr>
-			</thead>
-			<tbody>
-				@for (transaction of transactions; track transaction.id) {
-				<tr>
-					<td>{{ transaction.category_name }}</td>
-					<td>
-						<span class="badge d-inline-flex align-items-center gap-1" [ngClass]="getTypeBadgeClass(transaction.type)">
-							<i class="bi" [ngClass]="getTypeIcon(transaction.type)"></i>
-							{{ getTypeLabel(transaction.type) }}
+	<!-- ─── Card principal ───────────────────────────────────────────────────── -->
+	<div class="card border-0 shadow-sm">
+
+		<!-- Toolbar -->
+		<div class="card-header bg-white border-bottom py-3">
+			<div class="row g-2 align-items-center">
+
+				<!-- Buscador -->
+				<div class="col-12 col-md-4">
+					<div class="input-group input-group-sm">
+						<span class="input-group-text bg-light border-end-0">
+							<i class="bi bi-search text-muted"></i>
 						</span>
-					</td>
-					<td class="fw-semibold">{{ formatAmount(transaction.amount) }}</td>
-					<td>{{ transaction.transaction_date | date:'dd/MM/yyyy' }}</td>
-					<td>{{ transaction.description || '-' }}</td>
-				</tr>
-				}
-			</tbody>
-		</table>
+						<input type="text" class="form-control border-start-0 bg-light"
+							placeholder="Buscar descripción, categoría..." [(ngModel)]="searchTerm" (input)="onSearchInput()">
+						@if (searchTerm) {
+						<button class="btn btn-outline-secondary btn-sm" type="button" (click)="clearFilters()">
+							<i class="bi bi-x"></i>
+						</button>
+						}
+					</div>
+				</div>
+
+				<!-- Filtro tipo -->
+				<div class="col-6 col-md-2">
+					<select class="form-select form-select-sm bg-light" [(ngModel)]="selectedType"
+						(change)="onTypeFilterChange()">
+						<option value="">Todos los tipos</option>
+						<option value="income">Ingreso</option>
+						<option value="expense">Egreso</option>
+					</select>
+				</div>
+
+				<!-- Fecha desde -->
+				<div class="col-6 col-md-2">
+					<input type="date" class="form-control form-control-sm bg-light" [(ngModel)]="dateFrom"
+						(change)="onDateFilterChange()" title="Desde">
+				</div>
+
+				<!-- Fecha hasta -->
+				<div class="col-6 col-md-2">
+					<input type="date" class="form-control form-control-sm bg-light" [(ngModel)]="dateTo"
+						(change)="onDateFilterChange()" title="Hasta">
+				</div>
+
+				<!-- Por página -->
+				<div class="col-6 col-md-1">
+					<select class="form-select form-select-sm bg-light" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+						@for (size of pageSizeOptions; track size) {
+						<option [value]="size">{{ size }}</option>
+						}
+					</select>
+				</div>
+
+				<!-- Contador + limpiar -->
+				<div class="col-6 col-md-1 text-end">
+					<span class="badge bg-primary rounded-pill">{{ totalFiltered }}</span>
+					@if (hasActiveFilters) {
+					<button class="btn btn-link btn-sm text-muted p-0 ms-1" (click)="clearFilters()" title="Limpiar filtros">
+						<i class="bi bi-funnel-fill text-warning"></i>
+					</button>
+					}
+				</div>
+
+			</div>
+
+			<!-- Sub-resumen cuando hay filtros activos -->
+			@if (hasActiveFilters && totalFiltered > 0) {
+			<div class="d-flex align-items-center gap-3 mt-2 pt-2 border-top">
+				<small class="text-muted">Filtrado:</small>
+				<small class="text-success fw-semibold">
+					<i class="bi bi-arrow-down-circle me-1"></i>{{ formatAmount(filteredIncome) }}
+				</small>
+				<small class="text-danger fw-semibold">
+					<i class="bi bi-arrow-up-circle me-1"></i>{{ formatAmount(filteredExpense) }}
+				</small>
+				<small class="fw-semibold" [class.text-success]="(filteredIncome - filteredExpense) >= 0"
+					[class.text-danger]="(filteredIncome - filteredExpense) < 0">
+					Balance: {{ formatAmount(filteredIncome - filteredExpense) }}
+				</small>
+			</div>
+			}
+		</div>
+
+		<!-- Estado de carga -->
+		@if (loading()) {
+		<div class="text-center py-5">
+			<div class="spinner-border text-primary" role="status"></div>
+			<p class="text-muted mt-2 small">Cargando transacciones...</p>
+		</div>
+		}
+
+		<!-- Tabla -->
+		@if (!loading() && pagedTransactions.length > 0) {
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead>
+					<tr class="table-users-header">
+						<th class="ps-4">Fecha</th>
+						<th>Categoría</th>
+						<th>Tipo</th>
+						<th>Descripción</th>
+						<th class="text-end">Monto</th>
+						<th class="text-center pe-4">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (transaction of pagedTransactions; track transaction.id) {
+					<tr class="table-users-row">
+
+						<td class="ps-4">
+							<!-- <div class="fw-semibold small">{{ transaction.transaction_date | date:'dd MMM yyyy' }}</div>
+							<div class="text-muted" style="font-size:0.7rem;">{{ transaction.transaction_date | date:'EEEE' }}</div> -->
+							<div class="fw-semibold small">{{ transaction.transaction_date | date:'dd MMM yyyy' }}</div>
+							<div class="text-muted" style="font-size:0.7rem;">{{ transaction.transaction_date | date:'EEEE' }}</div>
+						</td>
+
+						<td>
+							<span class="text-dark small fw-semibold">{{ transaction.category_name || 'Sin categoría' }}</span>
+						</td>
+
+						<td>
+							<span class="transaction-type-badge"
+								[class.transaction-type-badge--income]="transaction.type === 'income'"
+								[class.transaction-type-badge--expense]="transaction.type === 'expense'">
+								<i class="bi me-1" [ngClass]="getTypeIcon(transaction.type)"></i>
+								{{ getTypeLabel(transaction.type) }}
+							</span>
+						</td>
+
+						<td>
+							<span class="text-dark small">{{ transaction.description || '—' }}</span>
+							@if (transaction.notes) {
+							<div class="text-muted mt-2"
+								style="font-size:0.7rem; white-space: normal; word-break: break-word; overflow-wrap: anywhere;">
+								<i class="bi bi-chat-left-text me-1"></i>{{ transaction.notes }}
+							</div>
+							}
+						</td>
+
+						<td class="text-end">
+							<span class="fw-bold" [class.text-success]="transaction.type === 'income'"
+								[class.text-danger]="transaction.type === 'expense'" style="font-size:0.95rem;">
+								{{ transaction.type === 'income' ? '+' : '-' }}{{ formatAmount(transaction.amount) }}
+							</span>
+						</td>
+
+						<td class="text-center pe-4">
+							<div class="d-flex justify-content-center gap-1">
+								<button class="btn btn-sm btn-icon" title="Ver detalle" (click)="openViewModal(transaction)">
+									<i class="bi bi-eye text-primary"></i>
+								</button>
+
+								<button class="btn btn-sm btn-icon" title="Editar" (click)="openEditModal(transaction)">
+									<i class="bi bi-pencil text-warning"></i>
+								</button>
+
+								<button class="btn btn-sm btn-icon" title="Eliminar" (click)="openDeleteModal(transaction)">
+									<i class="bi bi-trash text-danger"></i>
+								</button>
+							</div>
+						</td>
+
+					</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Footer paginación -->
+		<div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+			<span class="text-muted small">
+				Mostrando <strong>{{ fromRecord }}–{{ toRecord }}</strong> de <strong>{{ totalFiltered }}</strong>
+				transacción(es)
+			</span>
+			@if (totalPages > 1) {
+			<nav>
+				<ul class="pagination pagination-sm mb-0">
+					<li class="page-item" [class.disabled]="currentPage === 1">
+						<a class="page-link" (click)="goToPage(currentPage - 1)" role="button">‹</a>
+					</li>
+					@for (page of pages; track page) {
+					<li class="page-item" [class.active]="page === currentPage">
+						<a class="page-link" (click)="goToPage(page)" role="button">{{ page }}</a>
+					</li>
+					}
+					<li class="page-item" [class.disabled]="currentPage === totalPages">
+						<a class="page-link" (click)="goToPage(currentPage + 1)" role="button">›</a>
+					</li>
+				</ul>
+			</nav>
+			}
+		</div>
+		}
+
+		<!-- Empty state -->
+		@if (!loading() && pagedTransactions.length === 0) {
+		<div class="card-body text-center py-5">
+			<i class="bi bi-receipt display-4 text-muted opacity-50"></i>
+			@if (hasActiveFilters) {
+			<p class="text-muted mt-3 mb-0">No se encontraron transacciones con los filtros aplicados.</p>
+			<button class="btn btn-outline-secondary btn-sm mt-3" (click)="clearFilters()">
+				<i class="bi bi-x-circle me-1"></i> Limpiar filtros
+			</button>
+			} @else {
+			<p class="text-muted mt-3 mb-0">No hay transacciones registradas todavía.</p>
+			<button class="btn btn-primary btn-sm mt-3" (click)="openCreateModal()">
+				<i class="bi bi-plus-circle me-1"></i> Registrar primera transacción
+			</button>
+			}
+		</div>
+		}
+
 	</div>
-	}
+</div>
+
+
+<!-- ─── MODAL NUEVA TRANSACCIÓN ───────────────────────────────────────────────── -->
+<div class="modal fade" id="createTransactionModal" tabindex="-1" aria-labelledby="createTransactionModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title fw-bold" id="createTransactionModalLabel">
+					<i class="bi me-2" [ngClass]="modalMode === 'create'
+				      ? 'bi-arrow-left-right text-primary'
+				      : modalMode === 'edit'
+				      ? 'bi-pencil-square text-warning'
+				      : 'bi-eye text-info'">
+					</i>
+
+					{{ modalMode === 'create'
+					? 'Nueva transacción'
+					: modalMode === 'edit'
+					? 'Editar transacción'
+					: 'Detalle de transacción' }}
+				</h5>
+				<button type="button" class="btn-close" (click)="closeCreateModal()"></button>
+			</div>
+
+			<div class="modal-body">
+				<form [formGroup]="transactionForm" (ngSubmit)="onSubmitTransaction()">
+
+					<!-- Curso -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Curso <span class="text-danger">*</span></label>
+						<select class="form-select" formControlName="course_id">
+							<option value="">Selecciona un curso</option>
+							@for (course of activeCourses; track course.id) {
+							<option [value]="course.id">
+								{{ course.name }}
+								@if (course.level || course.section || course.school_year) {
+								- {{ course.level }} {{ course.section }} {{ course.school_year }}
+								}
+							</option>
+							}
+						</select>
+
+						@if (transactionForm.get('course_id')?.touched && transactionForm.get('course_id')?.invalid) {
+						<small class="text-danger">Debes seleccionar un curso.</small>
+						}
+					</div>
+
+					<!-- Tipo -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Tipo <span class="text-danger">*</span></label>
+						<div class="d-flex gap-2">
+
+							<!-- Ingreso -->
+							<label class="transaction-type-selector flex-fill"
+								[class.transaction-type-selector--active-income]="transactionForm.get('type')?.value === 'income'">
+								<input type="radio" formControlName="type" value="income" class="d-none" (change)="onFormTypeChange()">
+								<i class="bi bi-arrow-down-circle-fill me-1"></i> Ingreso
+							</label>
+
+							<!-- Egreso -->
+							<label class="transaction-type-selector flex-fill"
+								[class.transaction-type-selector--active-expense]="transactionForm.get('type')?.value === 'expense'">
+								<input type="radio" formControlName="type" value="expense" class="d-none" (change)="onFormTypeChange()">
+								<i class="bi bi-arrow-up-circle-fill me-1"></i> Egreso
+							</label>
+
+						</div>
+					</div>
+
+					<!-- Categoría — filtrada por tipo -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Categoría <span class="text-danger">*</span></label>
+						<select class="form-select" formControlName="category_id">
+							<option value="">Selecciona una categoría</option>
+							@for (cat of categoriesByType; track cat.id) {
+							<option [value]="cat.id">{{ cat.name }}</option>
+							}
+						</select>
+						@if (categoriesByType.length === 0) {
+						<small class="text-warning">
+							<i class="bi bi-exclamation-triangle me-1"></i>
+							No hay categorías activas para este tipo.
+						</small>
+						}
+						@if (transactionForm.get('category_id')?.touched && transactionForm.get('category_id')?.invalid) {
+						<small class="text-danger">Debes seleccionar una categoría.</small>
+						}
+					</div>
+
+					<!-- Monto -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Monto (CLP) <span class="text-danger">*</span></label>
+						<div class="input-group">
+							<span class="input-group-text">$</span>
+							<input type="text" class="form-control"
+								[value]="formatAmountInputValue(transactionForm.get('amount')?.value?.toString() || '')"
+								(input)="onAmountInput($event)" placeholder="0" inputmode="numeric">
+						</div>
+						@if (transactionForm.get('amount')?.touched && transactionForm.get('amount')?.invalid) {
+						<small class="text-danger">Ingresa un monto válido mayor a 0.</small>
+						}
+					</div>
+
+					<!-- Fecha -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+						<input type="date" class="form-control" formControlName="transaction_date">
+						@if (transactionForm.get('transaction_date')?.touched && transactionForm.get('transaction_date')?.invalid) {
+						<small class="text-danger">Selecciona una fecha válida.</small>
+						}
+					</div>
+
+					<!-- Descripción -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">
+							Descripción <span class="text-muted small">(opcional)</span>
+						</label>
+						<input type="text" class="form-control" formControlName="description"
+							placeholder="Ej: Cuota mensual de marzo">
+					</div>
+
+					<!-- Notas -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">
+							Notas <span class="text-muted small">(opcional)</span>
+						</label>
+						<textarea class="form-control" formControlName="notes" rows="2"
+							placeholder="Información adicional..."></textarea>
+					</div>
+
+					<div class="modal-footer px-0 pb-0">
+						<button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
+							Cancelar
+						</button>
+						@if (modalMode !== 'view') {
+						<button type="submit" class="btn d-flex align-items-center gap-2"
+							[class.btn-success]="transactionForm.get('type')?.value === 'income'"
+							[class.btn-danger]="transactionForm.get('type')?.value === 'expense'"
+							[disabled]="transactionForm.invalid || saving()">
+
+							@if (saving()) {
+							<span class="spinner-border spinner-border-sm"></span>
+							Guardando...
+							} @else {
+							<i class="bi"
+								[ngClass]="modalMode === 'create' ? getTypeIcon(transactionForm.get('type')?.value) : 'bi-check-circle'"></i>
+							{{ modalMode === 'create'
+							? 'Registrar ' + getTypeLabel(transactionForm.get('type')?.value)
+							: 'Guardar cambios' }}
+							}
+						</button>
+						}
+					</div>
+
+				</form>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<!-- ─── MODAL ELIMINAR TRANSACCIÓN ───────────────────────────────────────────── -->
+<div class="modal fade" id="deleteTransactionModal" tabindex="-1" aria-labelledby="deleteTransactionModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title text-danger" id="deleteTransactionModalLabel">
+					<i class="bi bi-trash me-2"></i>
+					Eliminar transacción
+				</h5>
+				<button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+			</div>
+
+			<div class="modal-body">
+				@if (selectedTransaction) {
+				<p class="mb-3">
+					¿Estás seguro de que deseas eliminar esta transacción?
+				</p>
+
+				<div class="border rounded p-3 bg-light">
+					<div class="mb-2">
+						<span class="fw-semibold">Categoría:</span>
+						<span>{{ selectedTransaction.category_name || 'Sin categoría' }}</span>
+					</div>
+
+					<div class="mb-2">
+						<span class="fw-semibold">Tipo:</span>
+						<span>{{ getTypeLabel(selectedTransaction.type) }}</span>
+					</div>
+
+					<div class="mb-2">
+						<span class="fw-semibold">Monto:</span>
+						<span [class.text-success]="selectedTransaction.type === 'income'"
+							[class.text-danger]="selectedTransaction.type === 'expense'" class="fw-bold">
+							{{ selectedTransaction.type === 'income' ? '+' : '-' }}{{ formatAmount(selectedTransaction.amount) }}
+						</span>
+					</div>
+
+					<div class="mb-2">
+						<span class="fw-semibold">Fecha:</span>
+						<span>{{ selectedTransaction.transaction_date | date:'dd MMM yyyy' }}</span>
+					</div>
+
+					<div class="mb-0">
+						<span class="fw-semibold">Descripción:</span>
+						<span>{{ selectedTransaction.description || '—' }}</span>
+					</div>
+				</div>
+
+				<div class="alert alert-warning d-flex align-items-start gap-2 mt-3 mb-0">
+					<i class="bi bi-exclamation-triangle-fill"></i>
+					<div>
+						Esta acción no se puede deshacer.
+					</div>
+				</div>
+				}
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" (click)="closeDeleteModal()" [disabled]="deleting()">
+					Cancelar
+				</button>
+
+				<button type="button" class="btn btn-danger d-flex align-items-center gap-2"
+					(click)="confirmDeleteTransaction()" [disabled]="deleting() || !selectedTransaction">
+					@if (deleting()) {
+					<span class="spinner-border spinner-border-sm"></span>
+					Eliminando...
+					} @else {
+					<i class="bi bi-trash"></i>
+					Eliminar
+					}
+				</button>
+			</div>
+
+		</div>
+	</div>
 </div>

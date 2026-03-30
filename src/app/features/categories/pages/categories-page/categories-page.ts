@@ -385,7 +385,8 @@ export class CategoriesPage implements OnInit {
    * @returns {string}
    */
   getTypeBadgeClass(type: string): string {
-    return type === 'income' ? 'bg-success' : 'bg-warning text-dark';
+     return type === 'income' ? 'transaction-type-badge--income' : 'transaction-type-badge--expense';
+		 //return type==='income'? 'Ingreso': 'Egreso';
   }
 	/**
 	 * Retorna el icono según el tipo.

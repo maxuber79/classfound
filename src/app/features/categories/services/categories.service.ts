@@ -4,10 +4,6 @@ import { Category } from '../models/category.interface';
 
 const DEBUG = true;
 
-/**
- * Servicio encargado de gestionar las operaciones CRUD de categorías
- * contra Supabase.
- */
 @Injectable({
   providedIn: 'root'
 })
@@ -17,7 +13,7 @@ export class CategoriesService {
 
   /**
    * Obtiene el listado completo de categorías desde Supabase.
-   * @returns {Promise<Category[]>} Arreglo de categorías.
+   * @returns {Promise<Category[]>}
    */
   async getCategories(): Promise<Category[]> {
     if (DEBUG) console.log('📂 [CategoriesService][getCategories] Consultando categorías...');
@@ -28,22 +24,45 @@ export class CategoriesService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('🔴 [CategoriesService][getCategories] Error al obtener categorías:', error);
+      console.error('🔴 [CategoriesService][getCategories] Error:', error);
       throw error;
     }
 
-    if (DEBUG) console.log('✅ [CategoriesService][getCategories] Categorías obtenidas:', data);
-
+    if (DEBUG) console.log('✅ [CategoriesService][getCategories] Total:', data?.length);
     return (data ?? []) as Category[];
   }
 
-	  /**
+  /**
+   * Obtiene solo las categorías activas desde Supabase.
+   * Se usa en formularios de creación/edición de transacciones.
+   *
+   * @returns {Promise<Category[]>} Categorías con is_active = true.
+   */
+  async getActiveCategories(): Promise<Category[]> {
+    if (DEBUG) console.log('📂 [CategoriesService][getActiveCategories] Consultando categorías activas...');
+
+    const { data, error } = await this.supabase
+      .from('categories')
+      .select('id, name, type, is_active')
+      .eq('is_active', true)
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('🔴 [CategoriesService][getActiveCategories] Error:', error);
+      throw error;
+    }
+
+    if (DEBUG) console.log('✅ [CategoriesService][getActiveCategories] Total activas:', data?.length);
+    return (data ?? []) as Category[];
+  }
+
+  /**
    * Crea una nueva categoría en Supabase.
-   * @param {Pick<Category, 'name' | 'type' | 'is_active'>} payload Datos de la categoría a crear.
-   * @returns {Promise<Category>} Categoría creada.
+   * @param {Pick<Category, 'name' | 'type' | 'is_active'>} payload
+   * @returns {Promise<Category>}
    */
   async createCategory(payload: Pick<Category, 'name' | 'type' | 'is_active'>): Promise<Category> {
-    if (DEBUG) console.log('🆕 [CategoriesService][createCategory] Creando categoría...', payload);
+    if (DEBUG) console.log('🆕 [CategoriesService][createCategory] Creando:', payload);
 
     const { data, error } = await this.supabase
       .from('categories')
@@ -52,21 +71,33 @@ export class CategoriesService {
       .single();
 
     if (error) {
-      console.error('🔴 [CategoriesService][createCategory] Error al crear categoría:', error);
+      console.error('🔴 [CategoriesService][createCategory] Error:', error);
       throw error;
     }
 
-    if (DEBUG) console.log('✅ [CategoriesService][createCategory] Categoría creada:', data);
-
+    if (DEBUG) console.log('✅ [CategoriesService][createCategory] Creada:', data);
     return data as Category;
   }
 
-	async updateCategory(id: string, data: any) {
-		const { error } = await this.supabase
-			.from('categories')
-			.update(data)
-			.eq('id', id);
+  /**
+   * Actualiza una categoría existente.
+   * @param {string} id ID de la categoría.
+   * @param {Partial<Category>} payload Campos a actualizar.
+   * @returns {Promise<void>}
+   */
+  async updateCategory(id: string, payload: Partial<Category>): Promise<void> {
+    if (DEBUG) console.log('✏️ [CategoriesService][updateCategory] id:', id, '| payload:', payload);
 
-		if (error) throw error;
-	}
+    const { error } = await this.supabase
+      .from('categories')
+      .update(payload)
+      .eq('id', id);
+
+    if (error) {
+      console.error('🔴 [CategoriesService][updateCategory] Error:', error);
+      throw error;
+    }
+
+    if (DEBUG) console.log('✅ [CategoriesService][updateCategory] Actualizada');
+  }
 }

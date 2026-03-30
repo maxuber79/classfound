@@ -129,7 +129,13 @@
 									[ngClass]="category.type === 'income' ? 'bi-arrow-down-circle' : 'bi-arrow-up-circle'"></i>
 								{{ getTypeLabel(category.type) }}
 							</span> -->
-							<span class="badge d-inline-flex align-items-center gap-1" [ngClass]="getTypeBadgeClass(category.type)">
+							<!-- <span class="badge d-inline-flex align-items-center gap-1" [ngClass]="getTypeBadgeClass(category.type)">
+								<i class="bi" [ngClass]="getTypeIcon(category.type)"></i>
+								{{ getTypeLabel(category.type) }}
+							</span> -->
+
+							<span class="type-badge" [class.type-badge--income]="category.type === 'income'"
+								[class.type-badge--expense]="category.type === 'expense'">
 								<i class="bi" [ngClass]="getTypeIcon(category.type)"></i>
 								{{ getTypeLabel(category.type) }}
 							</span>
@@ -146,7 +152,12 @@
 								<span class="status-dot inactive"></span> Inactiva
 							</span>
 							} -->
-							<span class="badge" [ngClass]="category.is_active ? 'bg-success' : 'bg-secondary'">
+							<!-- <span class="status-badge"
+								[ngClass]="category.is_active ? 'status-badge--active' : 'status-badge--inactive'">
+								{{ category.is_active ? 'Activa' : 'Inactiva' }}
+							</span> -->
+							<span class="status-badge" [class.status-badge--active]="category.is_active"
+								[class.status-badge--inactive]="!category.is_active">
 								{{ category.is_active ? 'Activa' : 'Inactiva' }}
 							</span>
 						</td>

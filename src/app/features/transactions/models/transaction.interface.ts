@@ -8,15 +8,15 @@ export type TransactionType = 'income' | 'expense';
  */
 export interface Transaction {
   id: string;
-  course_id: string | null;
+  course_id: string;
   category_id: string;
   type: TransactionType;
   amount: number;
-  description: string | null;
+  description: string;
   notes: string | null;
   transaction_date: string;
-  created_by: string | null;
-  updated_by: string | null;
+  created_by: string;
+  updated_by: string;
   created_at: string;
   updated_at: string;
 }
