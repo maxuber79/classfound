@@ -1,0 +1,355 @@
+<div class="container-fluid px-4 py-4">
+
+	<!-- Header -->
+	<div class="d-flex justify-content-between align-items-start mb-4">
+		<div>
+			<h4 class="fw-bold mb-1">Colegios</h4>
+			<p class="text-muted mb-0 small">Administra los colegios registrados en el sistema</p>
+		</div>
+		<button class="btn btn-primary" type="button" (click)="openCreateModal()">
+			<i class="bi bi-plus-circle me-1"></i>
+			Crear colegio
+		</button>
+	</div>
+
+	<!-- Error -->
+	@if (errorMessage) {
+	<div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+		<i class="bi bi-exclamation-triangle-fill"></i>
+		{{ errorMessage }}
+	</div>
+	}
+
+	<!-- ─── Tarjetas de resumen ──────────────────────────────────────────────── -->
+	@if (!loading()) {
+	<div class="row g-3 mb-4">
+
+		<!-- Total colegios -->
+		<div class="col-12 col-md-4">
+			<div class="summary-card summary-card--primary">
+				<div class="summary-card__icon">
+					<i class="bi bi-building"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Total colegios</span>
+					<span class="summary-card__amount">{{ totalSchoolsCount }}</span>
+					<span class="summary-card__sub">registrados en el sistema</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Activos -->
+		<div class="col-12 col-md-4">
+			<div class="summary-card summary-card--success">
+				<div class="summary-card__icon">
+					<i class="bi bi-check-circle-fill"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Activos</span>
+					<span class="summary-card__amount">{{ activeSchoolsCount }}</span>
+					<span class="summary-card__sub">colegios operativos</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Inactivos -->
+		<div class="col-12 col-md-4">
+			<div class="summary-card summary-card--warning">
+				<div class="summary-card__icon">
+					<i class="bi bi-dash-circle-fill"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Inactivos</span>
+					<span class="summary-card__amount">{{ inactiveSchoolsCount }}</span>
+					<span class="summary-card__sub">colegios desactivados</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	}
+
+	<!-- ─── Card principal ───────────────────────────────────────────────────── -->
+	<div class="card border-0 shadow-sm">
+
+		<!-- Toolbar -->
+		<div class="card-header bg-white border-bottom py-3">
+			<div class="row g-2 align-items-center">
+
+				<!-- Buscador -->
+				<div class="col-12 col-md-5">
+					<div class="input-group input-group-sm">
+						<span class="input-group-text bg-light border-end-0">
+							<i class="bi bi-search text-muted"></i>
+						</span>
+						<input type="text" class="form-control border-start-0 bg-light"
+							placeholder="Buscar por nombre, comuna o región..." [(ngModel)]="searchTerm" (input)="onSearchInput()">
+						@if (searchTerm) {
+						<button class="btn btn-outline-secondary btn-sm" type="button" (click)="clearFilters()">
+							<i class="bi bi-x"></i>
+						</button>
+						}
+					</div>
+				</div>
+
+				<!-- Filtro estado -->
+				<div class="col-6 col-md-3">
+					<select class="form-select form-select-sm bg-light" [(ngModel)]="selectedStatus"
+						(change)="onStatusFilterChange()">
+						<option value="">Todos los estados</option>
+						<option value="active">Activos</option>
+						<option value="inactive">Inactivos</option>
+					</select>
+				</div>
+
+				<!-- Paginación -->
+				<div class="col-6 col-md-2">
+					<select class="form-select form-select-sm bg-light" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+						@for (size of pageSizeOptions; track size) {
+						<option [value]="size">{{ size }} por página</option>
+						}
+					</select>
+				</div>
+
+				<!-- Contador + limpiar -->
+				<div class="col-12 col-md-2 text-end">
+					<span class="badge bg-primary rounded-pill">{{ totalFiltered }}</span>
+					@if (hasActiveFilters) {
+					<button class="btn btn-link btn-sm text-muted p-0 ms-2" type="button" title="Limpiar filtros"
+						(click)="clearFilters()">
+						<i class="bi bi-funnel-fill text-warning"></i>
+					</button>
+					}
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Estado de carga -->
+		@if (loading()) {
+		<div class="text-center py-5">
+			<div class="spinner-border text-primary" role="status"></div>
+			<p class="text-muted mt-2 small mb-0">Cargando colegios...</p>
+		</div>
+		}
+
+		<!-- Tabla -->
+		@if (!loading() && pagedSchools.length > 0) {
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead>
+					<tr class="table-users-header">
+						<th class="ps-4">Nombre</th>
+						<th>Comuna</th>
+						<th>Región</th>
+						<th>Estado</th>
+						<th>Fecha creación</th>
+						<th class="text-center pe-4">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (school of pagedSchools; track school.id) {
+					<tr class="table-users-row">
+
+						<!-- Nombre -->
+						<td class="ps-4">
+							<div class="d-flex align-items-center gap-2">
+								<div class="school-avatar">
+									{{ school.name.charAt(0).toUpperCase() }}
+								</div>
+								<span class="fw-semibold text-dark">{{ school.name }}</span>
+							</div>
+						</td>
+
+						<!-- Comuna -->
+						<td>
+							<span class="text-dark small">{{ school.commune || '—' }}</span>
+						</td>
+
+						<!-- Región -->
+						<td>
+							<span class="text-dark small">{{ school.region || '—' }}</span>
+						</td>
+
+						<!-- Estado -->
+						<td>
+							<span class="status-badge" [class.status-badge--active]="school.is_active"
+								[class.status-badge--inactive]="!school.is_active">
+								{{ school.is_active ? 'Activo' : 'Inactivo' }}
+							</span>
+						</td>
+
+						<!-- Fecha -->
+						<td class="text-muted small">
+							{{ school.created_at | date:'dd MMM yyyy' }}
+						</td>
+
+						<!-- Acciones -->
+						<td class="text-center pe-4">
+							<div class="d-flex justify-content-center gap-1">
+								<button class="btn btn-sm btn-icon" title="Ver detalle" (click)="openViewModal(school)">
+									<i class="bi bi-eye text-primary"></i>
+								</button>
+								<button class="btn btn-sm btn-icon" title="Editar" (click)="openEditModal(school)">
+									<i class="bi bi-pencil text-warning"></i>
+								</button>
+								<button class="btn btn-sm btn-icon" [title]="school.is_active ? 'Inactivar' : 'Activar'"
+									(click)="toggleStatus(school)" [disabled]="updatingStatus()">
+									<i class="bi"
+										[ngClass]="school.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'">
+									</i>
+								</button>
+							</div>
+						</td>
+
+					</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Footer paginación -->
+		<div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+			<span class="text-muted small">
+				Mostrando <strong>{{ fromRecord }}–{{ toRecord }}</strong> de
+				<strong>{{ totalFiltered }}</strong> colegio(s)
+			</span>
+			@if (totalPages > 1) {
+			<nav>
+				<ul class="pagination pagination-sm mb-0">
+					<li class="page-item" [class.disabled]="currentPage === 1">
+						<a class="page-link" (click)="goToPage(currentPage - 1)" role="button">‹</a>
+					</li>
+					@for (page of pages; track page) {
+					<li class="page-item" [class.active]="page === currentPage">
+						<a class="page-link" (click)="goToPage(page)" role="button">{{ page }}</a>
+					</li>
+					}
+					<li class="page-item" [class.disabled]="currentPage === totalPages">
+						<a class="page-link" (click)="goToPage(currentPage + 1)" role="button">›</a>
+					</li>
+				</ul>
+			</nav>
+			}
+		</div>
+		}
+
+		<!-- Empty state -->
+		@if (!loading() && pagedSchools.length === 0) {
+		<div class="card-body text-center py-5">
+			<i class="bi bi-building display-4 text-muted opacity-50"></i>
+			@if (hasActiveFilters) {
+			<p class="text-muted mt-3 mb-0">No se encontraron colegios con los filtros aplicados.</p>
+			<button class="btn btn-outline-secondary btn-sm mt-3" (click)="clearFilters()">
+				<i class="bi bi-x-circle me-1"></i> Limpiar filtros
+			</button>
+			} @else {
+			<p class="text-muted mt-3 mb-0">No hay colegios registrados todavía.</p>
+			<button class="btn btn-primary btn-sm mt-3" (click)="openCreateModal()">
+				<i class="bi bi-plus-circle me-1"></i> Registrar primer colegio
+			</button>
+			}
+		</div>
+		}
+
+	</div>
+</div>
+
+
+<!-- ─── MODAL COLEGIO ─────────────────────────────────────────────────────────── -->
+<div class="modal fade" id="schoolModal" tabindex="-1" aria-labelledby="schoolModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title" id="schoolModalLabel">
+					@if (modalMode === 'create') {
+					<i class="bi bi-plus-circle me-2 text-primary"></i> Nuevo colegio
+					}
+					@if (modalMode === 'edit') {
+					<i class="bi bi-pencil-square me-2 text-warning"></i> Editar colegio
+					}
+					@if (modalMode === 'view') {
+					<i class="bi bi-eye me-2 text-info"></i> Detalle de colegio
+					}
+				</h5>
+				<button type="button" class="btn-close" (click)="closeSchoolModal()"></button>
+			</div>
+
+			<div class="modal-body">
+				<form [formGroup]="schoolForm" (ngSubmit)="onSubmitSchool()">
+
+					<!-- Nombre -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">
+							Nombre <span class="text-danger">*</span>
+						</label>
+						<input type="text" class="form-control" formControlName="name" placeholder="Ej: Colegio San Agustín">
+						@if (schoolForm.get('name')?.touched && schoolForm.get('name')?.invalid) {
+						<small class="text-danger">Debes ingresar el nombre del colegio.</small>
+						}
+					</div>
+
+					<!-- Comuna -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">
+							Comuna <span class="text-muted small">(opcional)</span>
+						</label>
+						<input type="text" class="form-control" formControlName="commune" placeholder="Ej: Ñuñoa">
+					</div>
+
+					<!-- Región -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">
+							Región <span class="text-muted small">(opcional)</span>
+						</label>
+						<input type="text" class="form-control" formControlName="region" placeholder="Ej: Metropolitana">
+					</div>
+
+					<!-- Estado -->
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Estado</label>
+
+						@if (modalMode === 'view') {
+						<div>
+							<span class="status-badge" [class.status-badge--active]="schoolForm.get('is_active')?.value"
+								[class.status-badge--inactive]="!schoolForm.get('is_active')?.value">
+								{{ schoolForm.get('is_active')?.value ? 'Activo' : 'Inactivo' }}
+							</span>
+						</div>
+						} @else {
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" formControlName="is_active" id="schoolStatusSwitch">
+							<label class="form-check-label" for="schoolStatusSwitch">
+								{{ schoolForm.get('is_active')?.value ? 'Activo' : 'Inactivo' }}
+							</label>
+						</div>
+						}
+					</div>
+
+					<div class="modal-footer px-0 pb-0">
+						<button type="button" class="btn btn-secondary" (click)="closeSchoolModal()">
+							Cerrar
+						</button>
+
+						@if (modalMode !== 'view') {
+						<button type="submit" class="btn btn-primary d-flex align-items-center gap-2"
+							[disabled]="schoolForm.invalid || saving()">
+							@if (saving()) {
+							<span class="spinner-border spinner-border-sm"></span>
+							Guardando...
+							} @else {
+							<i class="bi" [ngClass]="modalMode === 'create' ? 'bi-plus-circle' : 'bi-check-circle'">
+							</i>
+							{{ modalMode === 'create' ? 'Crear colegio' : 'Guardar cambios' }}
+							}
+						</button>
+						}
+					</div>
+
+				</form>
+			</div>
+
+		</div>
+	</div>
+</div>
