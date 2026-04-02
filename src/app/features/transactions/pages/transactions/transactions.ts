@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TransactionsService } from '../../services/transactions.service';
 import { CategoriesService } from '../../../categories/services/categories.service';
@@ -28,6 +29,8 @@ const DEBUG=true;
 	private readonly authService=inject(AuthService);
   private readonly fb=inject(FormBuilder);
 	private toastService = inject(ToastService);
+	private readonly route = inject(ActivatedRoute);
+	private readonly router = inject(Router);
 
   // ─── Estado ───────────────────────────────────────────────────────────────────
   readonly loading=signal(false);
@@ -39,6 +42,28 @@ const DEBUG=true;
 	selectedTransaction: TransactionListItem | null = null;
 	modalMode: 'create' | 'edit' | 'view' = 'create';
 
+	/**
+	 * Contexto opcional de curso.
+	 * Si tiene valor, la pantalla trabajará en modo contextual
+	 * y cargará solo las transacciones de ese curso.
+	 */
+	ejId = {
+		id0: null,
+		id1: '9566f309-ed18-4def-87c5-fc1917ea7375',
+		id2: '3424d9c6-9389-4b29-83b1-67b080adc375'
+	};
+	contextCourseId: string | null = null;//"9566f309-ed18-4def-87c5-fc1917ea7375" '3424d9c6-9389-4b29-83b1-67b080adc375'	
+	/**
+	 * Información del curso contextual actual.
+	 * Se utiliza para mostrar el curso en el modal cuando la pantalla
+	 * trabaja en modo contextual, incluso si aún no existen transacciones.
+	 */
+	contextCourseInfo: {
+		id: string;
+		name: string;
+		school_name: string;
+		school_year: number | null;
+	} | null = null;
 	/** Estado de eliminación en curso. */
 	readonly deleting = signal(false);
 
@@ -72,17 +97,27 @@ const DEBUG=true;
   async ngOnInit(): Promise<void> {
     if (DEBUG) console.log('📄 [TransactionsPage][ngOnInit] Inicializando...');
     
-		this.toastService.show('Toast success de prueba', 'success');
-		this.toastService.show('Toast error de prueba', 'error');
-		this.toastService.show('Toast warning de prueba', 'warning');
-		this.toastService.show('Toast info de prueba', 'info');
+		//this.toastService.show('Toast success de prueba', 'success');
+		//this.toastService.show('Toast error de prueba', 'error');
+		//this.toastService.show('Toast warning de prueba', 'warning');
+		//this.toastService.show('Toast info de prueba', 'info');
+		const courseIdFromRoute = this.route.snapshot.paramMap.get('courseId');
+  	this.contextCourseId = courseIdFromRoute;
 
+		if (DEBUG) {
+    if (this.contextCourseId) {
+      console.log('📍 [TransactionsPage][ngOnInit] courseId desde ruta:', this.contextCourseId);
+    } else {
+      console.log('🌐 [TransactionsPage][ngOnInit] Modo global');
+    }
+  }
 
+		//Inicializar formulario reactivo
 		this.initForm();
-    await Promise.all([ 
+    await Promise.all([
 			this.loadTransactions(),
-  		this.loadActiveCategories(),
-  		this.loadActiveCourses()
+			this.loadActiveCategories(),
+			this.loadActiveCourses()
 		]);
   }
 
@@ -122,6 +157,7 @@ const DEBUG=true;
 		try {
 			this.activeCourses = await this.transactionsService.getActiveCourses();
 			if (DEBUG) console.log('✅ [TransactionsPage][loadActiveCourses] Total:', this.activeCourses.length);
+			this.resolveContextCourseInfo();
 		} catch (error) {
 			console.error('🔴 [TransactionsPage][loadActiveCourses] Error:', error);
 		}
@@ -132,7 +168,7 @@ const DEBUG=true;
    * Al recargar recalcula automáticamente métricas y tabla.
    * @returns {Promise<void>}
    */
-  async loadTransactions(): Promise<void> {
+  /* async loadTransactions(): Promise<void> {
     if (DEBUG) console.log('🔄 [TransactionsPage][loadTransactions] Cargando...');
 
     this.loading.set(true);
@@ -151,8 +187,39 @@ const DEBUG=true;
     finally {
       this.loading.set(false);
     }
-  }
+  } */
 
+		/**
+		 * Obtiene transacciones desde Supabase.
+		 * Si existe contexto de curso, carga solo las transacciones de ese curso.
+		 * Si no existe, carga la lista global.
+		 *
+		 * @returns {Promise<void>}
+		 */
+		async loadTransactions(): Promise<void> {
+			if (DEBUG) console.log('🔄 [TransactionsPage][loadTransactions] Cargando...');
+
+			this.loading.set(true);
+			this.errorMessage = '';
+
+			try {
+				if (this.contextCourseId) {
+					if (DEBUG) console.log('📘 [TransactionsPage][loadTransactions] Modo contextual por curso:', this.contextCourseId);
+					this.allTransactions = await this.transactionsService.getTransactionsByCourse(this.contextCourseId);
+				} else {
+					if (DEBUG) console.log('🌐 [TransactionsPage][loadTransactions] Modo global');
+					this.allTransactions = await this.transactionsService.getTransactions();
+				}
+
+				if (DEBUG) console.log('✅ [TransactionsPage][loadTransactions] Total:', this.allTransactions.length); 
+				this.resolveContextCourseInfo();
+			} catch (error) {
+				console.error('🔴 [TransactionsPage][loadTransactions] Error:', error);
+				this.errorMessage = 'No fue posible cargar las transacciones.';
+			} finally {
+				this.loading.set(false);
+			}
+		}
   /**
    * Obtiene las categorías activas para poblar el select del formulario.
    * @returns {Promise<void>}
@@ -555,7 +622,7 @@ const DEBUG=true;
 		this.transactionForm.enable();
 
 		this.transactionForm.reset({
-			course_id: '',
+			course_id: this.contextCourseId || '',
 			type: 'income',
 			category_id: '',
 			amount: null,
@@ -907,4 +974,66 @@ const DEBUG=true;
 			this.deleting.set(false);
 		}
 	}
+
+	 /**
+ * Resuelve la información del curso contextual actual.
+ * Prioriza los datos de las transacciones cargadas y luego usa
+ * la lista de cursos activos como respaldo.
+ *
+ * @returns {void}
+ */
+private resolveContextCourseInfo(): void {
+  if (DEBUG) console.log('🧭 [TransactionsPage][resolveContextCourseInfo] Resolviendo curso contextual...');
+
+  if (!this.contextCourseId) {
+    this.contextCourseInfo = null;
+    if (DEBUG) console.log('ℹ️ [TransactionsPage][resolveContextCourseInfo] Sin contextCourseId');
+    return;
+  }
+
+  // 1. Intentar resolver desde las transacciones cargadas
+  const transactionMatch = this.allTransactions.find(
+    transaction => transaction.course_id === this.contextCourseId
+  );
+
+  if (transactionMatch) {
+    this.contextCourseInfo = {
+      id: transactionMatch.course_id,
+      name: transactionMatch.course_name || 'Sin curso',
+      school_name: transactionMatch.school_name || 'Sin colegio',
+      school_year: transactionMatch.school_year ?? null,
+    };
+
+    if (DEBUG) {
+      console.log('✅ [TransactionsPage][resolveContextCourseInfo] Resuelto desde allTransactions:', this.contextCourseInfo);
+    }
+    return;
+  }
+
+  // 2. Intentar resolver desde cursos activos
+  const courseMatch = this.activeCourses.find(
+    course => course.id === this.contextCourseId
+  );
+
+  if (courseMatch) {
+    this.contextCourseInfo = {
+      id: courseMatch.id,
+      name: courseMatch.name,
+      school_name: courseMatch.schools?.name || 'Sin colegio',
+      school_year: courseMatch.school_year ?? null,
+    };
+
+    if (DEBUG) {
+      console.log('✅ [TransactionsPage][resolveContextCourseInfo] Resuelto desde activeCourses:', this.contextCourseInfo);
+    }
+    return;
+  }
+
+  // 3. No encontrado
+  this.contextCourseInfo = null;
+
+  if (DEBUG) {
+    console.warn('⚠️ [TransactionsPage][resolveContextCourseInfo] No se pudo resolver el curso contextual');
+  }
+}
 }

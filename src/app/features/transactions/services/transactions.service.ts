@@ -27,31 +27,55 @@ export class TransactionsService {
   private readonly supabaseService = inject(SupabaseService);
   private readonly supabase = this.supabaseService.client;
 
-  /**
-   * Obtiene el listado de transacciones con join a categorías.
-   * @returns {Promise<TransactionListItem[]>}
-   */
-  async getTransactions(): Promise<TransactionListItem[]> {
-    if (DEBUG) console.log('💸 [TransactionsService][getTransactions] Consultando...');
+   /**
+	 * Obtiene el listado de transacciones con join a categorías, cursos y colegios.
+	 * Esto permite enriquecer la tabla y futuros filtros sin cambiar la BD.
+	 *
+	 * @returns {Promise<TransactionListItem[]>}
+	 */
+	async getTransactions(): Promise<TransactionListItem[]> {
+		if (DEBUG) console.log('💸 [TransactionsService][getTransactions] Consultando...');
 
-    const { data, error } = await this.supabase
-      .from('transactions')
-      .select(`*, categories ( name )`)
-      .order('transaction_date', { ascending: false });
+		const { data, error } = await this.supabase
+			.from('transactions')
+			.select(`
+				*,
+				categories (
+					name
+				),
+				courses (
+					id,
+					name,
+					school_year,
+					schools (
+						id,
+						name
+					)
+				)
+			`)
+			.order('transaction_date', { ascending: false });
 
-    if (error) {
-      console.error('🔴 [TransactionsService][getTransactions] Error:', error);
-      throw error;
-    }
+		if (error) {
+			console.error('🔴 [TransactionsService][getTransactions] Error:', error);
+			throw error;
+		}
 
-    const mappedData: TransactionListItem[] = (data ?? []).map((item: any) => ({
-      ...item,
-      category_name: item.categories?.name ?? 'Sin categoría'
-    }));
+		const mappedData: TransactionListItem[] = (data ?? []).map((item: any) => ({
+			...item,
+			category_name: item.categories?.name ?? 'Sin categoría',
+			course_name: item.courses?.name ?? '',
+			school_name:
+				Array.isArray(item.courses?.schools)
+					? item.courses.schools[0]?.name ?? ''
+					: item.courses?.schools?.name ?? '',
+			school_year: item.courses?.school_year ?? null
+		}));
 
-    if (DEBUG) console.log('✅ [TransactionsService][getTransactions] Total:', mappedData.length);
-    return mappedData;
-  }
+		if (DEBUG) console.log('✅ [TransactionsService][getTransactions] Total:', mappedData.length);
+		if (DEBUG) console.log('📦 [TransactionsService][getTransactions] Data enriquecida:', mappedData);
+
+		return mappedData;
+	}
 
   /**
    * Crea una nueva transacción en Supabase.
@@ -88,8 +112,10 @@ export class TransactionsService {
     return data as Transaction;
   }
 
-	/**
+	 /**
 	 * Obtiene los cursos activos para el selector del formulario.
+	 * Incluye el colegio relacionado para mostrar una etiqueta más clara en el modal.
+	 *
 	 * @returns {Promise<TransactionCourseOption[]>}
 	 */
 	async getActiveCourses(): Promise<TransactionCourseOption[]> {
@@ -97,7 +123,19 @@ export class TransactionsService {
 
 		const { data, error } = await this.supabase
 			.from('courses')
-			.select('id, name, level, section, school_year, is_active')
+			.select(`
+				id,
+				school_id,
+				name,
+				level,
+				section,
+				school_year,
+				is_active,
+				schools (
+					id,
+					name
+				)
+			`)
 			.eq('is_active', true)
 			.order('school_year', { ascending: false })
 			.order('name', { ascending: true });
@@ -107,9 +145,22 @@ export class TransactionsService {
 			throw error;
 		}
 
-		if (DEBUG) console.log('✅ [TransactionsService][getActiveCourses] Cursos:', data);
+		if (DEBUG) console.log('✅ [TransactionsService][getActiveCourses] Cursos raw:', data);
 
-		return (data ?? []) as any[];
+		const normalizedCourses: TransactionCourseOption[] = (data ?? []).map((course: any) => ({
+			id: course.id,
+			school_id: course.school_id,
+			name: course.name,
+			level: course.level,
+			section: course.section,
+			school_year: course.school_year,
+			is_active: course.is_active,
+			schools: Array.isArray(course.schools) ? (course.schools[0] ?? null) : course.schools ?? null
+		}));
+
+		if (DEBUG) console.log('✅ [TransactionsService][getActiveCourses] Cursos normalizados:', normalizedCourses);
+
+		return normalizedCourses;
 	}
 
 	/**
@@ -167,5 +218,60 @@ export class TransactionsService {
 		}
 
 		if (DEBUG) console.log('✅ [TransactionsService][deleteTransaction] Eliminada correctamente');
+	}
+
+	/**
+	 * Obtiene transacciones filtradas por curso.
+	 *
+	 * @param {string} courseId ID del curso.
+	 * @returns {Promise<TransactionListItem[]>}
+	 */
+	async getTransactionsByCourse(courseId: string): Promise<TransactionListItem[]> {
+		if (DEBUG) console.log('📘 [TransactionsService][getTransactionsByCourse] Consultando por curso:', courseId);
+
+		const { data, error } = await this.supabase
+			.from('transactions')
+			.select(`
+				*,
+				categories (
+					name
+				),
+				courses (
+					id,
+					name,
+					school_year,
+					schools (
+						id,
+						name
+					)
+				)
+			`)
+			.eq('course_id', courseId)
+			.order('transaction_date', { ascending: false });
+
+		if (error) {
+			console.error('🔴 [TransactionsService][getTransactionsByCourse] Error:', error);
+			throw error;
+		}
+
+		const mappedData: TransactionListItem[] = (data ?? []).map((item: any) => ({
+			...item,
+			category_name: item.categories?.name ?? 'Sin categoría',
+			course_name: item.courses?.name ?? '',
+			school_name:
+				Array.isArray(item.courses?.schools)
+					? item.courses.schools[0]?.name ?? ''
+					: item.courses?.schools?.name ?? '',
+			school_year: item.courses?.school_year ?? null,
+			school_id:
+				Array.isArray(item.courses?.schools)
+					? item.courses.schools[0]?.id ?? ''
+					: item.courses?.schools?.id ?? ''
+		}));
+
+		if (DEBUG) console.log('✅ [TransactionsService][getTransactionsByCourse] Total:', mappedData.length);
+		if (DEBUG) console.log('📦 [TransactionsService][getTransactionsByCourse] Data enriquecida:', mappedData);
+
+		return mappedData;
 	}
 }

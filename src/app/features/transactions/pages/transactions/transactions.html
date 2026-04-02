@@ -4,7 +4,16 @@
 	<div class="d-flex justify-content-between align-items-start mb-4">
 		<div>
 			<h4 class="fw-bold mb-1">Transacciones</h4>
-			<p class="text-muted mb-0 small">Historial de ingresos y egresos del sistema</p>
+
+			@if (contextCourseInfo) {
+			<p class="text-muted mb-0 small">
+				{{ contextCourseInfo.name }} · {{ contextCourseInfo.school_name }} · {{ contextCourseInfo.school_year }}
+			</p>
+			} @else {
+			<p class="text-muted mb-0 small">
+				Historial de ingresos y egresos del sistema
+			</p>
+			}
 		</div>
 		<button class="btn btn-primary" type="button" (click)="openCreateModal()">
 			<i class="bi bi-plus-circle me-1"></i>
@@ -168,7 +177,14 @@
 			<table class="table table-hover align-middle mb-0">
 				<thead>
 					<tr class="table-users-header">
+						<!-- <th class="ps-4">Fecha</th>
+						<th>Categoría</th>
+						<th>Tipo</th>
+						<th>Descripción</th>
+						<th class="text-end">Monto</th>
+						<th class="text-center pe-4">Acciones</th> -->
 						<th class="ps-4">Fecha</th>
+						<th>Curso</th>
 						<th>Categoría</th>
 						<th>Tipo</th>
 						<th>Descripción</th>
@@ -185,6 +201,18 @@
 							<div class="text-muted" style="font-size:0.7rem;">{{ transaction.transaction_date | date:'EEEE' }}</div> -->
 							<div class="fw-semibold small">{{ transaction.transaction_date | date:'dd MMM yyyy' }}</div>
 							<div class="text-muted" style="font-size:0.7rem;">{{ transaction.transaction_date | date:'EEEE' }}</div>
+						</td>
+
+						<td>
+							<div class="fw-semibold small">
+								{{ transaction.course_name || '—' }}
+							</div>
+							<div class="text-muted" style="font-size:0.7rem;">
+								{{ transaction.school_name || '' }}
+								@if (transaction.school_year) {
+								- {{ transaction.school_year }}
+								}
+							</div>
 						</td>
 
 						<td>
@@ -315,16 +343,14 @@
 				<form [formGroup]="transactionForm" (ngSubmit)="onSubmitTransaction()">
 
 					<!-- Curso -->
+					@if (!contextCourseId) {
 					<div class="mb-3">
 						<label class="form-label fw-semibold">Curso <span class="text-danger">*</span></label>
 						<select class="form-select" formControlName="course_id">
 							<option value="">Selecciona un curso</option>
 							@for (course of activeCourses; track course.id) {
 							<option [value]="course.id">
-								{{ course.name }}
-								@if (course.level || course.section || course.school_year) {
-								- {{ course.level }} {{ course.section }} {{ course.school_year }}
-								}
+								{{ course.schools?.name || 'Sin colegio' }} - {{ course.name }} - {{ course.school_year }}
 							</option>
 							}
 						</select>
@@ -333,6 +359,14 @@
 						<small class="text-danger">Debes seleccionar un curso.</small>
 						}
 					</div>
+					} @else {
+					<div class="mb-3">
+						<label class="form-label fw-semibold">Curso</label>
+						<input type="text" class="form-control" [value]="contextCourseInfo
+					    ? contextCourseInfo.name + ' - ' + contextCourseInfo.school_name + ' - ' + contextCourseInfo.school_year
+					    : 'Curso no disponible'" readonly>
+					</div>
+					}
 
 					<!-- Tipo -->
 					<div class="mb-3">

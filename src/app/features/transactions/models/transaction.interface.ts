@@ -26,4 +26,8 @@ export interface Transaction {
  */
 export interface TransactionListItem extends Transaction {
   category_name?: string;
+  course_name?: string;
+  school_name?: string;
+  school_year?: number | null;
+  school_id?: string;
 }
