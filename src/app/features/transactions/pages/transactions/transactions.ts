@@ -42,7 +42,12 @@ const DEBUG=true;
 	selectedTransaction: TransactionListItem | null = null;
 	modalMode: 'create' | 'edit' | 'view' = 'create';
 
-	isAdmin = true; // 👈 temporal para pruebas
+	//isAdmin = true; // 👈 temporal para pruebas
+	/**
+	 * Signal derivada desde AuthService que indica si el usuario es admin.
+	 * Reemplaza el flag temporal isAdmin = true.
+	 */
+	readonly isAdmin = this.authService.isAdmin;
 
 	/**
 	 * Contexto opcional de curso.

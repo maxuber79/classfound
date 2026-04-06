@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Session, User } from '@supabase/supabase-js';
 import { SupabaseService } from '../../core/services/supabase.service';
-
+import { AdminUser } from '../../features/admin/users/models/admin-user.interface';
 @Injectable({
   providedIn: 'root',
 })
@@ -52,25 +52,56 @@ export class AuthService {
    */
   readonly userEmail = computed(() => this._user()?.email ?? null);
 
-  constructor() {
-    //console.log('[AuthService] Servicio inicializado');
-		console.log('%c<<< Start AuthService >>>','background: #fff3cd; color: #664d03; padding: 2px 5px;');
-    this.initializeAuth();
-  }
+	/**
+ * Signal interna que almacena el perfil completo del usuario autenticado
+ * desde la tabla profiles, incluyendo global_role.
+ */
+private readonly _profile = signal<AdminUser | null>(null);
 
-  /**
-   * Inicializa el estado de autenticación de la aplicación.
-   *
-   * Flujo:
-   * 1. Consulta la sesión actual en Supabase.
-   * 2. Guarda la sesión y el usuario en signals.
-   * 3. Escucha cambios futuros de autenticación (login, logout, refresh, etc.).
-   *
-   * Este método se ejecuta automáticamente al instanciar el servicio.
-   *
-   * @returns {Promise<void>} Promesa resuelta cuando termina la carga inicial.
-   */
-  private async initializeAuth(): Promise<void> {
+/**
+ * Signal pública de solo lectura que expone el perfil actual.
+ */
+readonly profile = this._profile.asReadonly();
+
+/**
+ * Signal derivada que indica si el usuario tiene rol super_admin.
+ * Se usa para proteger rutas y elementos exclusivos de super administrador.
+ */
+readonly isSuperAdmin = computed(() => {
+  const role = this._profile()?.global_role;
+  console.log('[AuthService][isSuperAdmin] global_role:', role);
+  return role === 'super_admin';
+});
+
+/**
+ * Signal derivada que indica si el usuario tiene rol admin o superior.
+ * Se usa para proteger rutas y elementos del panel de administración.
+ */
+readonly isAdmin = computed(() => {
+  const role = this._profile()?.global_role;
+  console.log('[AuthService][isAdmin] global_role:', role);
+  return role === 'admin' || role === 'super_admin';
+});
+
+		constructor() {
+			//console.log('[AuthService] Servicio inicializado');
+			console.log('%c<<< Start AuthService >>>','background: #fff3cd; color: #664d03; padding: 2px 5px;');
+			this.initializeAuth();
+		}
+
+		/**
+		 * Inicializa el estado de autenticación de la aplicación.
+		 *
+		 * Flujo:
+		 * 1. Consulta la sesión actual en Supabase.
+		 * 2. Guarda la sesión y el usuario en signals.
+		 * 3. Escucha cambios futuros de autenticación (login, logout, refresh, etc.).
+		 *
+		 * Este método se ejecuta automáticamente al instanciar el servicio.
+		 *
+		 * @returns {Promise<void>} Promesa resuelta cuando termina la carga inicial.
+		 */
+		private async initializeAuth(): Promise<void> {
   console.log('[AuthService][initializeAuth] Iniciando...');
 
   this.supabaseService.client.auth.onAuthStateChange((event, session) => {
@@ -80,101 +111,99 @@ export class AuthService {
     this._session.set(session);
     this._user.set(session?.user ?? null);
 
-    // Marca loading como false cuando ya tenemos la sesión inicial
     if (event === 'INITIAL_SESSION') {
+      this._loading.set(false);
+    }
+
+    if (event === 'PASSWORD_RECOVERY') {
       this._loading.set(false);
     }
 
     console.log('[AuthService][onAuthStateChange] Session actualizada:', this._session());
     console.log('[AuthService][onAuthStateChange] User actualizado:', this._user());
+
+    // 👇 cargar perfil
+    if (session?.user) {
+      console.log('[AuthService][onAuthStateChange] Cargando perfil del usuario...');
+      this.loadProfile(session.user.id);
+    } else {
+      console.log('[AuthService][onAuthStateChange] Sin sesión, limpiando perfil...');
+      this._profile.set(null);
+    }
   });
-	// Agregar en initializeAuth() dentro del onAuthStateChange:
-this.supabaseService.client.auth.onAuthStateChange((event, session) => {
-  this._session.set(session);
-  this._user.set(session?.user ?? null);
+}
 
-  if (event === 'INITIAL_SESSION') {
-    this._loading.set(false);
-  }
+		/**
+		 * Inicia sesión con email y contraseña usando Supabase Auth.
+		 *
+		 * @param {string} email Correo del usuario.
+		 * @param {string} password Contraseña del usuario.
+		 * @returns {Promise<void>} Promesa resuelta si el login fue exitoso.
+		 * @throws {Error} Lanza error si Supabase responde con fallo de autenticación.
+		 */
+		async signIn(email: string, password: string): Promise<void> {
+			console.log('[AuthService][signIn] Intentando login con email:', email);
 
-  // 👇 agrega esto
-  if (event === 'PASSWORD_RECOVERY') {
-    this._loading.set(false);
-  }
-});
-	}
+			const { data, error } = await this.supabaseService.client.auth.signInWithPassword({
+				email,
+				password
+			});
 
-  /**
-   * Inicia sesión con email y contraseña usando Supabase Auth.
-   *
-   * @param {string} email Correo del usuario.
-   * @param {string} password Contraseña del usuario.
-   * @returns {Promise<void>} Promesa resuelta si el login fue exitoso.
-   * @throws {Error} Lanza error si Supabase responde con fallo de autenticación.
-   */
-  async signIn(email: string, password: string): Promise<void> {
-    console.log('[AuthService][signIn] Intentando login con email:', email);
+			console.log('[AuthService][signIn] Respuesta signInWithPassword:', {
+				data,
+				error
+			});
 
-    const { data, error } = await this.supabaseService.client.auth.signInWithPassword({
-      email,
-      password
-    });
+			if (error) {
+				console.error('[AuthService][signIn] Error en login:', error.message);
+				throw new Error(error.message);
+			}
 
-    console.log('[AuthService][signIn] Respuesta signInWithPassword:', {
-      data,
-      error
-    });
+			console.log('[AuthService][signIn] Login correcto');
+		}
 
-    if (error) {
-      console.error('[AuthService][signIn] Error en login:', error.message);
-      throw new Error(error.message);
-    }
+		/**
+		 * Cierra la sesión actual del usuario autenticado.
+		 *
+		 * @returns {Promise<void>} Promesa resuelta si el logout fue exitoso.
+		 * @throws {Error} Lanza error si Supabase responde con fallo al cerrar sesión.
+		 */
+		async signOut(): Promise<void> {
+			console.log('[AuthService][signOut] Cerrando sesión...');
 
-    console.log('[AuthService][signIn] Login correcto');
-  }
+			const { error } = await this.supabaseService.client.auth.signOut();
 
-  /**
-   * Cierra la sesión actual del usuario autenticado.
-   *
-   * @returns {Promise<void>} Promesa resuelta si el logout fue exitoso.
-   * @throws {Error} Lanza error si Supabase responde con fallo al cerrar sesión.
-   */
-  async signOut(): Promise<void> {
-    console.log('[AuthService][signOut] Cerrando sesión...');
+			console.log('[AuthService][signOut] Resultado logout:', { error });
 
-    const { error } = await this.supabaseService.client.auth.signOut();
+			if (error) {
+				console.error('[AuthService][signOut] Error al cerrar sesión:', error.message);
+				throw new Error(error.message);
+			}
 
-    console.log('[AuthService][signOut] Resultado logout:', { error });
+			console.log('[AuthService][signOut] Sesión cerrada correctamente');
+		}
 
-    if (error) {
-      console.error('[AuthService][signOut] Error al cerrar sesión:', error.message);
-      throw new Error(error.message);
-    }
+		/**
+		 * Devuelve el usuario autenticado actual de forma síncrona.
+		 * Útil para lecturas rápidas desde componentes o guards.
+		 *
+		 * @returns {User | null} Usuario autenticado actual o null.
+		 */
+		getCurrentUser(): User | null {
+			console.log('[AuthService][getCurrentUser] Usuario actual:', this._user());
+			return this._user();
+		}
 
-    console.log('[AuthService][signOut] Sesión cerrada correctamente');
-  }
-
-  /**
-   * Devuelve el usuario autenticado actual de forma síncrona.
-   * Útil para lecturas rápidas desde componentes o guards.
-   *
-   * @returns {User | null} Usuario autenticado actual o null.
-   */
-  getCurrentUser(): User | null {
-    console.log('[AuthService][getCurrentUser] Usuario actual:', this._user());
-    return this._user();
-  }
-
-  /**
-   * Devuelve la sesión actual de forma síncrona.
-   * Útil para validaciones o debugging.
-   *
-   * @returns {Session | null} Sesión activa o null.
-   */
-  getCurrentSession(): Session | null {
-    console.log('[AuthService][getCurrentSession] Sesión actual:', this._session());
-    return this._session();
-  }
+		/**
+		 * Devuelve la sesión actual de forma síncrona.
+		 * Útil para validaciones o debugging.
+		 *
+		 * @returns {Session | null} Sesión activa o null.
+		 */
+		getCurrentSession(): Session | null {
+			console.log('[AuthService][getCurrentSession] Sesión actual:', this._session());
+			return this._session();
+		}
 
 		async signUp(email: string, password: string): Promise<void> {
 			const { error } = await this.supabaseService.client.auth.signUp({ email, password });
@@ -196,6 +225,31 @@ this.supabaseService.client.auth.onAuthStateChange((event, session) => {
 			if (error) throw new Error(error.message);
 		}
 
-		
-   
+		/**
+		 * Carga el perfil completo del usuario autenticado desde la tabla profiles.
+		 * Incluye global_role para determinar permisos en el frontend.
+		 * Se llama automáticamente al detectar una sesión activa.
+		 *
+		 * @param {string} userId ID del usuario autenticado desde auth.users.
+		 * @returns {Promise<void>}
+		 */
+		private async loadProfile(userId: string): Promise<void> {
+			console.log('[AuthService][loadProfile] Cargando perfil para userId:', userId);
+
+			const { data, error } = await this.supabaseService.client
+				.from('profiles')
+				.select('*')
+				.eq('id', userId)
+				.single();
+
+			if (error) {
+				console.error('[AuthService][loadProfile] Error al cargar perfil:', error);
+				this._profile.set(null);
+				return;
+			}
+
+			console.log('[AuthService][loadProfile] Perfil cargado:', data);
+			console.log('[AuthService][loadProfile] global_role:', data?.global_role);
+			this._profile.set(data as AdminUser);
+		}
 }

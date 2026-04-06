@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../auth/services/auth.service';
 
@@ -9,6 +9,7 @@ interface NavItem {
   label: string;
   route: string;
   exact?: boolean;
+  adminOnly?: boolean;
 }
 
 interface Notification {
@@ -37,21 +38,32 @@ export class Dashboard {
   readonly notificationsOpen = signal(false);
   readonly profileOpen = signal(false);
 
-  /**
-   * Items del sidebar con su ruta hija correspondiente.
-   * La propiedad `route` es relativa a /dashboard/.
-   */
-  readonly navItems: NavItem[] = [
-    { icon: 'bi-house',         label: 'Inicio',        route: 'home', exact: true },
-    { icon: 'bi-people',        label: 'Usuarios',      route: 'admin/users' },
-    { icon: 'bi-person-circle', label: 'Mi perfil',     route: 'profile', exact: true },
-    { icon: 'bi-building',      label: 'Colegios',      route: 'schools', exact: true },
-    { icon: 'bi-mortarboard',   label: 'Cursos',        route: 'courses', exact: true },
-    { icon: 'bi-tags',          label: 'Categorías',    route: 'categories', exact: true },
-    { icon: 'bi-cash-stack',    label: 'Transacciones', route: 'transactions', exact: true },
-    { icon: 'bi-receipt',       label: 'Comprobantes',  route: 'receipts', exact: true },
-    { icon: 'bi-bar-chart',     label: 'Reportes',      route: 'reports', exact: true },
+	readonly isAdmin = this.authService.isAdmin;
+	readonly isSuperAdmin = this.authService.isSuperAdmin;
+
+   /**
+	 * Items del sidebar filtrados según el rol del usuario autenticado.
+	 * Admin y super_admin ven todo. Usuario contextual solo ve lo suyo.
+	 */
+	 readonly navItems = computed<NavItem[]>(() => {
+  const admin = this.isAdmin();
+
+  const allItems: NavItem[] = [
+    { icon: 'bi-house',         label: 'Inicio',        route: 'home',         exact: true,  adminOnly: false },
+    { icon: 'bi-people',        label: 'Usuarios',      route: 'admin/users',  exact: true,  adminOnly: true  },
+    { icon: 'bi-person-circle', label: 'Mi perfil',     route: 'profile',      exact: true,  adminOnly: false },
+    { icon: 'bi-building',      label: 'Colegios',      route: 'schools',      exact: true,  adminOnly: true  },
+    { icon: 'bi-mortarboard',   label: 'Cursos',        route: 'courses',      exact: true,  adminOnly: true  },
+    { icon: 'bi-tags',          label: 'Categorías',    route: 'categories',   exact: true,  adminOnly: true  },
+    { icon: 'bi-cash-stack',    label: 'Transacciones', route: 'transactions', exact: true,  adminOnly: true  },
+    { icon: 'bi-receipt',       label: 'Comprobantes',  route: 'receipts',     exact: true,  adminOnly: true  },
+    { icon: 'bi-bar-chart',     label: 'Reportes',      route: 'reports',      exact: true,  adminOnly: true  },
   ];
+
+  if (DEBUG) console.log('🧭 [Dashboard][navItems] isAdmin:', admin);
+
+  return allItems.filter(item => !item.adminOnly || admin);
+});
 
   readonly notifications: Notification[] = [
     {

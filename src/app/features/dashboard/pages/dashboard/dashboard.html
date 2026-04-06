@@ -101,7 +101,7 @@
 		<!-- SIDEBAR -->
 		<aside class="dashboard-sidebar" [class.expanded]="sidebarExpanded()">
 			<nav class="sidebar-nav">
-				@for (item of navItems; track item.label) {
+				@for (item of navItems(); track item.label) {
 				<a class="sidebar-item" [routerLink]="'/dashboard/' + item.route" routerLinkActive="active"
 					[routerLinkActiveOptions]="{ exact: item.exact ?? false }" [title]="item.label">
 					<i class="bi {{ item.icon }} sidebar-icon"></i>
