@@ -42,6 +42,8 @@ const DEBUG=true;
 	selectedTransaction: TransactionListItem | null = null;
 	modalMode: 'create' | 'edit' | 'view' = 'create';
 
+	isAdmin = true; // 👈 temporal para pruebas
+
 	/**
 	 * Contexto opcional de curso.
 	 * Si tiene valor, la pantalla trabajará en modo contextual
@@ -63,6 +65,7 @@ const DEBUG=true;
 		name: string;
 		school_name: string;
 		school_year: number | null;
+		school_id: string | null;
 	} | null = null;
 	/** Estado de eliminación en curso. */
 	readonly deleting = signal(false);
@@ -113,12 +116,11 @@ const DEBUG=true;
   }
 
 		//Inicializar formulario reactivo
+		// Inicializar formulario reactivo
 		this.initForm();
-    await Promise.all([
-			this.loadTransactions(),
-			this.loadActiveCategories(),
-			this.loadActiveCourses()
-		]);
+		await this.loadTransactions();
+		await this.loadActiveCourses();
+		await this.loadActiveCategories(); // 👈 debe ir después de loadActiveCourses
   }
 
   // ─── Setup ────────────────────────────────────────────────────────────────────
@@ -220,22 +222,29 @@ const DEBUG=true;
 				this.loading.set(false);
 			}
 		}
-  /**
-   * Obtiene las categorías activas para poblar el select del formulario.
-   * @returns {Promise<void>}
-   */
-  async loadActiveCategories(): Promise<void> {
-    if (DEBUG) console.log('📂 [TransactionsPage][loadActiveCategories] Cargando categorías activas...');
+    /**
+		 * Obtiene las categorías activas para poblar el select del formulario.
+		 * En modo contextual trae globales + las del colegio del curso.
+		 * En modo global trae todas las activas.
+		 *
+		 * @returns {Promise<void>}
+		 */
+		async loadActiveCategories(): Promise<void> {
+			if (DEBUG) console.log('📂 [TransactionsPage][loadActiveCategories] Cargando categorías activas...');
 
-    try {
-      this.activeCategories=await this.categoriesService.getActiveCategories();
-      if (DEBUG) console.log('✅ [TransactionsPage][loadActiveCategories] Total:', this.activeCategories.length);
-    }
+			try {
+				if (this.contextCourseId && this.contextCourseInfo?.school_id) {
+					if (DEBUG) console.log('🏫 [TransactionsPage][loadActiveCategories] Modo contextual, school_id:', this.contextCourseInfo.school_id);
+					this.activeCategories = await this.categoriesService.getCategoriesBySchool(this.contextCourseInfo.school_id);
+				} else {
+					this.activeCategories = await this.categoriesService.getActiveCategories();
+				}
 
-    catch (error) {
-      console.error('🔴 [TransactionsPage][loadActiveCategories] Error:', error);
-    }
-  }
+				if (DEBUG) console.log('✅ [TransactionsPage][loadActiveCategories] Total:', this.activeCategories.length);
+			} catch (error) {
+				console.error('🔴 [TransactionsPage][loadActiveCategories] Error:', error);
+			}
+		}
 
   // ─── Métricas ─────────────────────────────────────────────────────────────────
 
@@ -976,64 +985,76 @@ const DEBUG=true;
 	}
 
 	 /**
- * Resuelve la información del curso contextual actual.
- * Prioriza los datos de las transacciones cargadas y luego usa
- * la lista de cursos activos como respaldo.
- *
- * @returns {void}
- */
-private resolveContextCourseInfo(): void {
-  if (DEBUG) console.log('🧭 [TransactionsPage][resolveContextCourseInfo] Resolviendo curso contextual...');
+	 * Resuelve la información del curso contextual actual.
+	 * Prioriza los datos de las transacciones cargadas y luego usa
+	 * la lista de cursos activos como respaldo.
+	 *
+	 * @returns {void}
+	 */
+	private resolveContextCourseInfo(): void {
+		if (DEBUG) console.log('🧭 [TransactionsPage][resolveContextCourseInfo] Resolviendo curso contextual...');
 
-  if (!this.contextCourseId) {
-    this.contextCourseInfo = null;
-    if (DEBUG) console.log('ℹ️ [TransactionsPage][resolveContextCourseInfo] Sin contextCourseId');
-    return;
-  }
+		if (!this.contextCourseId) {
+			this.contextCourseInfo = null;
+			if (DEBUG) console.log('ℹ️ [TransactionsPage][resolveContextCourseInfo] Sin contextCourseId');
+			return;
+		}
 
-  // 1. Intentar resolver desde las transacciones cargadas
-  const transactionMatch = this.allTransactions.find(
-    transaction => transaction.course_id === this.contextCourseId
-  );
+		// 1. Intentar resolver desde las transacciones cargadas
+		const transactionMatch = this.allTransactions.find(
+			transaction => transaction.course_id === this.contextCourseId
+		);
 
-  if (transactionMatch) {
-    this.contextCourseInfo = {
-      id: transactionMatch.course_id,
-      name: transactionMatch.course_name || 'Sin curso',
-      school_name: transactionMatch.school_name || 'Sin colegio',
-      school_year: transactionMatch.school_year ?? null,
-    };
+		if (transactionMatch) {
+			this.contextCourseInfo = {
+				id: transactionMatch.course_id,
+				name: transactionMatch.course_name || 'Sin curso',
+				school_name: transactionMatch.school_name || 'Sin colegio',
+				school_year: transactionMatch.school_year ?? null,
+				school_id: transactionMatch.school_id ?? null,
+			};
 
-    if (DEBUG) {
-      console.log('✅ [TransactionsPage][resolveContextCourseInfo] Resuelto desde allTransactions:', this.contextCourseInfo);
-    }
-    return;
-  }
+			if (DEBUG) {
+				console.log('✅ [TransactionsPage][resolveContextCourseInfo] Resuelto desde allTransactions:', this.contextCourseInfo);
+			}
+			return;
+		}
 
-  // 2. Intentar resolver desde cursos activos
-  const courseMatch = this.activeCourses.find(
-    course => course.id === this.contextCourseId
-  );
+		// 2. Intentar resolver desde cursos activos
+		const courseMatch = this.activeCourses.find(
+			course => course.id === this.contextCourseId
+		);
 
-  if (courseMatch) {
-    this.contextCourseInfo = {
-      id: courseMatch.id,
-      name: courseMatch.name,
-      school_name: courseMatch.schools?.name || 'Sin colegio',
-      school_year: courseMatch.school_year ?? null,
-    };
+		if (courseMatch) {
+			this.contextCourseInfo = {
+				id: courseMatch.id,
+				name: courseMatch.name,
+				school_name: courseMatch.schools?.name || 'Sin colegio',
+				school_year: courseMatch.school_year ?? null,
+				school_id: courseMatch.school_id ?? null,
+			};
 
-    if (DEBUG) {
-      console.log('✅ [TransactionsPage][resolveContextCourseInfo] Resuelto desde activeCourses:', this.contextCourseInfo);
-    }
-    return;
-  }
+			if (DEBUG) {
+				console.log('✅ [TransactionsPage][resolveContextCourseInfo] Resuelto desde activeCourses:', this.contextCourseInfo);
+			}
+			return;
+		}
 
-  // 3. No encontrado
-  this.contextCourseInfo = null;
+		// 3. No encontrado
+		this.contextCourseInfo = null;
 
-  if (DEBUG) {
-    console.warn('⚠️ [TransactionsPage][resolveContextCourseInfo] No se pudo resolver el curso contextual');
-  }
-}
+		if (DEBUG) {
+			console.warn('⚠️ [TransactionsPage][resolveContextCourseInfo] No se pudo resolver el curso contextual');
+		}
+	}
+
+	/**
+	 * Navega de vuelta al listado de cursos.
+	 * Solo aplica en modo contextual.
+	 */
+	goBackToCourses(): void {
+		if (DEBUG) console.log('🔙 [TransactionsPage] Volviendo a /dashboard/courses');
+
+		this.router.navigate(['/dashboard/courses']);
+	}
 }

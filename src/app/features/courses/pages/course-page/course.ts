@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop'; // Opcional para convertir Observable a Signal
 
@@ -24,7 +25,7 @@ export interface ComunaChile {
 @Component({
   selector: 'app-course-page',
 	standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule , RouterModule],
   templateUrl: './course.html',
   styleUrl: './course.scss',
 })
@@ -35,6 +36,7 @@ export class CoursePage implements OnInit {
   private readonly schoolsService = inject(SchoolsService);
   private readonly fb             = inject(FormBuilder);
   private readonly toastService   = inject(ToastService);
+	private readonly router         = inject(Router);
 
 	// ─── Estado ───────────────────────────────────────────────────────────────────
   readonly loading = signal(false);
@@ -110,7 +112,7 @@ export class CoursePage implements OnInit {
     if (DEBUG) console.log('✅ [CoursesPage][initForm] Formulario creado');
   }
 
-	 // ─── Carga de datos ───────────────────────────────────────────────────────────
+	// ─── Carga de datos ───────────────────────────────────────────────────────────
 
 	 /**
  * Genera un rango de años (ej: actual ±2 años).
@@ -613,7 +615,32 @@ generateYears(): number[] {
   }
 }
 
-	
+// --- Navegacion -----------------------------------------------------------
+/**
+ * Navega al módulo de transacciones contextual de un curso.
+ *
+ * Ruta esperada:
+ * /dashboard/courses/:courseId/transactions
+ *
+ * @param {Course} course Curso seleccionado desde la tabla.
+ * @returns {void}
+ */
+goToCourseTransactions(course: Course): void {
+  if (DEBUG) {
+    console.groupCollapsed('💸 [CoursesPage][goToCourseTransactions] Navegando a transacciones del curso');
+    console.log('📦 Curso recibido:', course);
+    console.log('🆔 course.id:', course?.id);
+    console.groupEnd();
+  }
+
+  if (!course?.id) {
+    console.warn('⚠️ [CoursesPage][goToCourseTransactions] No existe course.id');
+    this.toastService.show('No fue posible identificar el curso ⚠️', 'warning');
+    return;
+  }
+
+  this.router.navigate(['/dashboard/courses', course.id, 'transactions']);
+}
 
 	testConsole() {
     console.log('🚀 El componente CoursePage está respondiendo correctamente.');

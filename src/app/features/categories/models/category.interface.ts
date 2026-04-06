@@ -13,4 +13,9 @@ export interface Category {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  school_id?: string | null;
+  schools?: {
+    id: string;
+    name: string;
+  } | null;
 }

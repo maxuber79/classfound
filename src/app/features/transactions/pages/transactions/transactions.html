@@ -3,6 +3,13 @@
 	<!-- Header -->
 	<div class="d-flex justify-content-between align-items-start mb-4">
 		<div>
+			@if (contextCourseId && isAdmin) {
+			<button class="btn btn-link p-0 mb-2 text-decoration-none d-inline-flex align-items-center gap-1"
+				(click)="goBackToCourses()">
+				<i class="bi bi-arrow-left"></i>
+				<span class="small">Volver a cursos</span>
+			</button>
+			}
 			<h4 class="fw-bold mb-1">Transacciones</h4>
 
 			@if (contextCourseInfo) {
@@ -31,9 +38,12 @@
 
 	<!-- ─── Tarjetas de resumen ──────────────────────────────────────────────── -->
 	@if (!loading()) {
+	@if (!loading()) {
+
+	@if (contextCourseId) {
 	<div class="row g-3 mb-4">
 
-		<!-- Balance general -->
+		<!-- Balance contextual -->
 		<div class="col-12 col-md-4">
 			<div class="summary-card" [class.summary-card--positive]="isBalancePositive"
 				[class.summary-card--negative]="!isBalancePositive">
@@ -41,7 +51,7 @@
 					<i class="bi" [ngClass]="isBalancePositive ? 'bi-wallet2' : 'bi-exclamation-circle'"></i>
 				</div>
 				<div class="summary-card__body">
-					<span class="summary-card__label">Balance general</span>
+					<span class="summary-card__label">Balance del curso</span>
 					<span class="summary-card__amount">{{ formatAmount(balance) }}</span>
 					<span class="summary-card__sub">{{ incomeCount + expenseCount }} transacciones en total</span>
 				</div>
@@ -55,7 +65,7 @@
 					<i class="bi bi-arrow-down-circle-fill"></i>
 				</div>
 				<div class="summary-card__body">
-					<span class="summary-card__label">Total ingresos</span>
+					<span class="summary-card__label">Ingresos del curso</span>
 					<span class="summary-card__amount">{{ formatAmount(totalIncome) }}</span>
 					<span class="summary-card__sub">{{ incomeCount }} movimientos</span>
 				</div>
@@ -69,7 +79,7 @@
 					<i class="bi bi-arrow-up-circle-fill"></i>
 				</div>
 				<div class="summary-card__body">
-					<span class="summary-card__label">Total egresos</span>
+					<span class="summary-card__label">Egresos del curso</span>
 					<span class="summary-card__amount">{{ formatAmount(totalExpense) }}</span>
 					<span class="summary-card__sub">{{ expenseCount }} movimientos</span>
 				</div>
@@ -77,6 +87,69 @@
 		</div>
 
 	</div>
+	} @else {
+	<div class="row g-3 mb-4">
+
+		<!-- Balance global -->
+		<div class="col-12 col-md-3">
+			<div class="summary-card" [class.summary-card--positive]="isBalancePositive"
+				[class.summary-card--negative]="!isBalancePositive">
+				<div class="summary-card__icon">
+					<i class="bi" [ngClass]="isBalancePositive ? 'bi-wallet2' : 'bi-exclamation-circle'"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Balance global</span>
+					<span class="summary-card__amount">{{ formatAmount(balance) }}</span>
+					<span class="summary-card__sub">Todos los cursos</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Ingresos globales -->
+		<div class="col-12 col-md-3">
+			<div class="summary-card summary-card--income">
+				<div class="summary-card__icon">
+					<i class="bi bi-arrow-down-circle-fill"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Ingresos globales</span>
+					<span class="summary-card__amount">{{ formatAmount(totalIncome) }}</span>
+					<span class="summary-card__sub">{{ incomeCount }} movimientos</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Egresos globales -->
+		<div class="col-12 col-md-3">
+			<div class="summary-card summary-card--expense">
+				<div class="summary-card__icon">
+					<i class="bi bi-arrow-up-circle-fill"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Egresos globales</span>
+					<span class="summary-card__amount">{{ formatAmount(totalExpense) }}</span>
+					<span class="summary-card__sub">{{ expenseCount }} movimientos</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Total de transacciones -->
+		<div class="col-12 col-md-3">
+			<div class="summary-card summary-card--income">
+				<div class="summary-card__icon">
+					<i class="bi bi-receipt-cutoff"></i>
+				</div>
+				<div class="summary-card__body">
+					<span class="summary-card__label">Transacciones</span>
+					<span class="summary-card__amount">{{ incomeCount + expenseCount }}</span>
+					<span class="summary-card__sub">Registros acumulados</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	}
+	}
 	}
 
 	<!-- ─── Card principal ───────────────────────────────────────────────────── -->
@@ -184,7 +257,9 @@
 						<th class="text-end">Monto</th>
 						<th class="text-center pe-4">Acciones</th> -->
 						<th class="ps-4">Fecha</th>
+						@if (!contextCourseId) {
 						<th>Curso</th>
+						}
 						<th>Categoría</th>
 						<th>Tipo</th>
 						<th>Descripción</th>
@@ -203,6 +278,18 @@
 							<div class="text-muted" style="font-size:0.7rem;">{{ transaction.transaction_date | date:'EEEE' }}</div>
 						</td>
 
+						<!-- <td>
+							<div class="fw-semibold small">
+								{{ transaction.course_name || '—' }}
+							</div>
+							<div class="text-muted" style="font-size:0.7rem;">
+								{{ transaction.school_name || '' }}
+								@if (transaction.school_year) {
+								- {{ transaction.school_year }}
+								}
+							</div>
+						</td> -->
+						@if (!contextCourseId) {
 						<td>
 							<div class="fw-semibold small">
 								{{ transaction.course_name || '—' }}
@@ -214,6 +301,7 @@
 								}
 							</div>
 						</td>
+						}
 
 						<td>
 							<span class="text-dark small fw-semibold">{{ transaction.category_name || 'Sin categoría' }}</span>
@@ -303,7 +391,24 @@
 				<i class="bi bi-x-circle me-1"></i> Limpiar filtros
 			</button>
 			} @else {
-			<p class="text-muted mt-3 mb-0">No hay transacciones registradas todavía.</p>
+
+			@if (contextCourseId) {
+			<p class="text-muted mt-3 mb-0">
+				Este curso aún no tiene transacciones registradas.
+			</p>
+
+			@if (contextCourseInfo) {
+			<p class="text-muted small mb-0 mt-2">
+				{{ contextCourseInfo.name }} · {{ contextCourseInfo.school_name }} · {{ contextCourseInfo.school_year }}
+			</p>
+			}
+
+			} @else {
+			<p class="text-muted mt-3 mb-0">
+				No hay transacciones registradas todavía.
+			</p>
+			}
+
 			<button class="btn btn-primary btn-sm mt-3" (click)="openCreateModal()">
 				<i class="bi bi-plus-circle me-1"></i> Registrar primera transacción
 			</button>
