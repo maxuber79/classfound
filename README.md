@@ -302,3 +302,255 @@ function ejemplo() {
   <br><br>
   <b>✨ Classfund — Hecho con Angular, Supabase y mucha cafeína ☕</b>
 </div>
+
+```
+tesoreria-cursos-app
+├─ .angular
+├─ .editorconfig
+├─ angular.json
+├─ CLAUDE.md
+├─ package-lock.json
+├─ package.json
+├─ public
+│  └─ favicon.ico
+├─ README.md
+├─ src
+│  ├─ app
+│  │  ├─ app.config.ts
+│  │  ├─ app.html
+│  │  ├─ app.routes.ts
+│  │  ├─ app.scss
+│  │  ├─ app.spec.ts
+│  │  ├─ app.ts
+│  │  ├─ auth
+│  │  │  ├─ guards
+│  │  │  │  ├─ auth.guard.ts
+│  │  │  │  ├─ login.guard.ts
+│  │  │  │  └─ role.guard.ts
+│  │  │  ├─ models
+│  │  │  ├─ pages
+│  │  │  │  ├─ forgot-password
+│  │  │  │  │  ├─ forgot-password.html
+│  │  │  │  │  ├─ forgot-password.scss
+│  │  │  │  │  └─ forgot-password.ts
+│  │  │  │  ├─ login
+│  │  │  │  │  ├─ login.html
+│  │  │  │  │  ├─ login.scss
+│  │  │  │  │  └─ login.ts
+│  │  │  │  ├─ register
+│  │  │  │  │  ├─ register.html
+│  │  │  │  │  ├─ register.scss
+│  │  │  │  │  └─ register.ts
+│  │  │  │  └─ reset-password
+│  │  │  │     ├─ reset-password.html
+│  │  │  │     ├─ reset-password.scss
+│  │  │  │     └─ reset-password.ts
+│  │  │  └─ services
+│  │  │     └─ auth.service.ts
+│  │  ├─ core
+│  │  │  └─ services
+│  │  │     ├─ location.service.ts
+│  │  │     ├─ supabase.service.ts
+│  │  │     └─ toast.service.ts
+│  │  ├─ features
+│  │  │  ├─ admin
+│  │  │  │  └─ users
+│  │  │  │     ├─ components
+│  │  │  │     ├─ models
+│  │  │  │     │  ├─ admin-user.interface.ts
+│  │  │  │     │  └─ create-admin-user-payload.interface.ts
+│  │  │  │     ├─ pages
+│  │  │  │     │  └─ users-page
+│  │  │  │     │     ├─ users-page.html
+│  │  │  │     │     ├─ users-page.scss
+│  │  │  │     │     └─ users-page.ts
+│  │  │  │     └─ services
+│  │  │  │        └─ admin-users.service.ts
+│  │  │  ├─ categories
+│  │  │  │  ├─ components
+│  │  │  │  ├─ models
+│  │  │  │  │  └─ category.interface.ts
+│  │  │  │  ├─ pages
+│  │  │  │  │  └─ categories-page
+│  │  │  │  │     ├─ categories-page.html
+│  │  │  │  │     ├─ categories-page.scss
+│  │  │  │  │     └─ categories-page.ts
+│  │  │  │  └─ services
+│  │  │  │     └─ categories.service.ts
+│  │  │  ├─ courses
+│  │  │  │  ├─ models
+│  │  │  │  │  └─ course.interface.ts
+│  │  │  │  ├─ pages
+│  │  │  │  │  └─ course-page
+│  │  │  │  │     ├─ course.html
+│  │  │  │  │     ├─ course.scss
+│  │  │  │  │     └─ course.ts
+│  │  │  │  └─ services
+│  │  │  │     └─ course.service.ts
+│  │  │  ├─ dashboard
+│  │  │  │  ├─ components
+│  │  │  │  ├─ pages
+│  │  │  │  │  ├─ dashboard
+│  │  │  │  │  │  ├─ dashboard.html
+│  │  │  │  │  │  ├─ dashboard.scss
+│  │  │  │  │  │  └─ dashboard.ts
+│  │  │  │  │  └─ dashboard-home
+│  │  │  │  │     ├─ dashboard-home.html
+│  │  │  │  │     ├─ dashboard-home.scss
+│  │  │  │  │     └─ dashboard-home.ts
+│  │  │  │  └─ services
+│  │  │  │     └─ profile.service.ts
+│  │  │  ├─ members
+│  │  │  │  ├─ components
+│  │  │  │  ├─ models
+│  │  │  │  ├─ pages
+│  │  │  │  └─ services
+│  │  │  ├─ profile
+│  │  │  │  ├─ models
+│  │  │  │  │  └─ profile.interface.ts
+│  │  │  │  ├─ pages
+│  │  │  │  │  └─ profile-page
+│  │  │  │  │     ├─ profile-page.html
+│  │  │  │  │     ├─ profile-page.scss
+│  │  │  │  │     └─ profile-page.ts
+│  │  │  │  └─ services
+│  │  │  │     └─ profile.service.ts
+│  │  │  ├─ schools
+│  │  │  │  ├─ components
+│  │  │  │  ├─ models
+│  │  │  │  │  └─ school.interface.ts
+│  │  │  │  ├─ pages
+│  │  │  │  │  └─ schools
+│  │  │  │  │     ├─ schools.html
+│  │  │  │  │     ├─ schools.scss
+│  │  │  │  │     └─ schools.ts
+│  │  │  │  └─ services
+│  │  │  │     └─ school.service.ts
+│  │  │  └─ transactions
+│  │  │     ├─ components
+│  │  │     ├─ models
+│  │  │     │  ├─ cursos.interface.ts
+│  │  │     │  └─ transaction.interface.ts
+│  │  │     ├─ pages
+│  │  │     │  └─ transactions
+│  │  │     │     ├─ transactions.html
+│  │  │     │     ├─ transactions.scss
+│  │  │     │     └─ transactions.ts
+│  │  │     └─ services
+│  │  │        └─ transactions.service.ts
+│  │  ├─ layout
+│  │  │  ├─ navbar
+│  │  │  ├─ shell
+│  │  │  └─ sidebar
+│  │  └─ shared
+│  │     ├─ components
+│  │     │  └─ toast
+│  │     │     ├─ toast.html
+│  │     │     ├─ toast.scss
+│  │     │     └─ toast.ts
+│  │     ├─ models
+│  │     │  ├─ course-member.interface.ts
+│  │     │  ├─ course.interface.ts
+│  │     │  ├─ profile.interface.ts
+│  │     │  └─ school.interface.ts
+│  │     └─ utils
+│  ├─ assets
+│  │  ├─ data
+│  │  │  └─ comunas-chile.json
+│  │  ├─ fonts
+│  │  ├─ icons
+│  │  │  ├─ Ahorro.svg
+│  │  │  ├─ Boleta.svg
+│  │  │  ├─ Configuración.svg
+│  │  │  ├─ Curso.svg
+│  │  │  ├─ Dashboard.svg
+│  │  │  ├─ Notificaciones.svg
+│  │  │  ├─ Transacciones.svg
+│  │  │  ├─ Usuarios.svg
+│  │  │  └─ Wallet.svg
+│  │  ├─ images
+│  │  └─ scss
+│  │     ├─ abstracts
+│  │     │  ├─ _color.scss
+│  │     │  ├─ _functions.scss
+│  │     │  ├─ _index.scss
+│  │     │  ├─ _mixins.scss
+│  │     │  ├─ _placeholders.scss
+│  │     │  └─ _variables.scss
+│  │     ├─ bakup
+│  │     │  ├─ CHANGELOG.md
+│  │     │  └─ README.md
+│  │     ├─ base
+│  │     │  ├─ _font-google.scss
+│  │     │  ├─ _global.scss
+│  │     │  ├─ _icons.scss
+│  │     │  ├─ _index.scss
+│  │     │  ├─ _reset.scss
+│  │     │  └─ _typography.scss
+│  │     ├─ CHANGELOG.md
+│  │     ├─ components
+│  │     │  ├─ _badge.scss
+│  │     │  ├─ _button.scss
+│  │     │  ├─ _callout.scss
+│  │     │  ├─ _card.scss
+│  │     │  ├─ _form.scss
+│  │     │  ├─ _index.scss
+│  │     │  └─ _tables.scss
+│  │     ├─ editorconfig
+│  │     ├─ gitignore
+│  │     ├─ helps
+│  │     │  ├─ _debug.scss
+│  │     │  ├─ _help.scss
+│  │     │  ├─ _helps_querys.scss
+│  │     │  ├─ _index.scss
+│  │     │  └─ _whith.scss
+│  │     ├─ layout
+│  │     │  ├─ _footer.scss
+│  │     │  ├─ _header.scss
+│  │     │  └─ _index.scss
+│  │     ├─ LICENSE
+│  │     ├─ main-dist.css
+│  │     ├─ main-respaldo.scss
+│  │     ├─ main.css
+│  │     ├─ main.scss
+│  │     ├─ package.json
+│  │     ├─ pages
+│  │     │  ├─ _about.scss
+│  │     │  ├─ _home.scss
+│  │     │  └─ _index.scss
+│  │     ├─ prepros.config
+│  │     ├─ README.md
+│  │     ├─ themes
+│  │     │  └─ _index.scss
+│  │     ├─ utilities
+│  │     │  ├─ _bgx-color.scss
+│  │     │  ├─ _index.scss
+│  │     │  └─ _stretch-card.scss
+│  │     └─ vendors
+│  │        └─ _index.scss
+│  ├─ environments
+│  │  └─ environment.ts
+│  ├─ index.html
+│  ├─ main.ts
+│  └─ styles.scss
+├─ supabase
+│  ├─ .temp
+│  │  ├─ cli-latest
+│  │  ├─ gotrue-version
+│  │  ├─ pooler-url
+│  │  ├─ postgres-version
+│  │  ├─ project-ref
+│  │  ├─ rest-version
+│  │  ├─ storage-migration
+│  │  └─ storage-version
+│  ├─ config.toml
+│  └─ functions
+│     └─ create-user-admin
+│        ├─ .npmrc
+│        ├─ deno.json
+│        └─ index.ts
+├─ tsconfig.app.json
+├─ tsconfig.json
+└─ tsconfig.spec.json
+
+```

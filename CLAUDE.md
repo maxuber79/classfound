@@ -27,6 +27,13 @@ orientada al mercado latinoamericano.
 
 ## Esquema de base de datos (Supabase)
 
+### Enums
+
+- `global_role_enum`: `super_admin`, `user`
+- `course_role_enum`: `presidente`, `tesorero`, `secretario`, `apoderado`
+- `category_type_enum`: `income`, `expense`
+- `transaction_type_enum`: `income`, `expense`
+
 ### profiles
 
 Vinculada a auth.users.id
@@ -59,7 +66,7 @@ Vinculada a auth.users.id
 - id: uuid (PK)
 - course_id: uuid (FK → courses)
 - user_id: uuid (FK → profiles)
-- role: course_role_enum
+- role: course_role_enum → valores: presidente, tesorero, secretario, apoderado
 - is_active: bool
 - created_at, updated_at: timestamp
 
@@ -93,6 +100,103 @@ Vinculada a auth.users.id
 - file_size: int4
 - uploaded_by: uuid (FK → profiles)
 - created_at: timestamp
+
+### Funciones RLS
+
+- `is_super_admin()` → verifica global_role = super_admin
+- `has_course_role(p_course_id uuid, p_role course_role_enum)` → verifica rol activo en course_members
+
+### Políticas RLS activas
+
+- `transactions_insert_tesorero_or_super_admin` → INSERT
+- `transactions_update_tesorero_or_super_admin` → UPDATE
+- `receipts_insert_tesorero_or_super_admin` → INSERT
+
+## Estructura del proyecto Angular
+
+src/app/
+│ app.config.ts
+│ app.html
+│ app.routes.ts
+│ app.scss
+│ app.ts
+│
+├───auth/
+│ ├───guards/
+│ │ auth.guard.ts
+│ │ login.guard.ts
+│ │ role.guard.ts
+│ ├───pages/
+│ │ ├───forgot-password/
+│ │ ├───login/
+│ │ ├───register/
+│ │ └───reset-password/
+│ └───services/
+│ auth.service.ts
+│
+├───core/
+│ └───services/
+│ location.service.ts
+│ supabase.service.ts
+│ toast.service.ts
+│
+├───features/
+│ ├───admin/users/
+│ │ ├───models/
+│ │ ├───pages/users-page/
+│ │ └───services/admin-users.service.ts
+│ │
+│ ├───categories/
+│ │ ├───models/category.interface.ts
+│ │ ├───pages/categories-page/
+│ │ └───services/categories.service.ts
+│ │
+│ ├───courses/
+│ │ ├───models/course.interface.ts
+│ │ ├───pages/course-page/
+│ │ └───services/course.service.ts
+│ │
+│ ├───dashboard/
+│ │ ├───components/
+│ │ ├───pages/
+│ │ │ ├───dashboard/ ← layout principal
+│ │ │ └───dashboard-home/ ← widgets y home ← FASE 3 aquí
+│ │ └───services/
+│ │ profile.service.ts
+│ │ dashboard.service.ts ← CREAR en Fase 3
+│ │
+│ ├───members/ ← vacío, uso futuro
+│ │
+│ ├───profile/
+│ │ ├───models/profile.interface.ts
+│ │ ├───pages/profile-page/
+│ │ └───services/profile.service.ts
+│ │
+│ ├───schools/
+│ │ ├───models/school.interface.ts
+│ │ ├───pages/schools/
+│ │ └───services/school.service.ts
+│ │
+│ └───transactions/
+│ ├───models/
+│ │ cursos.interface.ts
+│ │ transaction.interface.ts
+│ ├───pages/transactions/
+│ └───services/transactions.service.ts
+│
+├───layout/
+│ ├───navbar/
+│ ├───shell/
+│ └───sidebar/
+│
+└───shared/
+├───components/toast/
+├───models/
+│ course-member.interface.ts ← agregar CourseRole enum
+│ course.interface.ts
+│ profile.interface.ts
+│ school.interface.ts
+└───utils/
 
 ## Estructura de rutas
 
@@ -204,24 +308,19 @@ createTransaction(), updateTransaction(), deleteTransaction()
 
 **Fase 1** → Categorías globales + por colegio ✅ Completada
 
-- ✅ school_id nullable agregado a categories
-- ✅ getCategoriesBySchool() en service
-- ✅ Transacciones carga categorías según contexto
-- ⏳ Pendiente menor: UI en categories-page para crear categorías por colegio
-
 **Fase 2** → Roles reales en frontend ✅ Completada
 
-- ✅ AuthService carga global_role desde profiles
-- ✅ isAdmin y isSuperAdmin como computed signals
-- ✅ roleGuard creado y aplicado a rutas admin
-- ✅ Menú sidebar filtrado por rol con computed()
-- ✅ Flag temporal isAdmin = true eliminado de transactions.ts
+**Fase 3** → Widgets y dashboard definitivos ✅ Completada
 
-**Fase 3** → Widgets y dashboard admin global definitivos
+- ✅ course_role_enum migrado: presidente, tesorero, secretario, apoderado
+- ✅ Políticas RLS y función has_course_role recreadas
+- ✅ is_course_member() corregida con SECURITY DEFINER
+- ✅ DashboardService con getAdminStats() y getCourseStats()
+- ✅ AuthService: courseProfile signal + isCourseUser computed
+- ✅ Dashboard-home: widgets admin vs contextual con effect()
+- ✅ UI: cards con card-variant mixin, Bootstrap Icons, skeleton loader
 
 **Fase 4** → Comprobantes (receipts)
-
-- Módulo visual, subida de archivos, vínculo con transacción
 
 **Fase 5** → Reportes y analítica
 

@@ -1,4 +1,4 @@
-.dashboard-home {
+/* .dashboard-home {
   padding: 1rem;
 
   .card {
@@ -8,5 +8,240 @@
     &:hover {
       transform: translateY(-3px);
     }
+  }
+} */
+
+// ─── Variables (mismo sistema que transactions.scss) ─────────────────────────
+$primary: #1e3a5f;
+$primary-light: #E8F2FC;
+$primary-action: #2563eb;
+
+$secondary: #1a7f5a;
+$secondary-light: #E2F5EF;
+
+$tertiary: #164478;
+$primary-light: #E8F2FC;
+
+$success: #10b981;
+$success-dark: #0f766e;
+$success-light: #6ee7b7;
+
+$warning: #fbbf24;
+$warning-dark: #d97706;
+
+$danger: #ef4444;
+$danger-dark: #b91c1c;
+$danger-light: #fca5a5;
+
+$accent: #FFC107;
+$accent-dark: #FFB300;
+$accent-light: #FFF8E1;
+
+// ─── Mixin card-variant ───────────────────────────────────────────────────────
+@mixin card-variant($color, $color-light, $amount-color: null) {
+  border-top: 4px solid $color;
+
+  .summary-card__icon {
+    background: rgba($color, 0.12);
+    color: $color;
+  }
+
+  @if $amount-color {
+    .summary-card__amount {
+      color: $amount-color;
+    }
+  }
+}
+
+// ─── Dashboard Home ───────────────────────────────────────────────────────────
+.dashboard-home {
+  padding: 1.5rem;
+
+  // ─── Sección de widgets ──────────────────────────────────────────────────────
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 0.75rem;
+
+    &-icon {
+      font-size: 2.5rem;
+      color: #9ca3af;
+    }
+
+    &-text {
+      font-size: 0.95rem;
+      color: #6c757d;
+      margin: 0;
+    }
+  }
+}
+
+// ─── Sección títulos ─────────────────────────────────────────────────────────
+.widgets-section {
+  margin-bottom: 2rem;
+
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+}
+
+// ─── Grid de widgets ─────────────────────────────────────────────────────────
+.widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Widget Card ─────────────────────────────────────────────────────────────
+.widget-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+  border-top: 4px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    background: rgba(#6c757d, 0.08);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+  }
+
+  &__value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1a1a2e;
+  }
+
+  &__sub {
+    font-size: 0.72rem;
+    color: #9ca3af;
+  }
+
+  // ─── Variantes admin ─────────────────────────────────────────────────────────
+  &--schools {
+    @include card-variant($primary-action, $primary-light);
+  }
+
+  &--courses {
+    @include card-variant($secondary, $secondary-light);
+  }
+
+  &--users {
+    @include card-variant($tertiary, $primary-light);
+  }
+
+  &--transactions {
+    @include card-variant($accent, $accent-light, $accent-dark);
+  }
+
+  // ─── Variantes contextual ────────────────────────────────────────────────────
+  &--income {
+    @include card-variant($success, $success-light);
+  }
+
+  &--expense {
+    @include card-variant($danger, $danger-light);
+  }
+
+  &--balance-positive {
+    @include card-variant($success, $success-light, $success);
+  }
+
+  &--balance-negative {
+    @include card-variant($danger, $danger-light, $danger);
+  }
+
+  // ─── Skeleton loader ─────────────────────────────────────────────────────────
+  &--skeleton {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    pointer-events: none;
+  }
+}
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+
+  &--icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  &--title {
+    width: 80px;
+    height: 12px;
+  }
+
+  &--value {
+    width: 120px;
+    height: 28px;
+  }
+
+  &--sub {
+    width: 100px;
+    height: 10px;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
   }
 }

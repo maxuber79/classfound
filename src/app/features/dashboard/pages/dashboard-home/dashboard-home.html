@@ -1,4 +1,155 @@
+<!-- Dashboard Home -->
 <div class="dashboard-home">
+
+	<!-- ================================ -->
+	<!-- SKELETON LOADER                  -->
+	<!-- ================================ -->
+	@if (loading()) {
+	<div class="widgets-grid">
+		@for (item of [1,2,3,4]; track item) {
+		<div class="widget-card widget-card--skeleton">
+			<div class="skeleton skeleton--icon"></div>
+			<div class="skeleton skeleton--title"></div>
+			<div class="skeleton skeleton--value"></div>
+			<div class="skeleton skeleton--sub"></div>
+		</div>
+		}
+	</div>
+	}
+
+	<!-- ================================ -->
+	<!-- WIDGETS ADMIN                    -->
+	<!-- ================================ -->
+	@if (!loading() && isAdmin() && adminStats()) {
+	<div class="widgets-section">
+		<h6 class="widgets-section__title">Resumen del sistema</h6>
+		<div class="widgets-grid">
+
+			<!-- Colegios -->
+			<div class="widget-card widget-card--schools">
+				<div class="widget-card__icon">
+					<i class="bi bi-building"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Colegios</span>
+					<span class="widget-card__value">{{ adminStats()!.activeSchools }}</span>
+					<span class="widget-card__sub">{{ adminStats()!.totalSchools }} en total</span>
+				</div>
+			</div>
+
+			<!-- Cursos -->
+			<div class="widget-card widget-card--courses">
+				<div class="widget-card__icon">
+					<i class="bi bi-mortarboard"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Cursos</span>
+					<span class="widget-card__value">{{ adminStats()!.activeCourses }}</span>
+					<span class="widget-card__sub">{{ adminStats()!.totalCourses }} en total</span>
+				</div>
+			</div>
+
+			<!-- Usuarios -->
+			<div class="widget-card widget-card--users">
+				<div class="widget-card__icon">
+					<i class="bi bi-people"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Usuarios</span>
+					<span class="widget-card__value">{{ adminStats()!.activeUsers }}</span>
+					<span class="widget-card__sub">{{ adminStats()!.totalUsers }} en total</span>
+				</div>
+			</div>
+
+			<!-- Transacciones -->
+			<div class="widget-card widget-card--transactions">
+				<div class="widget-card__icon">
+					<i class="bi bi-credit-card"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Transacciones</span>
+					<span class="widget-card__value">{{ adminStats()!.totalTransactions }}</span>
+					<span class="widget-card__sub">{{ formatCLP(adminStats()!.totalAmount) }} ingresados</span>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	}
+
+	<!-- ================================ -->
+	<!-- WIDGETS CONTEXTUAL (CURSO)       -->
+	<!-- ================================ -->
+	@if (!loading() && isCourseUser() && courseStats()) {
+	<div class="widgets-section">
+		<h6 class="widgets-section__title">Resumen del curso</h6>
+		<div class="widgets-grid">
+
+			<!-- Ingresos -->
+			<div class="widget-card widget-card--income">
+				<div class="widget-card__icon">
+					<i class="bi bi-arrow-down-circle"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Ingresos</span>
+					<span class="widget-card__value">{{ formatCLP(courseStats()!.totalIncome) }}</span>
+					<span class="widget-card__sub">Total recaudado</span>
+				</div>
+			</div>
+
+			<!-- Egresos -->
+			<div class="widget-card widget-card--expense">
+				<div class="widget-card__icon">
+					<i class="bi bi-arrow-up-circle"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Egresos</span>
+					<span class="widget-card__value">{{ formatCLP(courseStats()!.totalExpense) }}</span>
+					<span class="widget-card__sub">Total gastado</span>
+				</div>
+			</div>
+
+			<!-- Saldo -->
+			<div class="widget-card" [class.widget-card--balance-positive]="courseStats()!.balance >= 0"
+				[class.widget-card--balance-negative]="courseStats()!.balance < 0">
+				<div class="widget-card__icon">
+					<i class="bi bi-wallet2"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Saldo</span>
+					<span class="widget-card__value">{{ formatCLP(courseStats()!.balance) }}</span>
+					<span class="widget-card__sub">Balance actual</span>
+				</div>
+			</div>
+
+			<!-- Transacciones -->
+			<div class="widget-card widget-card--transactions">
+				<div class="widget-card__icon">
+					<i class="bi bi-list-ul"></i>
+				</div>
+				<div class="widget-card__content">
+					<span class="widget-card__label">Movimientos</span>
+					<span class="widget-card__value">{{ courseStats()!.totalTransactions }}</span>
+					<span class="widget-card__sub">Total registrados</span>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	}
+
+	<!-- ================================ -->
+	<!-- EMPTY STATE                      -->
+	<!-- ================================ -->
+	@if (!loading() && !isAdmin() && !isCourseUser()) {
+	<div class="dashboard-home__empty">
+		<span class="dashboard-home__empty-icon">📊</span>
+		<p class="dashboard-home__empty-text">No hay información disponible aún.</p>
+	</div>
+	}
+
+</div>
+<!-- <div class="dashboard-home">
 
 	<h2 class="mb-3">Bienvenido a Cl@ssdFund</h2>
 	<p class="text-muted">
@@ -31,3 +182,12 @@
 	</div>
 
 </div>
+<footer class="text-muted py-3">
+	<div class="container text-center">
+		<p>ClassdFund &copy; 2026</p>
+		<small>
+			Desarrollado con <i class="bi bi-heart-fill text-danger"></i>
+			usando Angular v{{ angularVersion }}
+		</small>
+	</div>
+</footer> -->

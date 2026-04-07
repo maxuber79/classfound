@@ -1,4 +1,4 @@
-export type CourseRole = 'tesorero' | 'apoderado';
+export type CourseRole = 'presidente' | 'tesorero' | 'secretario' | 'apoderado';
 
 export interface CourseMember {
   id: string;
