@@ -97,13 +97,19 @@ Vinculada a auth.users.id
 ## Estructura de rutas
 
 - /dashboard → protegido por authGuard
-- /dashboard/admin/users
+- /dashboard/admin/users → protegido por roleGuard
 - /dashboard/profile
-- /dashboard/schools
-- /dashboard/courses
-- /dashboard/categories
-- /dashboard/transactions → modo global
+- /dashboard/schools → protegido por roleGuard
+- /dashboard/courses → protegido por roleGuard
+- /dashboard/categories → protegido por roleGuard
+- /dashboard/transactions → modo global, protegido por roleGuard
 - /dashboard/courses/:courseId/transactions → modo contextual
+
+## Guards
+
+- `authGuard` → protege todo el dashboard, verifica sesión activa
+- `loginGuard` → redirige a /dashboard si ya está autenticado
+- `roleGuard` → protege rutas admin, verifica global_role desde profiles
 
 ## Módulos y estado actual
 
@@ -111,20 +117,29 @@ Vinculada a auth.users.id
 
 - Login, Register, Forgot/Reset password: funcional
 - Dashboard protegido por authGuard
-- Roles en BD existen pero NO están implementados en frontend aún
+- Roles implementados en frontend ✅
+
+### ✅ AuthService (roles)
+
+- `_profile` signal carga global_role desde tabla profiles ✅
+- `isAdmin` computed: true si global_role es admin o super_admin ✅
+- `isSuperAdmin` computed: true si global_role es super_admin ✅
+- `loadProfile(userId)` se llama automáticamente en onAuthStateChange ✅
 
 ### ✅ Usuarios
 
 - Módulo admin funcional en dashboard/admin/users
+- Protegido por roleGuard ✅
 
 ### ✅ Perfil
 
 - Vista y edición del perfil propio: funcional
+- Accesible para todos los roles ✅
 
 ### ✅ Colegios
 
 - CRUD funcional
-- Base para relacionar cursos
+- Protegido por roleGuard ✅
 
 ### ✅ Cursos
 
@@ -132,7 +147,7 @@ Vinculada a auth.users.id
 - Filtros, paginación, modal crear/editar/ver
 - Activar/inactivar, eliminar
 - Navegación a transacciones contextuales: funcional
-- Ícono en columna de acciones para ir a transacciones del curso
+- Protegido por roleGuard ✅
 
 ### ✅ Transacciones (módulo más avanzado)
 
@@ -143,6 +158,7 @@ Vinculada a auth.users.id
 - Select de cursos en modal
 - Header genérico
 - Widgets globales (versión preliminar)
+- Protegido por roleGuard ✅
 
 **Modo Contextual** → `/dashboard/courses/:courseId/transactions`
 
@@ -151,7 +167,7 @@ Vinculada a auth.users.id
 - Modal con input readonly del curso
 - Columna Curso oculta
 - Empty state contextual
-- Botón volver a cursos (usa flag temporal isAdmin)
+- Botón volver a cursos usa isAdmin() signal real ✅
 - Widgets contextuales funcionales como primera versión
 - Carga categorías globales + las del colegio en modo contextual ✅
 
@@ -165,7 +181,15 @@ createTransaction(), updateTransaction(), deleteTransaction()
 - school_id nullable implementado en BD ✅
 - getCategoriesBySchool() implementado en service ✅
 - Transacciones carga globales + las del colegio en modo contextual ✅
+- Protegido por roleGuard ✅
 - Administración de categorías por colegio desde categories-page: pendiente
+
+### ✅ Dashboard / Sidebar
+
+- Menú dinámico filtrado por rol con computed() ✅
+- Admin/super_admin → ve todo el menú
+- Usuario contextual → ve solo Inicio y Mi perfil
+- roleGuard bloquea acceso directo por URL a rutas admin ✅
 
 ### ⏳ Comprobantes (receipts)
 
@@ -185,12 +209,13 @@ createTransaction(), updateTransaction(), deleteTransaction()
 - ✅ Transacciones carga categorías según contexto
 - ⏳ Pendiente menor: UI en categories-page para crear categorías por colegio
 
-**Fase 2** → Roles reales en frontend
+**Fase 2** → Roles reales en frontend ✅ Completada
 
-- Traer global_role desde profiles
-- Guards y lógica isAdmin / isSuperAdmin real
-- Restringir menú, rutas y botones por rol
-- Eliminar flag temporal isAdmin = true
+- ✅ AuthService carga global_role desde profiles
+- ✅ isAdmin y isSuperAdmin como computed signals
+- ✅ roleGuard creado y aplicado a rutas admin
+- ✅ Menú sidebar filtrado por rol con computed()
+- ✅ Flag temporal isAdmin = true eliminado de transactions.ts
 
 **Fase 3** → Widgets y dashboard admin global definitivos
 
@@ -216,3 +241,7 @@ createTransaction(), updateTransaction(), deleteTransaction()
   esté terminada, sin errores y con commit guardado
 - Primero TypeScript, luego HTML
 - Avanzar paso a paso validando cada etapa
+
+## Autor
+
+Claudio (WEBMAIN)
