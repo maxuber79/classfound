@@ -285,8 +285,12 @@ createTransaction(), updateTransaction(), deleteTransaction()
 - school_id nullable implementado en BD ✅
 - getCategoriesBySchool() implementado en service ✅
 - Transacciones carga globales + las del colegio en modo contextual ✅
-- Protegido por roleGuard ✅
-- Administración de categorías por colegio desde categories-page: pendiente
+- Protegido por authGuard (sin roleGuard) ✅
+- Header dinámico: colegio + curso para usuario contextual ✅
+- Usuario contextual: ve globales + las de su colegio (activas e inactivas) ✅
+- Usuario contextual: puede crear, editar, desactivar y eliminar categorías de su colegio ✅
+- Admin: siempre crea categorías globales (school_id = null) ✅
+- RLS: categories_insert/update/delete_course_member implementadas ✅
 
 ### ✅ Dashboard / Sidebar
 
@@ -320,9 +324,23 @@ createTransaction(), updateTransaction(), deleteTransaction()
 - ✅ Dashboard-home: widgets admin vs contextual con effect()
 - ✅ UI: cards con card-variant mixin, Bootstrap Icons, skeleton loader
 
-**Fase 4** → Comprobantes (receipts)
+**Fase 3.5** → Permisos y acceso por rol ✅ Completada
 
-**Fase 5** → Reportes y analítica
+- ✅ course_role_enum: presidente, tesorero, secretario, apoderado
+- ✅ Rutas receipts y reports creadas (componentes dummy)
+- ✅ roleGuard removido de categories → acceso para usuario contextual
+- ✅ Sidebar dinámico: usuario contextual ve Categorías, Transacciones, Comprobantes, Reportes
+- ✅ Transacciones contextuales: usuario va directo a su curso
+- ✅ CourseMember interface: agrega courses + schools anidado
+- ✅ AuthService: loadCourseProfile carga school_id del curso
+- ✅ Categorías modo contextual: header dinámico colegio + curso
+- ✅ Categorías modo contextual: CRUD solo en categorías del colegio
+- ✅ RLS: categories_insert/update/delete_course_member
+- ✅ Admin siempre crea categorías globales
+
+**Fase 4** → Comprobantes (receipts) ⏳ Pendiente
+
+**Fase 5** → Reportes y analítica ⏳ Pendiente
 
 ## Convenciones de código
 
