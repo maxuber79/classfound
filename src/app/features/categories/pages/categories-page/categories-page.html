@@ -3,11 +3,21 @@
 	<!-- Header -->
 	<div class="d-flex justify-content-between align-items-start mb-4">
 		<div>
+			@if (isAdmin()) {
 			<h4 class="fw-bold mb-1">Categorías</h4>
 			<p class="text-muted mb-0 small">Administra las categorías de ingresos y egresos del sistema</p>
+			} @else {
+			<h4 class="fw-bold mb-1">Categorías</h4>
+			<p class="text-muted mb-0 small">
+				<i class="bi bi-mortarboard me-1"></i> {{ courseProfile()?.courses?.name ?? '' }}
+				· <i class="bi bi-building me-1"></i>{{ contextSchoolName() ?? 'Mi colegio' }}
+				<!-- · Categorías globales y del colegio -->
+			</p>
+			}
 		</div>
 		<button class="btn btn-primary btn-sm mt-3" (click)="openCreateModal()">
-			<i class="bi bi-plus-circle me-1"></i> Crear primera categoría
+			<i class="bi bi-plus-circle me-1"></i>
+			@if (isAdmin()) { Crear categoría } @else { Nueva categoría }
 		</button>
 	</div>
 
@@ -170,20 +180,34 @@
 						<!-- Acciones -->
 						<td class="text-center pe-4">
 							<div class="d-flex justify-content-center gap-1">
+								<!-- Ver: siempre visible -->
 								<button class="btn btn-sm btn-icon" title="Ver detalle" (click)="openViewModal(category)">
 									<i class="bi bi-eye text-primary"></i>
 								</button>
 
+								<!-- Editar: admin siempre, contextual solo si es de su colegio -->
+								@if (isAdmin() || category.school_id) {
 								<button class="btn btn-sm btn-icon" title="Editar" (click)="openEditModal(category)">
 									<i class="bi bi-pencil text-warning"></i>
 								</button>
+								}
 
+								<!-- Activar/Desactivar: admin siempre, contextual solo si es de su colegio -->
+								@if (isAdmin() || category.school_id) {
 								<button class="btn btn-sm btn-icon" [title]="category.is_active ? 'Desactivar' : 'Activar'"
-									(click)="toggleCategoryStatus(category)">
+									(click)="openToggleConfirmModal(category)">
 									<i class="bi"
 										[ngClass]="category.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'">
 									</i>
 								</button>
+								}
+
+								<!-- Eliminar: solo categorías del colegio -->
+								@if (category.school_id) {
+								<button class="btn btn-sm btn-icon" title="Eliminar" (click)="openDeleteModal(category)">
+									<i class="bi bi-trash text-danger"></i>
+								</button>
+								}
 							</div>
 						</td>
 
@@ -331,6 +355,70 @@
 				</div>
 			</form>
 
+		</div>
+	</div>
+</div>
+
+<!-- Modal: Confirmar activar/desactivar categoría -->
+<div class="modal fade" id="toggleCategoryModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-sm">
+		<div class="modal-content border-0 shadow">
+			<div class="modal-header">
+				<h5 class="modal-title fw-bold">
+					{{ categoryToToggle?.is_active ? 'Desactivar' : 'Activar' }} categoría
+				</h5>
+				<button type="button" class="btn-close" (click)="closeToggleConfirmModal()"></button>
+			</div>
+			<div class="modal-body text-center py-3">
+				<i class="bi display-5 mb-3 d-block"
+					[ngClass]="categoryToToggle?.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'">
+				</i>
+				<p class="mb-1">¿Estás seguro que deseas</p>
+				<p class="fw-semibold mb-0">
+					{{ categoryToToggle?.is_active ? 'desactivar' : 'activar' }}
+					<span class="text-primary">{{ categoryToToggle?.name }}</span>?
+				</p>
+			</div>
+			<div class="modal-footer justify-content-center">
+				<button class="btn btn-outline-secondary btn-sm" (click)="closeToggleConfirmModal()">
+					Cancelar
+				</button>
+				<button class="btn btn-sm" [ngClass]="categoryToToggle?.is_active ? 'btn-danger' : 'btn-success'"
+					[disabled]="saving()" (click)="confirmToggleCategory()">
+					@if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+					{{ categoryToToggle?.is_active ? 'Sí, desactivar' : 'Sí, activar' }}
+				</button>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal: Confirmar eliminar categoría -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-sm">
+		<div class="modal-content border-0 shadow">
+			<div class="modal-header">
+				<h5 class="modal-title fw-bold text-danger">
+					<i class="bi bi-trash me-2"></i>Eliminar categoría
+				</h5>
+				<button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+			</div>
+			<div class="modal-body text-center py-3">
+				<i class="bi bi-exclamation-triangle display-5 text-danger mb-3 d-block"></i>
+				<p class="mb-1">¿Estás seguro que deseas eliminar</p>
+				<p class="fw-semibold mb-0 text-primary">{{ categoryToDelete?.name }}</p>
+				<p class="text-muted small mt-2 mb-0">Esta acción no se puede deshacer.</p>
+			</div>
+			<div class="modal-footer justify-content-center">
+				<button class="btn btn-outline-secondary btn-sm" (click)="closeDeleteModal()">
+					Cancelar
+				</button>
+				<button class="btn btn-danger btn-sm" [disabled]="saving()" (click)="confirmDeleteCategory()">
+					@if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+					Sí, eliminar
+				</button>
+			</div>
 		</div>
 	</div>
 </div>

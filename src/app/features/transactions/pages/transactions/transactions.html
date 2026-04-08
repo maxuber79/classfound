@@ -14,7 +14,9 @@
 
 			@if (contextCourseInfo) {
 			<p class="text-muted mb-0 small">
-				{{ contextCourseInfo.name }} · {{ contextCourseInfo.school_name }} · {{ contextCourseInfo.school_year }}
+				<i class="bi bi-mortarboard me-1"></i> {{ contextCourseInfo.name }} · <i class="bi bi-building me-1"></i> {{
+				contextCourseInfo.school_name }} · {{
+				contextCourseInfo.school_year }}
 			</p>
 			} @else {
 			<p class="text-muted mb-0 small">

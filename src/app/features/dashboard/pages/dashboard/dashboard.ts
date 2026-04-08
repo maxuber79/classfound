@@ -41,28 +41,51 @@ export class Dashboard {
 	readonly isAdmin = this.authService.isAdmin;
 	readonly isSuperAdmin = this.authService.isSuperAdmin;
 
+	// Agrega estos dos después de isAdmin e isSuperAdmin
+	readonly isCourseUser = this.authService.isCourseUser;
+	readonly courseProfile = this.authService.courseProfile;
+
    /**
 	 * Items del sidebar filtrados según el rol del usuario autenticado.
 	 * Admin y super_admin ven todo. Usuario contextual solo ve lo suyo.
 	 */
-	 readonly navItems = computed<NavItem[]>(() => {
-  const admin = this.isAdmin();
+ readonly navItems = computed<NavItem[]>(() => {
+  const admin      = this.isAdmin();
+  const isCourse   = this.isCourseUser();
+  const courseId   = this.courseProfile()?.course_id;
 
-  const allItems: NavItem[] = [
-    { icon: 'bi-house',         label: 'Inicio',        route: 'home',         exact: true,  adminOnly: false },
-    { icon: 'bi-people',        label: 'Usuarios',      route: 'admin/users',  exact: true,  adminOnly: true  },
-    { icon: 'bi-person-circle', label: 'Mi perfil',     route: 'profile',      exact: true,  adminOnly: false },
-    { icon: 'bi-building',      label: 'Colegios',      route: 'schools',      exact: true,  adminOnly: true  },
-    { icon: 'bi-mortarboard',   label: 'Cursos',        route: 'courses',      exact: true,  adminOnly: true  },
-    { icon: 'bi-tags',          label: 'Categorías',    route: 'categories',   exact: true,  adminOnly: true  },
-    { icon: 'bi-cash-stack',    label: 'Transacciones', route: 'transactions', exact: true,  adminOnly: true  },
-    { icon: 'bi-receipt',       label: 'Comprobantes',  route: 'receipts',     exact: true,  adminOnly: true  },
-    { icon: 'bi-bar-chart',     label: 'Reportes',      route: 'reports',      exact: true,  adminOnly: true  },
+  if (DEBUG) console.log('🧭 [Dashboard][navItems] isAdmin:', admin, '| isCourseUser:', isCourse, '| courseId:', courseId);
+
+  // Items exclusivos admin
+  const adminItems: NavItem[] = [
+    { icon: 'bi-people',      label: 'Usuarios',      route: 'admin/users',  exact: true, adminOnly: true },
+    { icon: 'bi-building',    label: 'Colegios',       route: 'schools',      exact: true, adminOnly: true },
+    { icon: 'bi-mortarboard', label: 'Cursos',         route: 'courses',      exact: true, adminOnly: true },
+    { icon: 'bi-tags',        label: 'Categorías',     route: 'categories',   exact: true, adminOnly: true },
+    { icon: 'bi-cash-stack',  label: 'Transacciones',  route: 'transactions', exact: true, adminOnly: true },
+    { icon: 'bi-receipt',     label: 'Comprobantes',   route: 'receipts',     exact: true, adminOnly: true },
+    { icon: 'bi-bar-chart',   label: 'Reportes',       route: 'reports',      exact: true, adminOnly: true },
   ];
 
-  if (DEBUG) console.log('🧭 [Dashboard][navItems] isAdmin:', admin);
+  // Items comunes a todos
+  const commonItems: NavItem[] = [
+    { icon: 'bi-house',         label: 'Inicio',    route: 'home',    exact: true, adminOnly: false },
+    { icon: 'bi-person-circle', label: 'Mi perfil', route: 'profile', exact: true, adminOnly: false },
+  ];
 
-  return allItems.filter(item => !item.adminOnly || admin);
+  // Items exclusivos usuario contextual
+  const courseItems: NavItem[] = isCourse && courseId ? [
+    { icon: 'bi-tags',       label: 'Categorías',    route: 'categories',                        exact: true, adminOnly: false },
+    { icon: 'bi-cash-stack', label: 'Transacciones', route: `courses/${courseId}/transactions`,   exact: true, adminOnly: false },
+    { icon: 'bi-receipt',    label: 'Comprobantes',  route: 'receipts',                          exact: true, adminOnly: false },
+    { icon: 'bi-bar-chart',  label: 'Reportes',      route: 'reports',                           exact: true, adminOnly: false },
+  ] : [];
+
+  if (admin) {
+    return [commonItems[0], ...adminItems, commonItems[1]];
+  }
+
+  return [commonItems[0], ...courseItems, commonItems[1]];
 });
 
   readonly notifications: Notification[] = [

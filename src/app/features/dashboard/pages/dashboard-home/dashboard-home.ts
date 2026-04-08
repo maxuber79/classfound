@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, VERSION } from '@angular/core';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { DashboardService, AdminStats, CourseStats } from '../../services/dashboard.service';
 
@@ -36,6 +36,12 @@ export class DashboardHome {
 
   /** Flag interno para evitar cargar stats más de una vez */
   private _statsLoaded = false;
+
+	// Creamos una propiedad para que sea accesible desde el HTML
+  public angularVersion = VERSION.full;
+  
+  // También puedes obtener solo el número mayor si prefieres
+  public majorVersion = VERSION.major;
 
   constructor() {
     if (DEBUG) console.log('🏠 [DashboardHome] Init');

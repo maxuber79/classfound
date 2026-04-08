@@ -288,9 +288,21 @@ export class AuthService {
 	private async loadCourseProfile(userId: string): Promise<void> {
 		if (DEBUG) console.log('[AuthService][loadCourseProfile] Cargando membresía para userId:', userId);
 
+		// después
 		const { data, error } = await this.supabaseService.client
 			.from('course_members')
-			.select('*')
+			.select(`
+				*,
+				courses (
+					id,
+					name,
+					school_id,
+					schools (
+						id,
+						name
+					)
+				)
+			`)
 			.eq('user_id', userId)
 			.eq('is_active', true)
 			.single();

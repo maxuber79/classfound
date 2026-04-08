@@ -1,5 +1,5 @@
 <!-- Dashboard Home -->
-<div class="dashboard-home">
+<div class="dashboard-home border-1">
 
 	<!-- ================================ -->
 	<!-- SKELETON LOADER                  -->
@@ -143,12 +143,21 @@
 	<!-- ================================ -->
 	@if (!loading() && !isAdmin() && !isCourseUser()) {
 	<div class="dashboard-home__empty">
-		<span class="dashboard-home__empty-icon">📊</span>
+		<span class="dashboard-home__empty-icon"><i class="bi bi-bar-chart-fill"></i></span>
 		<p class="dashboard-home__empty-text">No hay información disponible aún.</p>
 	</div>
 	}
 
 </div>
+<footer class="text-muted py-3 border-1">
+	<div class="container text-center">
+		<p>ClassdFund &copy; 2026</p>
+		<small>
+			Desarrollado con <i class="bi bi-heart-fill text-danger"></i>
+			usando Angular v{{ angularVersion }}
+		</small>
+	</div>
+</footer>
 <!-- <div class="dashboard-home">
 
 	<h2 class="mb-3">Bienvenido a Cl@ssdFund</h2>

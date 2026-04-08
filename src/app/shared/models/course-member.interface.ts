@@ -8,4 +8,13 @@ export interface CourseMember {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  courses?: {
+    id: string;
+    name: string;
+    school_id: string;
+    schools?: {
+      id: string;
+      name: string;
+    };
+  };
 }

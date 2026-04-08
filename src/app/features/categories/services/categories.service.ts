@@ -110,27 +110,49 @@ export class CategoriesService {
 	 * @returns {Promise<Category[]>} Categorías globales + las del colegio.
 	 */
 	async getCategoriesBySchool(schoolId: string): Promise<Category[]> {
-	if (DEBUG) console.log('🏫 [CategoriesService][getCategoriesBySchool] schoolId:', schoolId);
+		if (DEBUG) console.log('🏫 [CategoriesService][getCategoriesBySchool] schoolId:', schoolId);
 
-	const { data, error } = await this.supabase
-		.from('categories')
-		.select(`
-			id, name, type, is_active, school_id,
+		const { data, error } = await this.supabase
+			.from('categories')
+			.select(`
+			id, name, type, is_active, school_id, created_at, updated_at,
 			schools (
 				id,
 				name
 			)
-		`)
-		.eq('is_active', true)
-		.or(`school_id.is.null,school_id.eq.${schoolId}`)
-		.order('name', { ascending: true });
+		`) 
+			.or(`school_id.is.null,school_id.eq.${schoolId}`)
+			.order('name', { ascending: true });
 
-	if (error) {
-		console.error('🔴 [CategoriesService][getCategoriesBySchool] Error:', error);
-		throw error;
+		if (error) {
+			console.error('🔴 [CategoriesService][getCategoriesBySchool] Error:', error);
+			throw error;
+		}
+
+		if (DEBUG) console.log('✅ [CategoriesService][getCategoriesBySchool] Total:', data?.length);
+		return (data ?? []) as unknown as Category[];
 	}
 
-	if (DEBUG) console.log('✅ [CategoriesService][getCategoriesBySchool] Total:', data?.length);
-	return (data ?? []) as unknown as Category[];
+	/**
+	 * Elimina una categoría por ID.
+	 * Solo aplica a categorías del colegio (school_id no nulo).
+	 *
+	 * @param {string} id ID de la categoría a eliminar.
+	 * @returns {Promise<void>}
+	 */
+	async deleteCategory(id: string): Promise<void> {
+		if (DEBUG) console.log('🗑️ [CategoriesService][deleteCategory] id:', id);
+
+		const { error } = await this.supabase
+			.from('categories')
+			.delete()
+			.eq('id', id);
+
+		if (error) {
+			console.error('🔴 [CategoriesService][deleteCategory] Error:', error);
+			throw error;
+		}
+
+		if (DEBUG) console.log('✅ [CategoriesService][deleteCategory] Eliminada');
 	}
 }

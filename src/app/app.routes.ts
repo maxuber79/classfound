@@ -11,11 +11,14 @@ import { DashboardHome } from './features/dashboard/pages/dashboard-home/dashboa
 import { CategoriesPage } from './features/categories/pages/categories-page/categories-page';
 import { TransactionsPage } from './features/transactions/pages/transactions/transactions';
 import {  SchoolsPage } from './features/schools/pages/schools/schools';
+import { ReceiptsPage } from './features/receipts/pages/receipts-page/receipts-page';
+import { ReportsPage } from './features/reports/pages/reports-page/reports-page';
+
+
 // Módulos actuales
 import { UsersPage } from './features/admin/users/pages/users-page/users-page';
 import { ProfilePage }    from './features/profile/pages/profile-page/profile-page';
 import { CoursePage } from './features/courses/pages/course-page/course';
-
 
 //Importar guard de autenticación
 import { authGuard } from './auth/guards/auth.guard';
@@ -32,17 +35,18 @@ export const routes: Routes = [
 		component: Dashboard,
 		canActivate: [authGuard],
 	 	children: [			
+			{ path: '', pathMatch: 'full', redirectTo: 'home' },
       { path: 'home', loadComponent: () => import('./features/dashboard/pages/dashboard-home/dashboard-home').then(m => m.DashboardHome)},
-      { path: '', pathMatch: 'full', redirectTo: 'home' },
       { path: 'admin/users', component: UsersPage, canActivate: [roleGuard]   },
       { path: 'profile',     component: ProfilePage },
 			{ path: 'courses', loadComponent: () => import('./features/courses/pages/course-page/course').then(m => m.CoursePage), canActivate: [roleGuard]},
-      { path: 'categories', loadComponent: () => import('./features/categories/pages/categories-page/categories-page').then(m => m.CategoriesPage), canActivate: [roleGuard]},
+      { path: 'categories', loadComponent: () => import('./features/categories/pages/categories-page/categories-page').then(m => m.CategoriesPage)},
       { path: 'transactions', loadComponent: () => import('./features/transactions/pages/transactions/transactions').then(m => m.TransactionsPage), canActivate: [roleGuard]},
 			{ path: 'courses/:courseId/transactions', loadComponent: () => import('./features/transactions/pages/transactions/transactions').then(m => m.TransactionsPage)},
-			{ path: 'schools', loadComponent: () => import('./features/schools/pages/schools/schools').then(m => m.SchoolsPage), canActivate: [roleGuard]} 
-      //{ path: 'receipts', loadComponent: () => import('./features/receipts/pages/receipts-page/receipts-page.component').then(m => m.ReceiptsPageComponent)},
-      //{ path: 'reports', loadComponent: () => import('./features/reports/pages/reports-page/reports-page.component').then(m => m.ReportsPageComponent)},// Aquí agregarás más rutas hijas: reportes, calendario, etc.
+			{ path: 'schools', loadComponent: () => import('./features/schools/pages/schools/schools').then(m => m.SchoolsPage), canActivate: [roleGuard]}, 
+      { path: 'receipts', loadComponent: () => import('./features/receipts/pages/receipts-page/receipts-page').then(m => m.ReceiptsPage)},
+      { path: 'reports', loadComponent: () => import('./features/reports/pages/reports-page/reports-page').then(m => m.ReportsPage )},
+			// Aquí agregarás más rutas hijas: reportes, calendario, etc.
     ]
 	},
 	//{ path: 'admin/users', component: UsersPage, canActivate: [authGuard] },
