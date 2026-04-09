@@ -1,10 +1,21 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+
+//Interfaces
 import { ProfileService } from '../../services/profile.service';
 import { Profile } from '../../models/profile.interface';
 
+//Servicios
+import { AuthService } from '../../../../auth/services/auth.service';
+
 const DEBUG = true;
+
+function passwordMatchValidator(control: AbstractControl) {
+  const password = control.get('newPassword')?.value;
+  const confirm  = control.get('confirmPassword')?.value;
+  return password === confirm ? null : { passwordMismatch: true };
+}
 
 @Component({
   selector: 'app-profile-page',
@@ -17,6 +28,7 @@ export class ProfilePage implements OnInit {
 
   private readonly fb = inject(FormBuilder);
   private readonly profileService = inject(ProfileService);
+	private readonly authService = inject(AuthService);
 
   // ─── Estado ───────────────────────────────────────────────────────────────────
   readonly loading        = signal(false);
@@ -24,8 +36,15 @@ export class ProfilePage implements OnInit {
   readonly successMessage = signal<string | null>(null);
   readonly errorMessage   = signal<string | null>(null);
 
+	readonly savingPassword  = signal(false);
+	readonly passwordSuccess = signal<string | null>(null);
+	readonly passwordError   = signal<string | null>(null);
+	readonly showNewPassword = signal(false);
+	readonly showConfirmPassword = signal(false);
+
   profile: Profile | null = null;
   profileForm!: FormGroup;
+	passwordForm!: FormGroup;
 
   /**
    * Controla si el formulario está en modo visualización (true) o edición (false).
@@ -38,6 +57,8 @@ export class ProfilePage implements OnInit {
    * Si la URL es inválida o está vacía, vale null.
    */
   avatarPreview: string | null = null;
+
+	
 
   // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -68,6 +89,14 @@ export class ProfilePage implements OnInit {
     });
 
     if (DEBUG) console.log('✅ [ProfilePage][initForm] Formulario creado en modo visualización');
+
+		this.passwordForm = this.fb.group(
+			{
+				newPassword:     ['', [Validators.required, Validators.minLength(6)]],
+				confirmPassword: ['', [Validators.required]],
+			},
+			{ validators: passwordMatchValidator }
+		);
   }
 
   // ─── Carga de datos ───────────────────────────────────────────────────────────
@@ -249,4 +278,43 @@ export class ProfilePage implements OnInit {
     const name = this.profile?.full_name || this.profile?.email || '?';
     return name.charAt(0).toUpperCase();
   }
+
+	/**
+	 * Cambia la contraseña del usuario autenticado.
+	 * Usa AuthService.updatePassword() que llama a supabase.auth.updateUser().
+	 */
+	async changePassword(): Promise<void> {
+		if (DEBUG) console.log('🔑 [ProfilePage][changePassword] Iniciando cambio de contraseña...');
+
+		if (this.passwordForm.invalid) {
+			this.passwordForm.markAllAsTouched();
+			return;
+		}
+
+		this.savingPassword.set(true);
+		this.passwordSuccess.set(null);
+		this.passwordError.set(null);
+
+		try {
+			const { newPassword } = this.passwordForm.value;
+			await this.authService.updatePassword(newPassword);
+
+			if (DEBUG) console.log('✅ [ProfilePage][changePassword] Contraseña actualizada');
+
+			this.passwordSuccess.set('Contraseña actualizada correctamente.');
+			this.passwordForm.reset();
+
+		} catch (error: any) {
+			console.error('🔴 [ProfilePage][changePassword] Error:', error);
+			this.passwordError.set(error.message ?? 'No se pudo actualizar la contraseña.');
+		} finally {
+			this.savingPassword.set(false);
+		}
+	}
+
+	/** Alterna visibilidad del campo nueva contraseña. */
+	toggleNewPassword(): void     { this.showNewPassword.update((v) => !v); }
+
+	/** Alterna visibilidad del campo confirmar contraseña. */
+	toggleConfirmPassword(): void { this.showConfirmPassword.update((v) => !v); }
 }

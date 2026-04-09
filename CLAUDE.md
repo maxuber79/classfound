@@ -367,10 +367,16 @@ src/app/
 - Campo comuna usa select desde JSON comunas-chile.json via LocationService
 - JSON de 50 colegios RM descartado — flujo de creación cubre el caso de uso
 
-**Fase 3.10** → ⏳ Pendiente (definir próxima tarea)
+**Fase 3.10** → Cambio de contraseña en perfil ✅ Completada
 
-- Seed data colegios RM desde JSON
-- Campo curso con formato guiado + leyenda explicativa
+- Sección independiente debajo del formulario de perfil existente
+- Nuevo passwordForm con validación y confirmación de contraseña
+- Método changePassword() usa AuthService.updatePassword()
+- Signals: savingPassword, passwordSuccess, passwordError
+- Toggle visibilidad en ambos campos de contraseña
+
+**Fase 4** → Comprobantes (receipts) ⏳ Pendiente
+**Fase 5** → Reportes y analítica ⏳ Pendiente
 
 **Fase 4** → Comprobantes (receipts) ⏳ Pendiente
 **Fase 5** → Reportes y analítica ⏳ Pendiente

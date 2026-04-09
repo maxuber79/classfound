@@ -178,6 +178,91 @@
 		</div>
 
 	</div>
+	<!-- Sección cambio de contraseña -->
+	<div class="row g-4 mt-0">
+		<div class="col-12 col-md-8 offset-md-4">
+			<div class="card border-0 shadow-sm p-4">
+
+				<div class="d-flex align-items-center justify-content-between mb-4">
+					<h6 class="fw-semibold mb-0">Cambiar contraseña</h6>
+					<span class="badge bg-secondary-subtle text-secondary">
+						<i class="bi bi-shield-lock me-1"></i> Seguridad
+					</span>
+				</div>
+
+				<!-- Mensajes feedback -->
+				@if (passwordSuccess()) {
+				<div class="alert alert-success d-flex align-items-center gap-2 py-2">
+					<i class="bi bi-check-circle-fill"></i>
+					{{ passwordSuccess() }}
+				</div>
+				}
+				@if (passwordError()) {
+				<div class="alert alert-danger d-flex align-items-center gap-2 py-2">
+					<i class="bi bi-exclamation-triangle-fill"></i>
+					{{ passwordError() }}
+				</div>
+				}
+
+				<form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+					<div class="row g-3">
+
+						<!-- Nueva contraseña -->
+						<div class="col-md-6">
+							<label class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
+							<div class="input-group">
+								<input [type]="showNewPassword() ? 'text' : 'password'" class="form-control"
+									formControlName="newPassword" placeholder="Mínimo 6 caracteres"
+									[class.is-invalid]="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+								<button type="button" class="btn btn-outline-secondary" (click)="toggleNewPassword()" tabindex="-1">
+									<i class="bi" [class.bi-eye]="!showNewPassword()" [class.bi-eye-slash]="showNewPassword()"></i>
+								</button>
+							</div>
+							@if (passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.hasError('required')) {
+							<small class="text-danger">Ingresa una contraseña.</small>
+							}
+							@if (passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.hasError('minlength')) {
+							<small class="text-danger">Mínimo 6 caracteres.</small>
+							}
+						</div>
+
+						<!-- Confirmar contraseña -->
+						<div class="col-md-6">
+							<label class="form-label">Confirmar contraseña <span class="text-danger">*</span></label>
+							<div class="input-group">
+								<input [type]="showConfirmPassword() ? 'text' : 'password'" class="form-control"
+									formControlName="confirmPassword" placeholder="Repite la contraseña"
+									[class.is-invalid]="passwordForm.get('confirmPassword')?.touched && passwordForm.hasError('passwordMismatch')">
+								<button type="button" class="btn btn-outline-secondary" (click)="toggleConfirmPassword()" tabindex="-1">
+									<i class="bi" [class.bi-eye]="!showConfirmPassword()"
+										[class.bi-eye-slash]="showConfirmPassword()"></i>
+								</button>
+							</div>
+							@if (passwordForm.get('confirmPassword')?.touched && passwordForm.hasError('passwordMismatch')) {
+							<small class="text-danger">Las contraseñas no coinciden.</small>
+							}
+						</div>
+
+					</div>
+
+					<!-- Botón guardar -->
+					<div class="d-flex justify-content-end mt-4">
+						<button type="submit" class="btn btn-primary d-flex align-items-center gap-2"
+							[disabled]="passwordForm.invalid || savingPassword()">
+							@if (savingPassword()) {
+							<span class="spinner-border spinner-border-sm"></span>
+							Guardando...
+							} @else {
+							<i class="bi bi-shield-lock"></i>
+							Actualizar contraseña
+							}
+						</button>
+					</div>
+
+				</form>
+			</div>
+		</div>
+	</div>
 	}
 
 </div>
