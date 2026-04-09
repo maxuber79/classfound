@@ -364,4 +364,39 @@ export class AdminUsersService {
 		if (DEBUG) console.log('✅ [AdminUsersService][getOccupiedRoles] Roles ocupados:', occupied);
 		return occupied;
 	}
+
+	/**
+	 * Elimina un usuario completo del sistema.
+	 * Llama a la Edge Function delete-user-admin que borra en cascada:
+	 * course_members → profiles → auth.users
+	 *
+	 * @param {string} userId ID del usuario a eliminar.
+	 * @returns {Promise<void>}
+	 * @throws {Error} Si falla la invocación o la función responde sin éxito.
+	 */
+	async deleteUser(userId: string): Promise<void> {
+		if (DEBUG) console.log('🗑️ [AdminUsersService][deleteUser] userId:', userId);
+
+		const { data, error } = await this.supabaseService.client.functions.invoke(
+			'delete-user-admin',
+			{
+				body: { user_id: userId },
+				headers: {
+					Authorization: `Bearer ${this.supabaseService.anonKey}`,
+				},
+			}
+		);
+
+		if (error) {
+			console.error('🔴 [AdminUsersService][deleteUser] Error Edge Function:', error);
+			throw error;
+		}
+
+		if (!data?.success) {
+			console.error('🔴 [AdminUsersService][deleteUser] Error de negocio:', data);
+			throw new Error(data?.message || 'No se pudo eliminar el usuario.');
+		}
+
+		if (DEBUG) console.log('✅ [AdminUsersService][deleteUser] Usuario eliminado:', userId);
+	}
 }

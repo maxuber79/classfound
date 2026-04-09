@@ -336,6 +336,32 @@ src/app/
 - Al completar: crear usuario en auth.users + profiles + course_members
 - Misma Edge Function `create-user-admin` que usa el admin panel
 
+**Fase 3.7** → Wizard de registro ✅ Completada
+
+- Wizard Bootstrap de 4 pasos integrado con Angular signals
+- Paso 1: datos personales con validación reactiva (FormGroup)
+- Paso 2: selects encadenados colegio → curso desde Supabase
+- Paso 3: resumen computed + checkbox de confirmación
+- Paso 4: éxito con login automático y redirección al dashboard
+- getActiveSchools() agregado en SchoolsService
+- getActiveCoursesBySchool() agregado en CourseService
+- Política RLS pública para schools y courses activos (is_active = true)
+- Edge Function create-user-admin con JWT verification desactivado
+
+**Fase 3.8** → Eliminar usuario desde panel admin ✅ Completada
+
+- Nueva Edge Function delete-user-admin con borrado en cascada
+  course_members → profiles → auth.users
+- Agrega deleteUser() en AdminUsersService via Edge Function
+- Agrega deleteUser() en UsersPage con confirmación window.confirm
+- Botón eliminar en tabla de usuarios junto a acciones existentes
+- JWT verification desactivado en delete-user-admin (igual que create-user-admin)
+
+**Fase 3.9** → Mejoras wizard de registro ⏳ Pendiente
+
+- Seed data colegios RM desde JSON
+- Campo curso con formato guiado + leyenda explicativa
+
 **Fase 4** → Comprobantes (receipts) ⏳ Pendiente
 **Fase 5** → Reportes y analítica ⏳ Pendiente
 

@@ -486,4 +486,30 @@ export class UsersPage implements OnInit, OnDestroy {
 	isRoleOccupied(role: string): boolean {
 		return this.occupiedRoles.includes(role);
 	}
+
+	/**
+ * Elimina un usuario del sistema previa confirmación.
+ * Llama a la Edge Function delete-user-admin en cascada.
+ *
+ * @param {AdminUser} user Usuario a eliminar.
+ */
+async deleteUser(user: AdminUser): Promise<void> {
+  if (DEBUG) console.log('🗑️ [UsersPage][deleteUser] usuario:', user.email);
+
+  const confirmed = window.confirm(
+    `¿Seguro que deseas eliminar a "${user.full_name || user.email}"?\nEsta acción no se puede deshacer.`
+  );
+  if (!confirmed) return;
+
+  this.loading.set(true);
+  try {
+    await this.adminUsersService.deleteUser(user.id);
+    if (DEBUG) console.log('✅ [UsersPage][deleteUser] Usuario eliminado:', user.email);
+    await this.loadUsers();
+  } catch (error) {
+    console.error('🔴 [UsersPage][deleteUser] Error:', error);
+  } finally {
+    this.loading.set(false);
+  }
+}
 }

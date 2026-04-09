@@ -1,0 +1,452 @@
+[
+  {
+    "id": "cbd97bac-4254-4e31-8a6d-cfe61dd6f057",
+    "name": "Colegio San Agustín",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-03-12 14:18:03.345027+00",
+    "updated_at": "2026-03-12 14:18:03.345027+00"
+  },
+  {
+    "id": "5374cbfc-6152-4303-af9e-d592c38203a0",
+    "name": "Colegio Santiago Evangelista",
+    "commune": "La Reina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-03-30 22:31:45.326841+00",
+    "updated_at": "2026-03-30 22:31:45.326841+00"
+  },
+  {
+    "id": "15ddc901-cffe-4508-b6dd-701b6f731034",
+    "name": "Colegio Augusto D'Halmar",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-03-30 22:18:51.980137+00",
+    "updated_at": "2026-03-30 22:31:48.987772+00"
+  },
+  {
+    "id": "6e0c7293-11f0-4054-9e24-03fdf44f2a76",
+    "name": "Colegio Akros",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": false,
+    "created_at": "2026-03-30 22:30:42.638561+00",
+    "updated_at": "2026-03-30 22:31:53.484109+00"
+  },
+  {
+    "id": "241785ca-b70a-4f8b-bd02-54bb222cc7da",
+    "name": "Colegio República de Costa Rica",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-03-31 17:18:50.422975+00",
+    "updated_at": "2026-03-31 17:18:50.422975+00"
+  },
+  {
+    "id": "504fd4c6-677f-4185-b82b-475eb10a9070",
+    "name": "Instituto Pablo Neruda",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-03-31 17:23:03.82452+00",
+    "updated_at": "2026-03-31 17:23:03.82452+00"
+  },
+  {
+    "id": "4a1993b9-b927-4bec-9bfd-813863fcc3d2",
+    "name": "Instituto Nacional General José Miguel Carrera",
+    "commune": "Santiago",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "4a00cc12-cd8b-4381-b205-54c664dbb5a6",
+    "name": "Internado Nacional Barros Arana",
+    "commune": "Santiago",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "a09c240d-9f5b-4994-a048-e62f80ab4b6a",
+    "name": "Liceo de Aplicación",
+    "commune": "Santiago",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "d05e7d44-dbd9-4e0f-8dc4-acbfa4cc25b1",
+    "name": "Liceo 1 Javiera Carrera",
+    "commune": "Santiago",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "7caf839d-b070-4240-b31f-d354e0946790",
+    "name": "Liceo Miguel de Cervantes y Saavedra",
+    "commune": "Santiago",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "342904a1-2eb1-4e61-8f7a-ab047732d604",
+    "name": "Liceo Carmela Carvajal de Prat",
+    "commune": "Providencia",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "e5778768-6ac1-4b5b-966d-bd101de041b8",
+    "name": "Liceo José Victorino Lastarria",
+    "commune": "Providencia",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "a1ac2124-7698-4849-b3a4-a38fa6d504a7",
+    "name": "Colegio San Ignacio El Bosque",
+    "commune": "Providencia",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "51bef037-573d-4f9b-9809-2d1fa83e3959",
+    "name": "Colegio San Gabriel",
+    "commune": "Providencia",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "a5bd14bc-d2c9-4435-9751-7e35c7c93308",
+    "name": "The Grange School",
+    "commune": "La Reina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "2fd43e0f-967b-4802-9cfd-3aa298c514c7",
+    "name": "Colegio Andrée English School",
+    "commune": "La Reina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "13cee028-bf0b-48e5-829b-a3bd4d61afbc",
+    "name": "The British Royal School",
+    "commune": "La Reina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "9768674e-1c48-4d15-b62a-c0e98a95451a",
+    "name": "Colegio Madrigal",
+    "commune": "La Reina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "c090c06f-214d-4f76-a857-92bc3807ee94",
+    "name": "Saint Gaspar College",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "8adbac6d-d99e-4e19-9b56-ef7d51f3cca6",
+    "name": "Colegio Calasanz",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "7fa5d6cf-4ad3-48bd-a602-e98001bd5593",
+    "name": "Colegio Manuel de Salas",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "2b4cf8c0-e573-4008-8fb6-aceffd022b48",
+    "name": "Colegio Manquecura Ñuñoa",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "a0a6b3ff-1959-42ee-8914-f1c78459176b",
+    "name": "Colegio Santa Marta",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "d498c6ac-6355-412f-a9ae-84d0a1cceb8c",
+    "name": "Colegio San Agustín de Antofagasta Sede Santiago",
+    "commune": "Ñuñoa",
+    "region": "RM",
+    "is_active": false,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "99dbf447-834d-431a-875a-047ca933e540",
+    "name": "Colegio Compañía de María Apoquindo",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "a54f595f-414c-4036-84f2-78861dc262b3",
+    "name": "Colegio Verbo Divino",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "15bbdb0d-e950-4dfc-865e-43d38812351c",
+    "name": "Colegio Villa María Academy",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "66bd3475-e1af-4aff-a13a-f11f01a1aaff",
+    "name": "Colegio Cumbres",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "ada3826d-5dd2-4682-b25e-57bc96e19b4a",
+    "name": "Colegio Nuestra Señora del Rosario",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "3ab256ba-3c99-4d80-8b48-524aab6b8e2c",
+    "name": "Colegio del Verbo Divino",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "4d9f3499-7475-4d93-ab1f-2834390394e9",
+    "name": "Colegio San Francisco del Alba",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "02a81d78-26bd-499b-9a6e-c06ffc1387a4",
+    "name": "Colegio Leonardo da Vinci",
+    "commune": "Las Condes",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "d229ac4c-044c-4a67-8bbd-8d7c12f06599",
+    "name": "Colegio San Benito",
+    "commune": "Vitacura",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "253fd093-1151-4882-bd89-b73fe2eb060c",
+    "name": "Saint George's College",
+    "commune": "Vitacura",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "881c6ece-653d-466f-9486-64e514b00734",
+    "name": "Colegio Alemán de Santiago",
+    "commune": "Vitacura",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "acb9a99a-84f0-4acc-a31d-738964a52a20",
+    "name": "The Newland School",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "de70e94f-54a2-4ce8-b8f9-4a094175648a",
+    "name": "Nido de Águilas",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "7862c7ca-63ff-4994-a573-c8aae59e29c3",
+    "name": "Santiago College",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "bce90483-d68e-42bd-8c88-3654f65e2e67",
+    "name": "Craighouse School",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "78f34673-fce1-4ff8-bd62-4304ff6f3754",
+    "name": "Mayflower School",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "60cb0d44-0d14-4753-820e-481d460b9ce9",
+    "name": "Colegio Everest",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "8e3b8cc6-76ba-4732-9d16-619ca1b93b21",
+    "name": "Colegio Monte Tabor y Nazaret",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "49c1f10d-a7bb-4ffa-a401-a2931e49f0c6",
+    "name": "Colegio Huinganal",
+    "commune": "Lo Barnechea",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "2f2c4f8b-865d-486f-98d6-582bc09eeaaa",
+    "name": "Colegio Pumahue Chicureo",
+    "commune": "Colina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "a5220a9a-bc13-48a7-94f1-3056735a0d05",
+    "name": "Colegio Santa Cruz de Chicureo",
+    "commune": "Colina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "461cc8f3-69c9-4005-9f20-5ce9be9484c9",
+    "name": "Colegio Highlands",
+    "commune": "Colina",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "165df03d-ac06-4166-bc1a-5c9be31a401d",
+    "name": "Liceo Nacional de Maipú",
+    "commune": "Maipú",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "de0186ee-d064-4461-80ce-b8b0d14b39b1",
+    "name": "Colegio Boston College Maipú",
+    "commune": "Maipú",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  },
+  {
+    "id": "7cae64db-e75d-4430-a665-b38d65002938",
+    "name": "Colegio Alicante del Sol",
+    "commune": "Puente Alto",
+    "region": "RM",
+    "is_active": true,
+    "created_at": "2026-04-09 12:00:00+00",
+    "updated_at": "2026-04-09 12:00:00+00"
+  }
+]

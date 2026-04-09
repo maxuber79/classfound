@@ -179,6 +179,11 @@
 									<i class="bi"
 										[ngClass]="user.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'"></i>
 								</button>
+
+								<!-- Eliminar -->
+								<button class="btn btn-sm btn-icon" title="Eliminar" type="button" (click)="deleteUser(user)">
+									<i class="bi bi-trash text-danger"></i>
+								</button>
 							</div>
 						</td>
 
