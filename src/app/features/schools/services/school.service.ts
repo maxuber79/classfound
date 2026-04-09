@@ -135,4 +135,30 @@ export class SchoolsService {
 
     return data as School;
   }
+
+	/**
+	 * Obtiene solo los colegios activos desde Supabase.
+	 * Usado en el wizard de registro para poblar el select de colegios.
+	 *
+	 * @returns {Promise<School[]>} Lista de colegios activos ordenada por nombre ascendente.
+	 * @throws {Error} Si falla la consulta.
+	 */
+	async getActiveSchools(): Promise<School[]> {
+		if (DEBUG) console.log('🏫 [SchoolsService][getActiveSchools] Consultando colegios activos...');
+
+		const { data, error } = await this.supabase
+			.from('schools')
+			.select('*')
+			.eq('is_active', true)
+			.order('name', { ascending: true });
+
+		if (error) {
+			console.error('🔴 [SchoolsService][getActiveSchools] Error:', error);
+			throw error;
+		}
+
+		if (DEBUG) console.log('✅ [SchoolsService][getActiveSchools] Total activos:', data?.length ?? 0);
+
+		return (data ?? []) as School[];
+	}
 }

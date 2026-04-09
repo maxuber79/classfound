@@ -1,0 +1,159 @@
+.wizard-register {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8f9fc 0%, #eef3f8 100%);
+  display: flex;
+  align-items: center;
+}
+
+.wizard-card {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.wizard-progress {
+  height: 10px;
+}
+
+.wizard-step {
+  opacity: 0.5;
+  transition: all 0.25s ease;
+}
+
+.wizard-step.active,
+.wizard-step.completed {
+  opacity: 1;
+}
+
+.wizard-step__circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f3f5;
+  border: 2px solid #dee2e6;
+  color: #6c757d;
+  font-size: 1.25rem;
+  transition: all 0.25s ease;
+}
+
+.wizard-step.active .wizard-step__circle {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+  box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.2);
+}
+
+.wizard-step.completed .wizard-step__circle {
+  background: var(--bs-success);
+  border-color: var(--bs-success);
+  color: #fff;
+}
+
+.wizard-step__line {
+  height: 3px;
+  background: #dee2e6;
+  border-radius: 999px;
+  transition: all 0.25s ease;
+}
+
+.wizard-step__line.active {
+  background: linear-gradient(90deg, var(--bs-primary), var(--bs-success));
+}
+
+.wizard-panel {
+  animation: fadeWizard 0.25s ease;
+}
+
+.summary-box {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.03);
+}
+
+.input-group-text {
+  background: #fff;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--bs-danger);
+}
+
+.success-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--bs-success-rgb), 0.12);
+  color: var(--bs-success);
+  font-size: 3rem;
+}
+
+.success-text {
+  max-width: 560px;
+}
+
+.success-summary {
+  border: 1px solid #dee2e6;
+  font-weight: 500;
+}
+
+@keyframes fadeWizard {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .wizard-register {
+    align-items: start;
+  }
+}
+
+// ─── Optimización de altura del wizard ───────────────────────────────────────
+
+.wizard-register {
+
+  .input-group-lg>.form-control,
+  .input-group-lg>.form-select,
+  .input-group-lg>.input-group-text,
+  .input-group-lg>.btn {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .form-label {
+    margin-bottom: 0.25rem;
+  }
+
+  .row.g-3 {
+    --bs-gutter-y: 0.65rem;
+  }
+
+  .card-body.p-4 {
+    padding: 1.25rem !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .wizard-step__circle {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+  }
+}

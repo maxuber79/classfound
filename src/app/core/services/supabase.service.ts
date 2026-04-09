@@ -31,4 +31,12 @@ export class SupabaseService {
   get client(): SupabaseClient {
     return this.supabase;
   }
+
+	/**
+	 * Expone el anon key público de Supabase.
+	 * Necesario para invocar Edge Functions desde contextos no autenticados.
+	 */
+	get anonKey(): string {
+		return environment.supabase.key;
+	}
 }

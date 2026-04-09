@@ -105,12 +105,16 @@ Vinculada a auth.users.id
 
 - `is_super_admin()` → verifica global_role = super_admin
 - `has_course_role(p_course_id uuid, p_role course_role_enum)` → verifica rol activo en course_members
+- `is_course_member(p_course_id uuid)` → verifica membresía activa, SECURITY DEFINER
 
 ### Políticas RLS activas
 
 - `transactions_insert_tesorero_or_super_admin` → INSERT
 - `transactions_update_tesorero_or_super_admin` → UPDATE
 - `receipts_insert_tesorero_or_super_admin` → INSERT
+- `categories_insert_course_member` → INSERT
+- `categories_update_course_member` → UPDATE
+- `categories_delete_course_member` → DELETE
 
 ## Estructura del proyecto Angular
 
@@ -205,9 +209,11 @@ src/app/
 - /dashboard/profile
 - /dashboard/schools → protegido por roleGuard
 - /dashboard/courses → protegido por roleGuard
-- /dashboard/categories → protegido por roleGuard
+- /dashboard/categories → sin roleGuard, acceso por rol en componente
 - /dashboard/transactions → modo global, protegido por roleGuard
 - /dashboard/courses/:courseId/transactions → modo contextual
+- /dashboard/receipts → pendiente Fase 4
+- /dashboard/reports → pendiente Fase 5
 
 ## Guards
 
@@ -222,18 +228,27 @@ src/app/
 - Login, Register, Forgot/Reset password: funcional
 - Dashboard protegido por authGuard
 - Roles implementados en frontend ✅
+- ⏳ Register pendiente: reemplazar por wizard Bootstrap de 3 pasos
 
 ### ✅ AuthService (roles)
 
 - `_profile` signal carga global_role desde tabla profiles ✅
 - `isAdmin` computed: true si global_role es admin o super_admin ✅
 - `isSuperAdmin` computed: true si global_role es super_admin ✅
+- `isCourseUser` computed: true si tiene membresía activa en course_members ✅
+- `courseProfile` signal: carga course_members + courses + schools anidado ✅
 - `loadProfile(userId)` se llama automáticamente en onAuthStateChange ✅
+- `loadCourseProfile(userId)` se llama si global_role = user ✅
 
 ### ✅ Usuarios
 
 - Módulo admin funcional en dashboard/admin/users
 - Protegido por roleGuard ✅
+- Tabla con columna Colegio/Curso ✅
+- Modal crear: selects colegio → curso → rol (solo si global_role = user) ✅
+- Modal editar: mismos selects con datos precargados ✅
+- getOccupiedRoles() bloquea roles únicos ya asignados en el curso ✅
+- super_admin no ve sección de asignación de curso ✅
 
 ### ✅ Perfil
 
@@ -258,34 +273,20 @@ src/app/
 **Modo Global** → `/dashboard/transactions`
 
 - Lista todas las transacciones del sistema
-- Columna Curso visible
-- Select de cursos en modal
-- Header genérico
-- Widgets globales (versión preliminar)
+- Widgets: balance global, ingresos, egresos, total transacciones
 - Protegido por roleGuard ✅
 
 **Modo Contextual** → `/dashboard/courses/:courseId/transactions`
 
 - Filtra por course_id
 - Header dinámico: nombre curso · colegio · año
-- Modal con input readonly del curso
-- Columna Curso oculta
-- Empty state contextual
-- Botón volver a cursos usa isAdmin() signal real ✅
-- Widgets contextuales funcionales como primera versión
-- Carga categorías globales + las del colegio en modo contextual ✅
-
-**Service:** getTransactions(), getTransactionsByCourse(),
-createTransaction(), updateTransaction(), deleteTransaction()
+- Widgets contextuales: balance, ingresos, egresos, movimientos
+- Carga categorías globales + las del colegio ✅
 
 ### ✅ Categorías
 
 - CRUD funcional como catálogo global
-- Filtradas por tipo (income/expense) en modal de transacciones
-- school_id nullable implementado en BD ✅
-- getCategoriesBySchool() implementado en service ✅
-- Transacciones carga globales + las del colegio en modo contextual ✅
-- Protegido por authGuard (sin roleGuard) ✅
+- Sin roleGuard → acceso controlado por rol en componente ✅
 - Header dinámico: colegio + curso para usuario contextual ✅
 - Usuario contextual: ve globales + las de su colegio (activas e inactivas) ✅
 - Usuario contextual: puede crear, editar, desactivar y eliminar categorías de su colegio ✅
@@ -296,61 +297,46 @@ createTransaction(), updateTransaction(), deleteTransaction()
 
 - Menú dinámico filtrado por rol con computed() ✅
 - Admin/super_admin → ve todo el menú
-- Usuario contextual → ve solo Inicio y Mi perfil
-- roleGuard bloquea acceso directo por URL a rutas admin ✅
+- Usuario contextual → ve Inicio, Categorías, Transacciones, Comprobantes, Reportes, Mi perfil
+- Transacciones contextuales apuntan a /courses/:courseId/transactions ✅
+
+### ✅ Dashboard Home (widgets)
+
+- Admin → 4 widgets globales: colegios, cursos, usuarios, transacciones
+- Usuario contextual → 4 widgets del curso: ingresos, egresos, saldo, movimientos
+- Skeleton loader mientras cargan ✅
+- effect() reactivo al courseProfile ✅
 
 ### ⏳ Comprobantes (receipts)
 
 - Tabla en BD: lista
-- Frontend: pendiente
+- Componente dummy creado ✅
+- Frontend: pendiente Fase 4
 
 ### ⏳ Reportes
 
-- Conceptual solamente, no implementado
+- Componente dummy creado ✅
+- Pendiente Fase 5
 
 ## Fases pendientes (orden recomendado)
 
 **Fase 1** → Categorías globales + por colegio ✅ Completada
-
 **Fase 2** → Roles reales en frontend ✅ Completada
-
 **Fase 3** → Widgets y dashboard definitivos ✅ Completada
-
-- ✅ course_role_enum migrado: presidente, tesorero, secretario, apoderado
-- ✅ Políticas RLS y función has_course_role recreadas
-- ✅ is_course_member() corregida con SECURITY DEFINER
-- ✅ DashboardService con getAdminStats() y getCourseStats()
-- ✅ AuthService: courseProfile signal + isCourseUser computed
-- ✅ Dashboard-home: widgets admin vs contextual con effect()
-- ✅ UI: cards con card-variant mixin, Bootstrap Icons, skeleton loader
-
 **Fase 3.5** → Permisos y acceso por rol ✅ Completada
-
-- ✅ course_role_enum: presidente, tesorero, secretario, apoderado
-- ✅ Rutas receipts y reports creadas (componentes dummy)
-- ✅ roleGuard removido de categories → acceso para usuario contextual
-- ✅ Sidebar dinámico: usuario contextual ve Categorías, Transacciones, Comprobantes, Reportes
-- ✅ Transacciones contextuales: usuario va directo a su curso
-- ✅ CourseMember interface: agrega courses + schools anidado
-- ✅ AuthService: loadCourseProfile carga school_id del curso
-- ✅ Categorías modo contextual: header dinámico colegio + curso
-- ✅ Categorías modo contextual: CRUD solo en categorías del colegio
-- ✅ RLS: categories_insert/update/delete_course_member
-- ✅ Admin siempre crea categorías globales
-
 **Fase 3.6** → Gestión de usuarios con asignación de curso ✅ Completada
 
-- ✅ AdminUser interface: agrega course_id, course_role, course_name, school_id, school_name
-- ✅ getUsers() hace join con course_members + courses + schools
-- ✅ upsertCourseMember() para crear/actualizar membresía desde admin
-- ✅ getOccupiedRoles() bloquea roles únicos ya asignados en el curso
-- ✅ Modal crear: selects colegio → curso → rol (solo si global_role = user)
-- ✅ Modal editar: mismos selects con datos precargados
-- ✅ Tabla: columna Colegio/Curso visible
-- ✅ super_admin no ve sección de asignación de curso
+**Fase 3.7** → Wizard de registro ⏳ EN CURSO
+
+- El registro actual es un formulario simple → reemplazar por wizard Bootstrap de 3 pasos
+- Paso 1: Datos personales (nombre, apellido, teléfono, email, contraseña)
+- Paso 2: Selección de colegio → curso (select encadenado)
+- Paso 3: Selección de rol en el curso (presidente, tesorero, secretario, apoderado)
+- Claudio está construyendo el HTML/SCSS del wizard → pendiente integrar con Angular
+- Al completar: crear usuario en auth.users + profiles + course_members
+- Misma Edge Function `create-user-admin` que usa el admin panel
 
 **Fase 4** → Comprobantes (receipts) ⏳ Pendiente
-
 **Fase 5** → Reportes y analítica ⏳ Pendiente
 
 ## Convenciones de código
@@ -372,4 +358,4 @@ createTransaction(), updateTransaction(), deleteTransaction()
 
 ## Autor
 
-Claudio (WEBMAIN)
+Cl@udio (WEBM@IN)

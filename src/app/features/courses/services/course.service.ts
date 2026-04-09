@@ -230,5 +230,44 @@ export class CourseService {
     if (DEBUG) console.log('✅ [CoursesService][deleteCourse] Curso eliminado correctamente');
   }
 
+	/**
+	 * Obtiene solo los cursos activos de un colegio específico.
+	 * Usado en el wizard de registro para poblar el select de cursos
+	 * de forma encadenada tras seleccionar el colegio.
+	 *
+	 * @param {string} schoolId ID del colegio.
+	 * @returns {Promise<Course[]>} Lista de cursos activos del colegio, ordenados por año y nombre.
+	 * @throws {Error} Si falla la consulta.
+	 */
+	async getActiveCoursesBySchool(schoolId: string): Promise<Course[]> {
+		if (DEBUG) {
+			console.log('📚 [CoursesService][getActiveCoursesBySchool] Consultando cursos activos...');
+			console.log('🆔 [CoursesService][getActiveCoursesBySchool] schoolId:', schoolId);
+		}
+
+		const { data, error } = await this.supabase
+			.from('courses')
+			.select(`
+				*,
+				schools (
+					id,
+					name
+				)
+			`)
+			.eq('school_id', schoolId)
+			.eq('is_active', true)
+			.order('school_year', { ascending: false })
+			.order('name', { ascending: true });
+
+		if (error) {
+			console.error('🔴 [CoursesService][getActiveCoursesBySchool] Error:', error);
+			throw error;
+		}
+
+		if (DEBUG) console.log('✅ [CoursesService][getActiveCoursesBySchool] Total activos:', data?.length ?? 0);
+
+		return (data ?? []) as Course[];
+	}
+
 	
 }

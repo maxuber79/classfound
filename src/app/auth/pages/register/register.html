@@ -1,88 +1,486 @@
-<div class="container mt-5">
-	<div class="row justify-content-center">
-		<div class="col-md-4">
-			<div class="card shadow">
-				<div class="card-body p-4">
+<section class="wizard-register py-5">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-12 col-lg-10 col-xl-8">
 
-					<h4 class="text-center mb-4">Crear cuenta</h4>
+				<div class="card border-0 shadow-sm rounded-4 overflow-hidden wizard-card">
+					<div class="card-body p-4 p-lg-5">
 
-					<form [formGroup]="registerForm" (ngSubmit)="register()">
-
-						<!-- Email -->
-						<div class="mb-3">
-							<label class="form-label">Email</label>
-							<input type="email" class="form-control" formControlName="email" autocomplete="email"
-								[class.is-invalid]="email.invalid && email.touched" placeholder="correo@ejemplo.com">
-							@if (email.touched && email.hasError('required')) {
-							<div class="invalid-feedback">El email es requerido</div>
-							}
-							@if (email.touched && email.hasError('email')) {
-							<div class="invalid-feedback">Ingresa un email válido</div>
-							}
+						<!-- Header -->
+						<div class="mb-4 text-center text-lg-start">
+							<span class="badge rounded-pill text-bg-primary px-3 py-2 mb-3">
+								<i class="bi bi-stars me-2"></i>
+								Registro ClassFund
+							</span>
+							<h2 class="fw-bold mb-2">Crea tu cuenta paso a paso</h2>
+							<p class="text-secondary mb-0">
+								Completa tu registro de usuario, asocia tu colegio y curso,
+								y confirma tu información antes de finalizar.
+							</p>
 						</div>
 
-						<!-- Password -->
-						<div class="mb-3">
-							<label class="form-label">Contraseña</label>
-							<div class="input-group">
-								<input [type]="showPassword() ? 'text' : 'password'" class="form-control" formControlName="password"
-									autocomplete="new-password" [class.is-invalid]="password.invalid && password.touched"
-									placeholder="••••••••">
-								<button type="button" class="btn btn-outline-secondary" (click)="togglePassword()" tabindex="-1">
-									<i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
-								</button>
-								@if (password.touched && password.hasError('required')) {
-								<div class="invalid-feedback">La contraseña es requerida</div>
-								}
-								@if (password.touched && password.hasError('minlength')) {
-								<div class="invalid-feedback">Mínimo 6 caracteres</div>
-								}
+						<!-- Stepper -->
+						<div class="wizard-steps mb-4">
+							<div class="d-flex align-items-center justify-content-between gap-2 flex-wrap flex-lg-nowrap">
+
+								<!-- Paso 1 -->
+								<div class="wizard-step text-center flex-fill" [class.active]="currentStep() === 1"
+									[class.completed]="currentStep() > 1">
+									<div class="wizard-step__circle mx-auto mb-2">
+										@if (currentStep() > 1) {
+										<i class="bi bi-check-lg"></i>
+										} @else {
+										<i class="bi bi-person-fill"></i>
+										}
+									</div>
+									<small class="d-block text-secondary">Paso 1</small>
+									<span class="fw-semibold">Usuario</span>
+								</div>
+
+								<div class="wizard-step__line d-none d-lg-block flex-fill" [class.active]="currentStep() > 1"></div>
+
+								<!-- Paso 2 -->
+								<div class="wizard-step text-center flex-fill" [class.active]="currentStep() === 2"
+									[class.completed]="currentStep() > 2">
+									<div class="wizard-step__circle mx-auto mb-2">
+										@if (currentStep() > 2) {
+										<i class="bi bi-check-lg"></i>
+										} @else {
+										<i class="bi bi-buildings-fill"></i>
+										}
+									</div>
+									<small class="d-block text-secondary">Paso 2</small>
+									<span class="fw-semibold">Colegio y curso</span>
+								</div>
+
+								<div class="wizard-step__line d-none d-lg-block flex-fill" [class.active]="currentStep() > 2"></div>
+
+								<!-- Paso 3 -->
+								<div class="wizard-step text-center flex-fill" [class.active]="currentStep() === 3"
+									[class.completed]="currentStep() > 3">
+									<div class="wizard-step__circle mx-auto mb-2">
+										@if (currentStep() > 3) {
+										<i class="bi bi-check-lg"></i>
+										} @else {
+										<i class="bi bi-card-checklist"></i>
+										}
+									</div>
+									<small class="d-block text-secondary">Paso 3</small>
+									<span class="fw-semibold">Confirmar</span>
+								</div>
+
+								<div class="wizard-step__line d-none d-lg-block flex-fill" [class.active]="currentStep() > 3"></div>
+
+								<!-- Paso 4 -->
+								<div class="wizard-step text-center flex-fill" [class.active]="currentStep() === 4">
+									<div class="wizard-step__circle mx-auto mb-2">
+										<i class="bi bi-check2-circle"></i>
+									</div>
+									<small class="d-block text-secondary">Paso 4</small>
+									<span class="fw-semibold">Completado</span>
+								</div>
+
+							</div>
+
+							<!-- Barra de progreso -->
+							<div class="progress mt-4 rounded-pill wizard-progress" role="progressbar"
+								[attr.aria-valuenow]="progressPercent()" aria-valuemin="0" aria-valuemax="100"
+								aria-label="Progreso del registro">
+								<div class="progress-bar" [style.width.%]="progressPercent()"></div>
 							</div>
 						</div>
 
-						<!-- Confirm Password -->
-						<div class="mb-3">
-							<label class="form-label">Confirmar contraseña</label>
-							<div class="input-group">
-								<input [type]="showConfirm() ? 'text' : 'password'" class="form-control"
-									formControlName="confirmPassword" autocomplete="new-password"
-									[class.is-invalid]="confirmPassword.touched && registerForm.hasError('passwordMismatch')"
-									placeholder="••••••••">
-								<button type="button" class="btn btn-outline-secondary" (click)="toggleConfirm()" tabindex="-1">
-									<i class="bi" [class.bi-eye]="!showConfirm()" [class.bi-eye-slash]="showConfirm()"></i>
-								</button>
-								@if (confirmPassword.touched && registerForm.hasError('passwordMismatch')) {
-								<div class="invalid-feedback">Las contraseñas no coinciden</div>
-								}
+						<!-- ═══════════════════════════════════════
+									PASO 1 — Datos personales
+						═══════════════════════════════════════ -->
+						@if (currentStep() === 1) {
+						<div class="wizard-panel" [formGroup]="step1Form">
+							<div class="card border-0 bg-body-tertiary rounded-4">
+								<div class="card-body p-4">
+
+									<div class="mb-4">
+										<h4 class="fw-bold mb-1">Datos del usuario</h4>
+										<p class="text-secondary mb-0">
+											Ingresa la información principal para crear tu cuenta.
+										</p>
+									</div>
+
+									<div class="row g-3">
+
+										<!-- Nombre -->
+										<div class="col-12 col-md-6">
+											<label for="firstName" class="form-label fw-semibold">Nombre</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-person"></i></span>
+												<input type="text" id="firstName" class="form-control" formControlName="firstName"
+													placeholder="Ej: Claudio" [class.is-invalid]="firstName.invalid && firstName.touched">
+											</div>
+											@if (firstName.touched && firstName.hasError('required')) {
+											<div class="invalid-feedback d-block">Ingresa tu nombre.</div>
+											}
+										</div>
+
+										<!-- Apellido -->
+										<div class="col-12 col-md-6">
+											<label for="lastName" class="form-label fw-semibold">Apellido</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+												<input type="text" id="lastName" class="form-control" formControlName="lastName"
+													placeholder="Ej: Pérez" [class.is-invalid]="lastName.invalid && lastName.touched">
+											</div>
+											@if (lastName.touched && lastName.hasError('required')) {
+											<div class="invalid-feedback d-block">Ingresa tu apellido.</div>
+											}
+										</div>
+
+										<!-- Email -->
+										<div class="col-12 col-md-6">
+											<label for="email" class="form-label fw-semibold">Correo electrónico</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+												<input type="email" id="email" class="form-control" formControlName="email" autocomplete="email"
+													placeholder="correo@ejemplo.com" [class.is-invalid]="email.invalid && email.touched">
+											</div>
+											@if (email.touched && email.hasError('required')) {
+											<div class="invalid-feedback d-block">Ingresa tu correo.</div>
+											}
+											@if (email.touched && email.hasError('email')) {
+											<div class="invalid-feedback d-block">Ingresa un correo válido.</div>
+											}
+										</div>
+
+										<!-- Teléfono -->
+										<div class="col-12 col-md-6">
+											<label for="phone" class="form-label fw-semibold">Teléfono</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+												<input type="tel" id="phone" class="form-control" formControlName="phone"
+													placeholder="+56 9 1234 5678" [class.is-invalid]="phone.invalid && phone.touched">
+											</div>
+											@if (phone.touched && phone.hasError('required')) {
+											<div class="invalid-feedback d-block">Ingresa tu teléfono.</div>
+											}
+										</div>
+
+										<!-- Contraseña -->
+										<div class="col-12 col-md-6">
+											<label for="password" class="form-label fw-semibold">Contraseña</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+												<input [type]="showPassword() ? 'text' : 'password'" id="password" class="form-control"
+													formControlName="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"
+													[class.is-invalid]="password.invalid && password.touched">
+												<button type="button" class="btn btn-outline-secondary" (click)="togglePassword()"
+													tabindex="-1">
+													<i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
+												</button>
+											</div>
+											@if (password.touched && password.hasError('required')) {
+											<div class="invalid-feedback d-block">Ingresa una contraseña.</div>
+											}
+											@if (password.touched && password.hasError('minlength')) {
+											<div class="invalid-feedback d-block">Mínimo 6 caracteres.</div>
+											}
+										</div>
+
+										<!-- Confirmar contraseña -->
+										<div class="col-12 col-md-6">
+											<label for="confirmPassword" class="form-label fw-semibold">Confirmar contraseña</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-shield-lock-fill"></i></span>
+												<input [type]="showConfirm() ? 'text' : 'password'" id="confirmPassword" class="form-control"
+													formControlName="confirmPassword" autocomplete="new-password"
+													placeholder="Repite la contraseña"
+													[class.is-invalid]="confirmPassword.touched && step1Form.hasError('passwordMismatch')">
+												<button type="button" class="btn btn-outline-secondary" (click)="toggleConfirm()" tabindex="-1">
+													<i class="bi" [class.bi-eye]="!showConfirm()" [class.bi-eye-slash]="showConfirm()"></i>
+												</button>
+											</div>
+											@if (confirmPassword.touched && step1Form.hasError('passwordMismatch')) {
+											<div class="invalid-feedback d-block">Las contraseñas no coinciden.</div>
+											}
+										</div>
+
+									</div>
+								</div>
 							</div>
 						</div>
-
-						<!-- Error general -->
-						@if (errorMessage()) {
-						<div class="alert alert-danger py-2 small">{{ errorMessage() }}</div>
 						}
 
-						<!-- Submit -->
-						<div class="d-grid mb-3">
-							<button type="submit" class="btn btn-primary" [disabled]="loading()">
-								@if (loading()) {
-								<span class="spinner-border spinner-border-sm me-2"></span>
-								Registrando...
-								} @else {
-								Crear cuenta
-								}
-							</button>
+						<!-- ═══════════════════════════════════════
+									PASO 2 — Colegio, curso y rol
+						═══════════════════════════════════════ -->
+						@if (currentStep() === 2) {
+						<div class="wizard-panel" [formGroup]="step2Form">
+							<div class="card border-0 bg-body-tertiary rounded-4">
+								<div class="card-body p-4">
+
+									<div class="mb-4">
+										<h4 class="fw-bold mb-1">Colegio y curso</h4>
+										<p class="text-secondary mb-0">
+											Asocia tu perfil al colegio, curso y rol que te corresponde.
+										</p>
+									</div>
+
+									<div class="row g-3">
+
+										<!-- Colegio -->
+										<div class="col-12">
+											<label for="schoolId" class="form-label fw-semibold">Colegio</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-buildings-fill"></i></span>
+												<select id="schoolId" class="form-select" formControlName="schoolId"
+													(change)="onSchoolChange($event)" [class.is-invalid]="schoolId.invalid && schoolId.touched">
+													<option value="">
+														@if (loadingSchools()) { Cargando colegios... }
+														@else { Selecciona un colegio }
+													</option>
+													@for (school of schools(); track school.id) {
+													<option [value]="school.id">{{ school.name }}</option>
+													}
+												</select>
+											</div>
+											@if (schoolId.touched && schoolId.hasError('required')) {
+											<div class="invalid-feedback d-block">Selecciona un colegio.</div>
+											}
+										</div>
+
+										<!-- Curso -->
+										<div class="col-12 col-md-6">
+											<label for="courseId" class="form-label fw-semibold">Curso</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-mortarboard-fill"></i></span>
+												<select id="courseId" class="form-select" formControlName="courseId"
+													[class.is-invalid]="courseId.invalid && courseId.touched"
+													[attr.disabled]="(!schoolId.value || loadingCourses()) ? true : null">
+													<option value="">
+														@if (loadingCourses()) { Cargando cursos... }
+														@else if (!schoolId.value) { Primero selecciona un colegio }
+														@else if (courses().length === 0) { Sin cursos disponibles }
+														@else { Selecciona un curso }
+													</option>
+													@for (course of courses(); track course.id) {
+													<option [value]="course.id">
+														{{ course.name }} — {{ course.school_year }}
+													</option>
+													}
+												</select>
+											</div>
+											@if (courseId.touched && courseId.hasError('required')) {
+											<div class="invalid-feedback d-block">Selecciona un curso.</div>
+											}
+										</div>
+
+										<!-- Rol -->
+										<div class="col-12 col-md-6">
+											<label for="role" class="form-label fw-semibold">Tipo de usuario</label>
+											<div class="input-group input-group-lg">
+												<span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
+												<select id="role" class="form-select" formControlName="role"
+													[class.is-invalid]="role.invalid && role.touched">
+													<option value="">Selecciona una opción</option>
+													<option value="presidente">Presidente</option>
+													<option value="tesorero">Tesorero</option>
+													<option value="secretario">Secretario</option>
+													<option value="apoderado">Apoderado</option>
+												</select>
+											</div>
+											@if (role.touched && role.hasError('required')) {
+											<div class="invalid-feedback d-block">Selecciona tu rol en el curso.</div>
+											}
+										</div>
+
+									</div>
+								</div>
+							</div>
 						</div>
+						}
 
-					</form>
+						<!-- ═══════════════════════════════════════
+									PASO 3 — Confirmación y resumen
+						═══════════════════════════════════════ -->
+						@if (currentStep() === 3) {
+						<div class="wizard-panel" [formGroup]="step3Form">
+							<div class="card border-0 bg-body-tertiary rounded-4">
+								<div class="card-body p-4">
 
-					<div class="text-center small">
+									<div class="mb-4">
+										<h4 class="fw-bold mb-1">Confirma tu información</h4>
+										<p class="text-secondary mb-0">
+											Revisa los datos ingresados antes de finalizar tu registro.
+										</p>
+									</div>
+
+									<div class="alert alert-light border rounded-4 d-flex align-items-start gap-3 mb-4">
+										<i class="bi bi-info-circle-fill text-primary fs-5 mt-1"></i>
+										<div class="small text-secondary">
+											Si encuentras algún dato incorrecto, puedes volver al paso anterior antes de confirmar.
+										</div>
+									</div>
+
+									<div class="row g-3">
+
+										<div class="col-12">
+											<div class="summary-box">
+												<small class="text-secondary d-block mb-1">Nombre completo</small>
+												<div class="fw-semibold">{{ summary().fullName }}</div>
+											</div>
+										</div>
+
+										<div class="col-12 col-md-6">
+											<div class="summary-box h-100">
+												<small class="text-secondary d-block mb-1">Correo electrónico</small>
+												<div class="fw-semibold">{{ summary().email }}</div>
+											</div>
+										</div>
+
+										<div class="col-12 col-md-6">
+											<div class="summary-box h-100">
+												<small class="text-secondary d-block mb-1">Teléfono</small>
+												<div class="fw-semibold">{{ summary().phone }}</div>
+											</div>
+										</div>
+
+										<div class="col-12 col-md-6">
+											<div class="summary-box h-100">
+												<small class="text-secondary d-block mb-1">Colegio</small>
+												<div class="fw-semibold">{{ summary().school }}</div>
+											</div>
+										</div>
+
+										<div class="col-12 col-md-6">
+											<div class="summary-box h-100">
+												<small class="text-secondary d-block mb-1">Curso</small>
+												<div class="fw-semibold">{{ summary().course }}</div>
+											</div>
+										</div>
+
+										<div class="col-12 col-md-6">
+											<div class="summary-box h-100">
+												<small class="text-secondary d-block mb-1">Rol dentro del curso</small>
+												<div class="fw-semibold">{{ summary().role }}</div>
+											</div>
+										</div>
+
+									</div>
+
+									<!-- Checkbox confirmación -->
+									<div class="form-check mt-4">
+										<input class="form-check-input" type="checkbox" id="acceptTerms" formControlName="acceptTerms"
+											[class.is-invalid]="acceptTerms.invalid && acceptTerms.touched">
+										<label class="form-check-label" for="acceptTerms">
+											Confirmo que la información ingresada es correcta.
+										</label>
+									</div>
+									@if (acceptTerms.touched && acceptTerms.invalid) {
+									<div class="invalid-feedback d-block">
+										Debes confirmar la información antes de continuar.
+									</div>
+									}
+
+									<!-- Error general -->
+									@if (errorMessage()) {
+									<div class="alert alert-danger py-2 small mt-3">
+										{{ errorMessage() }}
+									</div>
+									}
+
+								</div>
+							</div>
+						</div>
+						}
+
+						<!-- ═══════════════════════════════════════
+									PASO 4 — Registro completado
+						═══════════════════════════════════════ -->
+						@if (currentStep() === 4) {
+						<div class="wizard-panel">
+							<div class="card border-0 bg-body-tertiary rounded-4">
+								<div class="card-body p-4 p-lg-5 text-center">
+
+									<div class="success-icon mx-auto mb-4">
+										<i class="bi bi-check2-circle"></i>
+									</div>
+
+									<h3 class="fw-bold mb-3">¡Registro completado con éxito!</h3>
+
+									<p class="text-secondary mb-4 mx-auto success-text">
+										Tu cuenta ya fue creada y asociada correctamente a tu colegio,
+										curso y rol dentro de ClassFund.
+									</p>
+
+									<div class="success-summary badge rounded-pill text-bg-light px-3 py-2 mb-4">
+										<i class="bi bi-person-check-fill me-2"></i>
+										Ya puedes continuar con el siguiente paso
+									</div>
+
+									<div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+										<button type="button" class="btn btn-outline-primary rounded-3 px-4" (click)="goToLogin()">
+											<i class="bi bi-box-arrow-in-right me-2"></i>
+											Iniciar sesión
+										</button>
+										<button type="button" class="btn btn-primary rounded-3 px-4" (click)="goToDashboard()">
+											<i class="bi bi-speedometer2 me-2"></i>
+											Ir al panel
+										</button>
+									</div>
+
+								</div>
+							</div>
+						</div>
+						}
+
+						<!-- ═══════════════════════════════════════
+									Acciones — Anterior / Siguiente / Confirmar
+						═══════════════════════════════════════ -->
+						@if (currentStep() < 4) { <div
+							class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4">
+
+							<button type="button" class="btn btn-outline-secondary rounded-3 px-4" (click)="prevStep()"
+								[disabled]="currentStep() === 1">
+								<i class="bi bi-arrow-left me-2"></i>
+								Anterior
+							</button>
+
+							<div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-3">
+
+								<span class="fw-semibold text-secondary text-center">
+									Paso {{ currentStep() }} de {{ totalSteps }}
+								</span>
+
+								@if (currentStep() < 3) { <button type="button" class="btn btn-primary rounded-3 px-4"
+									(click)="nextStep()">
+									Siguiente
+									<i class="bi bi-arrow-right ms-2"></i>
+									</button>
+									}
+
+									@if (currentStep() === 3) {
+									<button type="button" class="btn btn-success rounded-3 px-4" (click)="submitWizard()"
+										[disabled]="loading()">
+										@if (loading()) {
+										<span class="spinner-border spinner-border-sm me-2"></span>
+										Registrando...
+										} @else {
+										<i class="bi bi-check2-circle me-2"></i>
+										Confirmar registro
+										}
+									</button>
+									}
+
+							</div>
+					</div>
+
+					<div class="text-center small mt-3">
 						¿Ya tienes cuenta?
 						<a routerLink="/login" class="text-decoration-none">Inicia sesión</a>
 					</div>
+					}
 
 				</div>
 			</div>
+
 		</div>
 	</div>
-</div>
+	</div>
+</section>
