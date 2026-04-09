@@ -101,6 +101,7 @@
 					<tr class="table-users-header">
 						<th class="ps-4">Usuario</th>
 						<th>Rol</th>
+						<th>Colegio / Curso</th>
 						<th>Estado</th>
 						<th>Creado</th>
 						<th class="text-center pe-4">Acciones</th>
@@ -129,6 +130,20 @@
 								<i class="bi {{ getRoleIcon(user.global_role) }} me-1"></i>
 								{{ getRoleLabel(user.global_role) }}
 							</span>
+						</td>
+
+						<!-- Colegio / Curso -->
+						<td>
+							@if (user.school_name) {
+							<div class="d-flex flex-column">
+								<span class="small fw-semibold text-dark">{{ user.school_name }}</span>
+								<span class="small text-muted">{{ user.course_name ?? 'Sin curso' }} · {{
+									getCourseRoleLabel(user.course_role ?? '')
+									}}</span>
+							</div>
+							} @else {
+							<span class="text-muted small">Sin asignar</span>
+							}
 						</td>
 
 						<!-- Estado -->
@@ -220,7 +235,7 @@
 </div>
 
 
-<!-- ─── MODAL CREAR USUARIO ──────────────────────────────────────────────────── -->
+<!-- MODAL CREAR USUARIO ──────────────────────────────────────────────────── -->
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg modal-dialog-centered">
 		<div class="modal-content">
@@ -271,6 +286,52 @@
 							<option value="super_admin">Super Admin</option>
 						</select>
 					</div>
+					@if (createUserForm.get('global_role')?.value === 'user') {
+					<!-- Separador -->
+					<hr class="my-3">
+					<p class="text-muted small fw-semibold mb-2">
+						<i class="bi bi-mortarboard me-1"></i> Asignación de curso (opcional)
+					</p>
+
+					<!-- Colegio -->
+					<div class="mb-3">
+						<label class="form-label">Colegio</label>
+						<select class="form-select" formControlName="school_id"
+							(change)="onSchoolChange($any($event.target).value, 'create')">
+							<option value="">Sin asignar</option>
+							@for (school of schools; track school.id) {
+							<option [value]="school.id">{{ school.name }}</option>
+							}
+						</select>
+					</div>
+
+					<!-- Curso -->
+					<div class="mb-3">
+						<label class="form-label">Curso</label>
+						<select class="form-select" formControlName="course_id" (change)="onCourseChange($any($event.target).value)"
+							[disabled]="!createUserForm.get('school_id')?.value">
+							<option value="">Selecciona un curso</option>
+							@for (course of filteredCourses; track course.id) {
+							<option [value]="course.id">{{ course.name }} {{ course.section }}</option>
+							}
+						</select>
+					</div>
+
+					<!-- Rol en curso -->
+					<div class="mb-3">
+						<label class="form-label">Rol en el curso</label>
+						<select class="form-select" formControlName="course_role">
+							<option value="">Selecciona un rol</option>
+							@for (role of courseRoles; track role.value) {
+							<option [value]="role.value" [disabled]="isRoleOccupied(role.value)">
+								{{ role.label }} {{ isRoleOccupied(role.value) ? '(ocupado)' : '' }}
+							</option>
+							}
+						</select>
+					</div>
+					}
+
+
 					<div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" formControlName="is_active" id="isActiveSwitch">
 						<label class="form-check-label" for="isActiveSwitch">Activo</label>
@@ -353,6 +414,52 @@
 							<option value="super_admin">Super Admin</option>
 						</select>
 					</div>
+
+					@if (editUserForm.get('global_role')?.value === 'user') {
+					<!-- Separador -->
+					<hr class="my-3">
+					<p class="text-muted small fw-semibold mb-2">
+						<i class="bi bi-mortarboard me-1"></i> Asignación de curso
+					</p>
+
+					<!-- Colegio -->
+					<div class="mb-3">
+						<label class="form-label">Colegio</label>
+						<select class="form-select" formControlName="school_id"
+							(change)="onSchoolChange($any($event.target).value, 'edit')">
+							<option value="">Sin asignar</option>
+							@for (school of schools; track school.id) {
+							<option [value]="school.id">{{ school.name }}</option>
+							}
+						</select>
+					</div>
+
+					<!-- Curso -->
+					<div class="mb-3">
+						<label class="form-label">Curso</label>
+						<select class="form-select" formControlName="course_id"
+							(change)="onCourseChange($any($event.target).value, selectedUser?.id ?? null)"
+							[disabled]="!editUserForm.get('school_id')?.value">
+							<option value="">Selecciona un curso</option>
+							@for (course of filteredCourses; track course.id) {
+							<option [value]="course.id">{{ course.name }} {{ course.section }}</option>
+							}
+						</select>
+					</div>
+
+					<!-- Rol en curso -->
+					<div class="mb-3">
+						<label class="form-label">Rol en el curso</label>
+						<select class="form-select" formControlName="course_role">
+							<option value="">Selecciona un rol</option>
+							@for (role of courseRoles; track role.value) {
+							<option [value]="role.value" [disabled]="isRoleOccupied(role.value)">
+								{{ role.label }} {{ isRoleOccupied(role.value) ? '(ocupado)' : '' }}
+							</option>
+							}
+						</select>
+					</div>
+					}
 
 					<div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" formControlName="is_active" id="editIsActiveSwitch">

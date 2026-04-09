@@ -42,59 +42,97 @@ export class AdminUsersService {
    * @returns {Promise<AdminUser[]>} Lista de usuarios administrables.
    * @throws {Error} Lanza error si la consulta falla.
    */
-  async getUsers(params: GetUsersParams = {}): Promise<GetUsersResult> {
-    if (DEBUG) console.log('👥 [AdminUsersService][getUsers] Params:', params);
+   async getUsers(params: GetUsersParams = {}): Promise<GetUsersResult> {
+		if (DEBUG) console.log('👥 [AdminUsersService][getUsers] Params:', params);
 
-    const {
-      search = '',
-      role = '',
-      status = '',
-      page = 1,
-      pageSize = 5
-    } = params;
+		const {
+			search = '',
+			role = '',
+			status = '',
+			page = 1,
+			pageSize = 5
+		} = params;
 
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
+		const from = (page - 1) * pageSize;
+		const to = from + pageSize - 1;
 
-    let query = this.supabaseService.client
-      .from('profiles')
-      .select(
-        'id, full_name, first_name, last_name, phone, avatar_url, email, global_role, is_active, created_at, updated_at',
-        { count: 'exact' }
-      )
-      .order('created_at', { ascending: false })
-      .range(from, to);
+		let query = this.supabaseService.client
+			.from('profiles')
+			.select(
+				`
+					id, full_name, first_name, last_name, phone, avatar_url,
+					email, global_role, is_active, created_at, updated_at,
+					course_members (
+						role,
+						courses (
+							id,
+							name,
+							school_id,
+							schools (
+								id,
+								name
+							)
+						)
+					)
+				`,
+				{ count: 'exact' }
+			)
+			.order('created_at', { ascending: false })
+			.range(from, to);
 
-    if (search.trim()) {
-      query = query.or(
-        `full_name.ilike.%${search.trim()}%,email.ilike.%${search.trim()}%`
-      );
-    }
+		if (search.trim()) {
+			query = query.or(
+				`full_name.ilike.%${search.trim()}%,email.ilike.%${search.trim()}%`
+			);
+		}
 
-    if (role) {
-      query = query.eq('global_role', role);
-    }
+		if (role) {
+			query = query.eq('global_role', role);
+		}
 
-    if (status !== '') {
-      query = query.eq('is_active', status === 'true');
-    }
+		if (status !== '') {
+			query = query.eq('is_active', status === 'true');
+		}
 
-    const { data, error, count } = await query;
+		const { data, error, count } = await query;
 
-    if (DEBUG) console.log('👥 [AdminUsersService][getUsers] Respuesta Supabase:', { data, error, count });
+		if (DEBUG) console.log('👥 [AdminUsersService][getUsers] Respuesta Supabase:', { data, error, count });
 
-    if (error) {
-      console.error('🔴 [AdminUsersService][getUsers] Error:', error.message);
-      throw new Error(error.message);
-    }
+		if (error) {
+			console.error('🔴 [AdminUsersService][getUsers] Error:', error.message);
+			throw new Error(error.message);
+		}
 
-    if (DEBUG) console.log('🟢 [AdminUsersService][getUsers] Total:', count, '| Página:', page);
+		// Mapear datos anidados a estructura plana
+		const users: AdminUser[] = (data ?? []).map((profile: any) => {
+			const member = profile.course_members?.[0];
+			const course = member?.courses;
+			const school = course?.schools;
 
-    return {
-      users: (data ?? []) as AdminUser[],
-      total: count ?? 0
-    };
-  }
+			return {
+				id:           profile.id,
+				full_name:    profile.full_name,
+				first_name:   profile.first_name,
+				last_name:    profile.last_name,
+				phone:        profile.phone,
+				avatar_url:   profile.avatar_url,
+				email:        profile.email,
+				global_role:  profile.global_role,
+				is_active:    profile.is_active,
+				created_at:   profile.created_at,
+				updated_at:   profile.updated_at,
+				course_id:    course?.id ?? null,
+				course_role:  member?.role ?? null,
+				course_name:  course?.name ?? null,
+				school_id:    school?.id ?? null,
+				school_name:  school?.name ?? null,
+			};
+		});
+
+		if (DEBUG) console.log('🟢 [AdminUsersService][getUsers] Total:', count, '| Página:', page);
+
+		return { users, total: count ?? 0 };
+	}
 
 	/**
 	 * Crea un usuario administrativo invocando la Edge Function segura.
@@ -235,4 +273,95 @@ export class AdminUsersService {
 
     if (DEBUG) console.log('✅ [AdminUsersService][updateUserProfile] Perfil actualizado');
   }
+
+	/**
+	 * Inserta o actualiza la membresía de un usuario en un curso.
+	 * Si ya existe una membresía activa, la actualiza.
+	 * Si no existe, la crea.
+	 *
+	 * @param {string} userId ID del usuario
+	 * @param {string} courseId ID del curso
+	 * @param {string} courseRole Rol en el curso
+	 * @returns {Promise<void>}
+	 */
+	async upsertCourseMember(userId: string, courseId: string, courseRole: string): Promise<void> {
+		if (DEBUG) console.log('📘 [AdminUsersService][upsertCourseMember] userId:', userId, '| courseId:', courseId, '| role:', courseRole);
+
+		// Verificar si ya existe una membresía
+		const { data: existing } = await this.supabaseService.client
+			.from('course_members')
+			.select('id')
+			.eq('user_id', userId)
+			.single();
+
+		if (existing?.id) {
+			// Actualizar membresía existente
+			const { error } = await this.supabaseService.client
+				.from('course_members')
+				.update({
+					course_id: courseId,
+					role: courseRole,
+					is_active: true,
+					updated_at: new Date().toISOString()
+				})
+				.eq('user_id', userId);
+
+			if (error) {
+				console.error('🔴 [AdminUsersService][upsertCourseMember] Error al actualizar:', error);
+				throw error;
+			}
+			if (DEBUG) console.log('✅ [AdminUsersService][upsertCourseMember] Membresía actualizada');
+
+		} else {
+			// Crear nueva membresía
+			const { error } = await this.supabaseService.client
+				.from('course_members')
+				.insert({
+					course_id: courseId,
+					user_id: userId,
+					role: courseRole,
+					is_active: true
+				});
+
+			if (error) {
+				console.error('🔴 [AdminUsersService][upsertCourseMember] Error al insertar:', error);
+				throw error;
+			}
+			if (DEBUG) console.log('✅ [AdminUsersService][upsertCourseMember] Membresía creada');
+		}
+	}
+
+	/**
+	 * Obtiene los roles ya ocupados en un curso específico.
+	 * Excluye opcionalmente al usuario actual para no bloquearse en edición.
+	 *
+	 * @param {string} courseId ID del curso.
+	 * @param {string | null} excludeUserId ID del usuario a excluir (edición).
+	 * @returns {Promise<string[]>} Lista de roles ocupados.
+	 */
+	async getOccupiedRoles(courseId: string, excludeUserId: string | null = null): Promise<string[]> {
+		if (DEBUG) console.log('🔍 [AdminUsersService][getOccupiedRoles] courseId:', courseId, '| excludeUserId:', excludeUserId);
+
+		let query = this.supabaseService.client
+			.from('course_members')
+			.select('role, user_id')
+			.eq('course_id', courseId)
+			.eq('is_active', true)
+			.neq('role', 'apoderado'); // apoderado puede repetirse
+
+		if (excludeUserId) {
+			query = query.neq('user_id', excludeUserId);
+		}
+
+		const { data, error } = await query;
+
+		if (error) {
+			console.error('🔴 [AdminUsersService][getOccupiedRoles] Error:', error);
+			return [];
+		}
+
+		const occupied = (data ?? []).map((m: any) => m.role);
+		if (DEBUG) console.log('✅ [AdminUsersService][getOccupiedRoles] Roles ocupados:', occupied);
+		return occupied;
+	}
 }

@@ -338,6 +338,17 @@ createTransaction(), updateTransaction(), deleteTransaction()
 - ✅ RLS: categories_insert/update/delete_course_member
 - ✅ Admin siempre crea categorías globales
 
+**Fase 3.6** → Gestión de usuarios con asignación de curso ✅ Completada
+
+- ✅ AdminUser interface: agrega course_id, course_role, course_name, school_id, school_name
+- ✅ getUsers() hace join con course_members + courses + schools
+- ✅ upsertCourseMember() para crear/actualizar membresía desde admin
+- ✅ getOccupiedRoles() bloquea roles únicos ya asignados en el curso
+- ✅ Modal crear: selects colegio → curso → rol (solo si global_role = user)
+- ✅ Modal editar: mismos selects con datos precargados
+- ✅ Tabla: columna Colegio/Curso visible
+- ✅ super_admin no ve sección de asignación de curso
+
 **Fase 4** → Comprobantes (receipts) ⏳ Pendiente
 
 **Fase 5** → Reportes y analítica ⏳ Pendiente
