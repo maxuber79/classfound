@@ -357,7 +357,17 @@ src/app/
 - Botón eliminar en tabla de usuarios junto a acciones existentes
 - JWT verification desactivado en delete-user-admin (igual que create-user-admin)
 
-**Fase 3.9** → Mejoras wizard de registro ⏳ Pendiente
+**Fase 3.9** → Mejoras wizard de registro ✅ Completada
+
+- Paso 2 permite alternar entre seleccionar o crear colegio/curso
+- Nuevos FormGroups: newSchoolForm y newCourseForm con signals createNewSchool/createNewCourse
+- submitWizard crea colegio/curso en Supabase antes de invocar Edge Function
+- summary computed actualizado para mostrar datos de colegio/curso nuevo
+- Políticas RLS INSERT públicas para schools y courses activos
+- Campo comuna usa select desde JSON comunas-chile.json via LocationService
+- JSON de 50 colegios RM descartado — flujo de creación cubre el caso de uso
+
+**Fase 3.10** → ⏳ Pendiente (definir próxima tarea)
 
 - Seed data colegios RM desde JSON
 - Campo curso con formato guiado + leyenda explicativa
