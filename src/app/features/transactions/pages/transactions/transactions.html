@@ -252,12 +252,6 @@
 			<table class="table table-hover align-middle mb-0">
 				<thead>
 					<tr class="table-users-header">
-						<!-- <th class="ps-4">Fecha</th>
-						<th>Categoría</th>
-						<th>Tipo</th>
-						<th>Descripción</th>
-						<th class="text-end">Monto</th>
-						<th class="text-center pe-4">Acciones</th> -->
 						<th class="ps-4">Fecha</th>
 						@if (!contextCourseId) {
 						<th>Curso</th>
@@ -279,18 +273,6 @@
 							<div class="fw-semibold small">{{ transaction.transaction_date | date:'dd MMM yyyy' }}</div>
 							<div class="text-muted" style="font-size:0.7rem;">{{ transaction.transaction_date | date:'EEEE' }}</div>
 						</td>
-
-						<!-- <td>
-							<div class="fw-semibold small">
-								{{ transaction.course_name || '—' }}
-							</div>
-							<div class="text-muted" style="font-size:0.7rem;">
-								{{ transaction.school_name || '' }}
-								@if (transaction.school_year) {
-								- {{ transaction.school_year }}
-								}
-							</div>
-						</td> -->
 						@if (!contextCourseId) {
 						<td>
 							<div class="fw-semibold small">
@@ -319,9 +301,17 @@
 						</td>
 
 						<td>
-							<span class="text-dark small">{{ transaction.description || '—' }}</span>
+							<div class="d-flex align-items-center gap-2">
+								<span class="text-dark small">{{ transaction.description || '—' }}</span>
+								@if (transaction.has_receipt) {
+								<button class="btn btn-link p-0 border-0" title="Ver comprobante adjunto"
+									(click)="openReceiptModal(transaction)">
+									<i class="bi bi-paperclip text-success" style="font-size:0.85rem;"></i>
+								</button>
+								}
+							</div>
 							@if (transaction.notes) {
-							<div class="text-muted mt-2"
+							<div class="text-muted mt-1"
 								style="font-size:0.7rem; white-space: normal; word-break: break-word; overflow-wrap: anywhere;">
 								<i class="bi bi-chat-left-text me-1"></i>{{ transaction.notes }}
 							</div>
@@ -334,23 +324,52 @@
 								{{ transaction.type === 'income' ? '+' : '-' }}{{ formatAmount(transaction.amount) }}
 							</span>
 						</td>
-
+						<!-- Acciones -->
 						<td class="text-center pe-4">
-							<div class="d-flex justify-content-center gap-1">
-								<button class="btn btn-sm btn-icon" title="Ver detalle" (click)="openViewModal(transaction)">
-									<i class="bi bi-eye text-primary"></i>
-								</button>
+							<div class="d-flex justify-content-center align-items-center gap-1">
+								<div class="dropdown">
+									<button class="btn btn-sm btn-icon btn-icon--menu" type="button" data-bs-toggle="dropdown"
+										aria-expanded="false" title="Más acciones">
+										<i class="bi bi-three-dots-vertical"></i>
+									</button>
 
-								<button class="btn btn-sm btn-icon" title="Editar" (click)="openEditModal(transaction)">
-									<i class="bi bi-pencil text-warning"></i>
-								</button>
-
-								<button class="btn btn-sm btn-icon" title="Eliminar" (click)="openDeleteModal(transaction)">
-									<i class="bi bi-trash text-danger"></i>
-								</button>
+									<ul class="dropdown-menu dropdown-menu-end shadow-sm">
+										<li>
+											<button class="dropdown-item d-flex align-items-center gap-3 text-primary" type="button"
+												title="Ver detalle" (click)="openViewModal(transaction)">
+												<i class="bi bi-eye"></i>
+												<span>Ver detalle</span>
+											</button>
+										</li>
+										<li>
+											<button class="dropdown-item d-flex align-items-center gap-3 text-secondary" type="button"
+												(click)="openEditModal(transaction)">
+												<i class="bi bi-pencil"></i>
+												<span>Editar</span>
+											</button>
+										</li>
+										<li>
+											<hr class="dropdown-divider">
+										</li>
+										<li>
+											<button class="dropdown-item d-flex align-items-center gap-3" type="button"
+												(click)="openReceiptModal(transaction)">
+												<i class="bi bi-paperclip text-success"></i>
+												<span>Comprobante</span>
+												<!-- TODO: refactor UI — agregar badge dinámico cuando tenga archivo -->
+											</button>
+										</li>
+										<li>
+											<button class="dropdown-item d-flex align-items-center gap-3 text-danger" type="button"
+												(click)="openDeleteModal(transaction)">
+												<i class="bi bi-trash"></i>
+												<span>Eliminar</span>
+											</button>
+										</li>
+									</ul>
+								</div>
 							</div>
 						</td>
-
 					</tr>
 					}
 				</tbody>
@@ -663,6 +682,127 @@
 					Eliminar
 					}
 				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<!-- ─── MODAL COMPROBANTE ───────────────────────────────────────────────────── -->
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title fw-bold" id="receiptModalLabel">
+					<i class="bi bi-paperclip me-2 text-success"></i>
+					Comprobante
+				</h5>
+				<button type="button" class="btn-close" (click)="closeReceiptModal()"></button>
+			</div>
+
+			<div class="modal-body">
+
+				<!-- Loading -->
+				@if (loadingReceipt()) {
+				<div class="text-center py-4">
+					<div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+					<p class="text-muted mt-2 small">Cargando comprobante...</p>
+				</div>
+				}
+
+				<!-- Sin comprobante -->
+				@if (!loadingReceipt() && !currentReceipt()) {
+				<div class="text-center py-3">
+					<i class="bi bi-file-earmark-x display-5 text-muted opacity-50"></i>
+					<p class="text-muted mt-2 mb-3 small">Esta transacción no tiene comprobante adjunto.</p>
+
+					<!-- Input file -->
+					<div class="mb-3 text-start">
+						<label class="form-label fw-semibold small">Adjuntar archivo</label>
+						<input type="file" class="form-control form-control-sm"
+							accept="image/jpeg,image/png,image/webp,application/pdf" (change)="onFileSelected($event)">
+						<div class="form-text">Máx. 2 MB · JPG, PNG, WEBP, PDF</div>
+					</div>
+
+					@if (selectedFile()) {
+					<div class="alert alert-light border d-flex align-items-center gap-2 text-start py-2 mb-3">
+						<i class="bi bi-file-earmark text-success"></i>
+						<span class="small text-truncate">{{ selectedFile()!.name }}</span>
+						<span class="text-muted small ms-auto">
+							{{ (selectedFile()!.size / 1024).toFixed(0) }} KB
+						</span>
+					</div>
+					}
+				</div>
+				}
+
+				<!-- Con comprobante -->
+				@if (!loadingReceipt() && currentReceipt()) {
+				<div class="text-center">
+
+					<!-- Preview imagen -->
+					@if (isImageReceipt()) {
+					<img [src]="receiptSignedUrl()" alt="Comprobante" class="img-fluid rounded border mb-3"
+						style="max-height: 320px; object-fit: contain;">
+					}
+
+					<!-- PDF -->
+					@if (!isImageReceipt()) {
+					<div class="py-3">
+						<i class="bi bi-file-earmark-pdf display-4 text-danger"></i>
+						<p class="text-muted small mt-2 mb-0">{{ currentReceipt()!.file_name }}</p>
+					</div>
+					}
+
+					<div class="d-flex align-items-center justify-content-center gap-2 text-muted small mb-2">
+						<i class="bi bi-hdd"></i>
+						<span>{{ (currentReceipt()!.file_size / 1024).toFixed(0) }} KB</span>
+					</div>
+
+				</div>
+				}
+
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary btn-sm" (click)="closeReceiptModal()">
+					Cerrar
+				</button>
+
+				<!-- Botón subir -->
+				@if (!loadingReceipt() && !currentReceipt() && selectedFile()) {
+				<button type="button" class="btn btn-success btn-sm d-flex align-items-center gap-2" (click)="uploadReceipt()"
+					[disabled]="uploadingReceipt()">
+					@if (uploadingReceipt()) {
+					<span class="spinner-border spinner-border-sm"></span>
+					Subiendo...
+					} @else {
+					<i class="bi bi-cloud-upload"></i>
+					Subir comprobante
+					}
+				</button>
+				}
+
+				<!-- Botón ver / abrir PDF -->
+				@if (!loadingReceipt() && currentReceipt()) {
+				<button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-2"
+					(click)="openReceiptFile()">
+					<i class="bi bi-box-arrow-up-right"></i>
+					{{ isImageReceipt() ? 'Ver en pantalla completa' : 'Abrir PDF' }}
+				</button>
+
+				<button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-2"
+					(click)="deleteReceipt()" [disabled]="deletingReceipt()">
+					@if (deletingReceipt()) {
+					<span class="spinner-border spinner-border-sm"></span>
+					} @else {
+					<i class="bi bi-trash"></i>
+					}
+					Eliminar
+				</button>
+				}
+
 			</div>
 
 		</div>

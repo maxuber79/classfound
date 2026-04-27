@@ -30,4 +30,6 @@ export interface TransactionListItem extends Transaction {
   school_name?: string;
   school_year?: number | null;
   school_id?: string;
+  /** true si la transacción tiene al menos un comprobante adjunto. */
+  has_receipt?: boolean;
 }

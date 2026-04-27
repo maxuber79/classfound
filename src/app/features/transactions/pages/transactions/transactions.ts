@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -9,6 +9,9 @@ import { Category } from '../../../categories/models/category.interface';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
+
+import { ReceiptsService } from '../../../receipts/services/receipts.service';
+import { Receipt } from '../../../receipts/models/receipt.interface';
 
 
 declare var bootstrap: any;
@@ -31,6 +34,7 @@ const DEBUG=true;
 	private toastService = inject(ToastService);
 	private readonly route = inject(ActivatedRoute);
 	private readonly router = inject(Router);
+	private readonly receiptsService = inject(ReceiptsService);
 
   // ─── Estado ───────────────────────────────────────────────────────────────────
   readonly loading=signal(false);
@@ -96,6 +100,23 @@ const DEBUG=true;
   currentPage: number=1;
   pageSize: number=10;
   readonly pageSizeOptions: number[]=[5, 10, 25, 50];
+
+// ─── Estado comprobantes ──────────────────────────────────────────────────────
+/** Comprobante de la transacción seleccionada. null = sin comprobante. */
+readonly loadingReceipt = signal(false);
+readonly uploadingReceipt = signal(false);
+readonly deletingReceipt = signal(false);
+readonly currentReceipt = signal<Receipt | null>(null);
+readonly selectedFile = signal<File | null>(null);
+readonly receiptSignedUrl = signal<string | null>(null);
+
+/** true si el comprobante actual es una imagen (no PDF). */
+readonly isImageReceipt = computed(() => {
+    const receipt = this.currentReceipt();
+    if (!receipt) return false;
+    return receipt.mime_type.startsWith('image/');
+});
+
 
   // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -1062,4 +1083,211 @@ const DEBUG=true;
 
 		this.router.navigate(['/dashboard/courses']);
 	}
+
+ 
+	// ─── Modal comprobante ────────────────────────────────────────────────────────
+
+	/**
+	 * Abre el modal de comprobante para la transacción seleccionada.
+	 * Busca si ya existe un comprobante en Supabase y carga la URL firmada.
+	 *
+	 * @param {TransactionListItem} transaction Transacción seleccionada.
+	 * @returns {Promise<void>}
+	 */
+	async openReceiptModal(transaction: TransactionListItem): Promise<void> {
+			if (DEBUG) console.log('📎 [TransactionsPage][openReceiptModal] Abriendo modal comprobante...', transaction.id);
+
+			this.selectedTransaction = transaction;
+			this.currentReceipt.set(null);
+			this.selectedFile.set(null);
+			this.receiptSignedUrl.set(null);
+			this.loadingReceipt.set(true);
+
+			const modalEl = document.getElementById('receiptModal');
+			if (!modalEl) {
+					console.warn('⚠️ [TransactionsPage][openReceiptModal] No se encontró receiptModal');
+					return;
+			}
+
+			const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+			modal.show();
+
+			try {
+					const receipts = await this.receiptsService.getReceiptsByTransaction(transaction.id);
+					if (DEBUG) console.log('✅ [TransactionsPage][openReceiptModal] Comprobantes encontrados:', receipts.length);
+
+					if (receipts.length > 0) {
+    const receipt = receipts[0];
+
+    try {
+        const url = await this.receiptsService.getSignedUrl(receipt.file_path);
+        this.currentReceipt.set(receipt);
+        this.receiptSignedUrl.set(url);
+        if (DEBUG) console.log('✅ [TransactionsPage][openReceiptModal] URL firmada obtenida');
+    } catch (urlError) {
+        console.warn('⚠️ [TransactionsPage][openReceiptModal] Archivo no encontrado en Storage, limpiando registro huérfano...');
+        // Eliminar registro huérfano de la tabla
+        await this.receiptsService.deleteReceipt(receipt.id, receipt.file_path);
+        this.currentReceipt.set(null);
+        this.receiptSignedUrl.set(null);
+    }
+}
+			} catch (error) {
+					console.error('🔴 [TransactionsPage][openReceiptModal] Error:', error);
+			} finally {
+					this.loadingReceipt.set(false);
+			}
+	}
+
+	/**
+	 * Cierra el modal de comprobante y limpia el estado.
+	 *
+	 * @returns {void}
+	 */
+	closeReceiptModal(): void {
+			if (DEBUG) console.log('🪟 [TransactionsPage][closeReceiptModal] Cerrando modal...');
+
+			const modalEl = document.getElementById('receiptModal');
+			if (!modalEl) return;
+
+			const modal = bootstrap.Modal.getInstance(modalEl);
+			if (modal) modal.hide();
+
+			this.currentReceipt.set(null);
+			this.selectedFile.set(null);
+			this.receiptSignedUrl.set(null);
+			this.selectedTransaction = null;
+
+			if (DEBUG) console.log('✅ [TransactionsPage][closeReceiptModal] Modal cerrado y estado limpiado');
+	}
+
+	/**
+	 * Captura el archivo seleccionado en el input file.
+	 *
+	 * @param {Event} event Evento change del input file.
+	 * @returns {void}
+	 */
+	onFileSelected(event: Event): void {
+			const input = event.target as HTMLInputElement;
+			const file = input.files?.[0] ?? null;
+
+			if (DEBUG) console.log('📁 [TransactionsPage][onFileSelected] Archivo seleccionado:', file?.name);
+
+			this.selectedFile.set(file);
+	}
+
+	/**
+	 * Sube el archivo seleccionado a Supabase Storage y registra en tabla receipts.
+	 *
+	 * @returns {Promise<void>}
+	 */
+	async uploadReceipt(): Promise<void> {
+			if (DEBUG) console.log('☁️ [TransactionsPage][uploadReceipt] Iniciando subida...');
+
+			const file = this.selectedFile();
+			const transaction = this.selectedTransaction;
+
+			if (!file || !transaction) {
+					console.warn('⚠️ [TransactionsPage][uploadReceipt] Falta archivo o transacción');
+					return;
+			}
+
+			const currentUser =
+					this.authService.getCurrentUser() ??
+					this.authService.getCurrentSession()?.user ??
+					null;
+
+			if (!currentUser?.id) {
+					console.error('🔴 [TransactionsPage][uploadReceipt] No hay usuario autenticado');
+					return;
+			}
+
+			this.uploadingReceipt.set(true);
+
+			try {
+					const schoolId = transaction.school_id ?? 'sin-colegio';
+					const courseId = transaction.course_id;
+
+					const receipt = await this.receiptsService.uploadReceipt(
+							file,
+							transaction.id,
+							courseId,
+							schoolId,
+							currentUser.id
+					);
+
+					if (DEBUG) console.log('✅ [TransactionsPage][uploadReceipt] Comprobante subido:', receipt);
+
+					this.currentReceipt.set(receipt);
+					this.selectedFile.set(null);
+
+					const url = await this.receiptsService.getSignedUrl(receipt.file_path);
+					this.receiptSignedUrl.set(url);
+
+					this.toastService.show('Comprobante subido correctamente 📎', 'success');
+
+					// Recargar tabla para actualizar ícono has_receipt
+					await this.loadTransactions();
+			} catch (error) {
+					console.error('🔴 [TransactionsPage][uploadReceipt] Error:', error);
+					this.toastService.show('Error al subir el comprobante', 'error');
+			} finally {
+					this.uploadingReceipt.set(false);
+			}
+	}
+
+	/**
+	 * Abre el comprobante actual en una nueva pestaña.
+	 * Funciona para imágenes y PDFs usando la URL firmada.
+	 *
+	 * @returns {void}
+	 */
+	openReceiptFile(): void {
+			const url = this.receiptSignedUrl();
+			if (DEBUG) console.log('🔗 [TransactionsPage][openReceiptFile] Abriendo URL:', url);
+
+			if (!url) {
+					console.warn('⚠️ [TransactionsPage][openReceiptFile] No hay URL disponible');
+					return;
+			}
+
+			window.open(url, '_blank');
+	}
+
+	/**
+	 * Elimina el comprobante actual de Storage y de la tabla receipts.
+	 *
+	 * @returns {Promise<void>}
+	 */
+	async deleteReceipt(): Promise<void> {
+			if (DEBUG) console.log('🗑️ [TransactionsPage][deleteReceipt] Eliminando comprobante...');
+
+			const receipt = this.currentReceipt();
+			if (!receipt) {
+					console.warn('⚠️ [TransactionsPage][deleteReceipt] No hay comprobante seleccionado');
+					return;
+			}
+
+			this.deletingReceipt.set(true);
+
+			try {
+					await this.receiptsService.deleteReceipt(receipt.id, receipt.file_path);
+
+					if (DEBUG) console.log('✅ [TransactionsPage][deleteReceipt] Comprobante eliminado');
+
+					this.currentReceipt.set(null);
+					this.receiptSignedUrl.set(null);
+
+					this.toastService.show('Comprobante eliminado correctamente 🗑️', 'success');
+
+					// Recargar tabla para actualizar ícono has_receipt
+					await this.loadTransactions();
+			} catch (error) {
+					console.error('🔴 [TransactionsPage][deleteReceipt] Error:', error);
+					this.toastService.show('Error al eliminar el comprobante', 'error');
+			} finally {
+					this.deletingReceipt.set(false);
+			}
+	}
+		
 }

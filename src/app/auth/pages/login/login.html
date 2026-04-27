@@ -1,4 +1,187 @@
-<div class="container mt-5">
+<div class="login-page">
+	<div class="container">
+		<div class="row justify-content-center align-items-center min-vh-100">
+			<div class="col-12 col-xl-10">
+
+				<div class="login-shell">
+
+					<!-- IZQUIERDA -->
+					<div class="login-shell__aside">
+
+						<div class="login-brand">
+							<div class="login-brand__icon">
+								<i class="bi bi-wallet2"></i>
+							</div>
+							<div>
+								<h1 class="login-brand__title mb-1">ClassFund</h1>
+								<p class="login-brand__subtitle mb-0">Gestión simple para fondos de curso</p>
+							</div>
+						</div>
+
+						<div class="login-aside__content">
+							<span class="login-aside__eyebrow">Bienvenido</span>
+
+							<h2 class="login-aside__title">
+								Administra cursos, ingresos y egresos en un solo lugar
+							</h2>
+
+							<p class="login-aside__text">
+								Accede a tu panel para controlar movimientos, balances y gestión de cursos.
+							</p>
+
+							<div class="login-aside__features">
+
+								<div class="login-feature">
+									<div class="login-feature__icon">
+										<i class="bi bi-mortarboard"></i>
+									</div>
+									<div>
+										<h3>Gestión de cursos</h3>
+										<p>Organiza cursos y colegios fácilmente.</p>
+									</div>
+								</div>
+
+								<div class="login-feature">
+									<div class="login-feature__icon">
+										<i class="bi bi-cash-stack"></i>
+									</div>
+									<div>
+										<h3>Control financiero</h3>
+										<p>Registra ingresos y egresos.</p>
+									</div>
+								</div>
+
+								<div class="login-feature">
+									<div class="login-feature__icon">
+										<i class="bi bi-graph-up-arrow"></i>
+									</div>
+									<div>
+										<h3>Seguimiento</h3>
+										<p>Visualiza balances en tiempo real.</p>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+					</div>
+
+					<!-- DERECHA -->
+					<div class="login-shell__form">
+
+						<div class="login-card">
+
+							<div class="login-card__header">
+								<h2 class="login-card__title">Iniciar sesión</h2>
+								<p class="login-card__subtitle">
+									Ingresa con tu cuenta para continuar.
+								</p>
+							</div>
+
+							<!-- SOCIAL -->
+							<div class="login-social">
+								<button type="button" class="btn login-social__btn login-social__btn--google" (click)="onGoogleLogin()">
+									<i class="bi bi-google"></i>
+									<span>Google</span>
+								</button>
+
+								<button type="button" class="btn login-social__btn login-social__btn--facebook"
+									(click)="onFacebookLogin()">
+									<i class="bi bi-facebook"></i>
+									<span>Facebook</span>
+								</button>
+							</div>
+
+							<div class="login-divider">
+								<span>o ingresa con tu correo</span>
+							</div>
+
+							<form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
+
+								<!-- INPUTS UNIDOS -->
+								<div class="login-input-stack mb-3" [class.is-invalid]="
+										(email.invalid && email.touched) ||
+										(password.invalid && password.touched)
+									">
+
+									<!-- EMAIL -->
+									<div class="input-group login-input-stack__item">
+										<span class="input-group-text">
+											<i class="bi bi-envelope"></i>
+										</span>
+
+										<input type="email" class="form-control" formControlName="email" placeholder="correo@ejemplo.com">
+									</div>
+
+									<!-- PASSWORD -->
+									<div class="input-group login-input-stack__item">
+										<span class="input-group-text">
+											<i class="bi bi-lock"></i>
+										</span>
+
+										<input [type]="showPassword() ? 'text' : 'password'" class="form-control" formControlName="password"
+											placeholder="••••••••">
+
+										<button type="button" class="btn login-password-toggle" (click)="togglePassword()">
+											<i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()">
+											</i>
+										</button>
+									</div>
+
+								</div>
+
+								<!-- VALIDACIONES -->
+								@if (email.touched && email.hasError('required')) {
+								<div class="invalid-feedback d-block">El email es requerido</div>
+								}
+								@if (email.touched && email.hasError('email')) {
+								<div class="invalid-feedback d-block">Email inválido</div>
+								}
+								@if (password.touched && password.hasError('required')) {
+								<div class="invalid-feedback d-block">Contraseña requerida</div>
+								}
+
+								<div class="text-end mb-3">
+									<a routerLink="/forgot-password" class="login-link">
+										¿Olvidaste tu contraseña?
+									</a>
+								</div>
+
+								@if (errorMessage()) {
+								<div class="alert alert-danger login-alert">
+									{{ errorMessage() }}
+								</div>
+								}
+
+								<div class="d-grid mb-3">
+									<button type="submit" class="btn login-submit-btn" [disabled]="loading()">
+										@if (loading()) {
+										<span class="spinner-border spinner-border-sm me-2"></span>
+										Ingresando...
+										} @else {
+										Ingresar
+										}
+									</button>
+								</div>
+
+							</form>
+
+							<div class="login-card__footer text-center">
+								<span class="text-muted">¿No tienes cuenta?</span>
+								<a routerLink="/register" class="login-link ms-1">Regístrate</a>
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+<!-- <div class="container mt-5">
 	<div class="row justify-content-center">
 		<div class="col-md-4">
 			<div class="card shadow">
@@ -6,7 +189,7 @@
 
 					<h4 class="text-center mb-4">Iniciar sesión</h4>
 
-					<!-- Botones OAuth -->
+					 Botones OAuth  
 					<div class="d-grid gap-2 mb-3">
 						<button type="button" class="btn btn-outline-danger" (click)="onGoogleLogin()">
 							<i class="bi bi-google me-2"></i>Continuar con Google
@@ -22,10 +205,10 @@
 						<hr class="flex-grow-1">
 					</div>
 
-					<!-- Formulario reactivo -->
+				 Formulario reactivo 
 					<form [formGroup]="loginForm" (ngSubmit)="login()">
 
-						<!-- Email -->
+						 Email  
 						<div class="mb-3">
 							<label class="form-label">Email</label>
 							<input type="email" class="form-control" formControlName="email" autocomplete="email"
@@ -38,7 +221,7 @@
 							}
 						</div>
 
-						<!-- Password -->
+						 Password 
 						<div class="mb-3">
 							<label class="form-label">Contraseña</label>
 							<div class="input-group">
@@ -62,14 +245,14 @@
 							</div>
 						</div>
 
-						<!-- Error general -->
+					 Error general 
 						@if (errorMessage()) {
 						<div class="alert alert-danger py-2 small">
 							{{ errorMessage() }}
 						</div>
 						}
 
-						<!-- Submit -->
+					 Submit 
 						<div class="d-grid mb-3">
 							<button type="submit" class="btn btn-primary" [disabled]="loading()">
 								@if (loading()) {
@@ -83,7 +266,7 @@
 
 					</form>
 
-					<!-- Registro -->
+					 Registro 
 					<div class="text-center small">
 						¿No tienes cuenta?
 						<a routerLink="/register" class="text-decoration-none">
@@ -95,4 +278,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</div> -->

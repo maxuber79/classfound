@@ -37,39 +37,49 @@ export class TransactionsService {
 		if (DEBUG) console.log('💸 [TransactionsService][getTransactions] Consultando...');
 
 		const { data, error } = await this.supabase
-			.from('transactions')
-			.select(`
-				*,
-				categories (
-					name
-				),
-				courses (
-					id,
-					name,
-					school_year,
-					schools (
-						id,
-						name
-					)
-				)
-			`)
-			.order('transaction_date', { ascending: false });
+    .from('transactions')
+    .select(`
+        *,
+        categories (
+            name
+        ),
+        courses (
+            id,
+            name,
+            school_year,
+            schools (
+                id,
+                name
+            )
+        ),
+        receipts (
+            id
+        )
+    `)
+    .order('transaction_date', { ascending: false });
 
 		if (error) {
 			console.error('🔴 [TransactionsService][getTransactions] Error:', error);
 			throw error;
 		}
 
-		const mappedData: TransactionListItem[] = (data ?? []).map((item: any) => ({
-			...item,
-			category_name: item.categories?.name ?? 'Sin categoría',
-			course_name: item.courses?.name ?? '',
-			school_name:
-				Array.isArray(item.courses?.schools)
-					? item.courses.schools[0]?.name ?? ''
-					: item.courses?.schools?.name ?? '',
-			school_year: item.courses?.school_year ?? null
-		}));
+		 const mappedData: TransactionListItem[] = (data ?? []).map((item: any) => ({
+    ...item,
+    category_name: item.categories?.name ?? 'Sin categoría',
+    course_name: item.courses?.name ?? '',
+    school_name:
+        Array.isArray(item.courses?.schools)
+            ? item.courses.schools[0]?.name ?? ''
+            : item.courses?.schools?.name ?? '',
+    school_year: item.courses?.school_year ?? null,
+    school_id:
+        Array.isArray(item.courses?.schools)
+            ? item.courses.schools[0]?.id ?? null
+            : item.courses?.schools?.id ?? null,
+    has_receipt: Array.isArray(item.receipts)
+        ? item.receipts.length > 0
+        : false
+}));
 
 		if (DEBUG) console.log('✅ [TransactionsService][getTransactions] Total:', mappedData.length);
 		if (DEBUG) console.log('📦 [TransactionsService][getTransactions] Data enriquecida:', mappedData);
@@ -266,7 +276,10 @@ export class TransactionsService {
 			school_id:
 				Array.isArray(item.courses?.schools)
 					? item.courses.schools[0]?.id ?? ''
-					: item.courses?.schools?.id ?? ''
+					: item.courses?.schools?.id ?? '',
+			has_receipt: Array.isArray(item.receipts)
+			? item.receipts.length > 0
+			: false
 		}));
 
 		if (DEBUG) console.log('✅ [TransactionsService][getTransactionsByCourse] Total:', mappedData.length);

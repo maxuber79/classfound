@@ -1,32 +1,8 @@
-// ─── Variables del sistema de diseño ─────────────────────────────────────────
-$primary: #1e3a5f;
-$primary-dark: #162a44;
-$primary-light: #E8F2FC;
-$primary-action: #2563eb;
+@use '../../../../../assets/scss/abstracts'as *;
+@use 'sass:color';
+@use 'sass:list'; // Para list.nth
+@use 'sass:meta'; // Para meta.type-of 
 
-$secondary: #1a7f5a;
-$secondary-dark: #14532d;
-$secondary-light:#E2F5EF;
-
-$tertiary: #164478;
-$tertiary-dark: #0f2a3b;
-$tertiary-light: #3a5f8f;
-
-$accent: #FFC107;
-$accent-dark: #FFB300;
-$accent-light: #FFF8E1;
-
-$success: #10b981;
-$success-dark: #0f766e;
-$success-light: #6ee7b7;
-
-$warning: #fbbf24;
-$warning-dark: #d97706;
-$warning-light: #fde68a;
-
-$danger: #ef4444;
-$danger-dark: #b91c1c;
-$danger-light: #fca5a5;
 
 // ─── Mixin base para variantes de summary-card ───────────────────────────────
 // Genera border-top + icon background/color + amount color
@@ -216,4 +192,39 @@ $danger-light: #fca5a5;
     background: rgba($danger, 0.08);
     color: $danger-dark;
   }
+}
+
+// Botón base (si ya tienes .btn-icon puedes extenderlo)
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+// Variante menú (3 puntitos)
+.btn-icon--menu {
+  background-color: #f1f5f9; // gris claro
+  color: #64748b; // gris medio
+
+  border-radius: 50%; // 🔥 círculo
+
+  i {
+    font-size: 0.9rem;
+  }
+}
+
+// Hover bonito
+.btn-icon--menu:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+  transform: scale(1.05);
+}
+
+// Active (cuando hace click)
+.btn-icon--menu:active {
+  transform: scale(0.95);
 }

@@ -216,27 +216,7 @@
 
 						<!-- Acciones -->
 						<td class="text-center pe-4">
-							<div class="d-flex justify-content-center gap-1">
-								<!-- <button class="btn btn-sm btn-icon" title="Ver detalle" (click)="openViewModal(course)">
-									<i class="bi bi-eye text-primary"></i>
-								</button>
-								<button class="btn btn-sm btn-icon" title="Editar" (click)="openEditModal(course)">
-									<i class="bi bi-pencil text-warning"></i>
-								</button>
-								<button class="btn btn-sm btn-icon" [title]="course.is_active ? 'Inactivar' : 'Activar'"
-									(click)="toggleStatus(course)" [disabled]="updatingStatus()">
-									<i class="bi"
-										[ngClass]="course.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'"></i>
-								</button>
-								<button class="btn-icon danger" (click)="onDeleteCourse(course)">
-									<i class="bi bi-trash"></i>
-								</button> -->
-						<td class="text-center pe-4">
-							<div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
-
-						<td class="text-center pe-4">
 							<div class="d-flex justify-content-center align-items-center gap-1 flex-nowrap">
-
 								<button class="btn btn-sm btn-icon" title="Ver transacciones" (click)="goToCourseTransactions(course)">
 									<i class="bi bi-cash-coin text-primary"></i>
 								</button>
@@ -252,74 +232,69 @@
 								<button class="btn btn-sm btn-icon" [title]="course.is_active ? 'Inactivar' : 'Activar'"
 									(click)="toggleStatus(course)" [disabled]="updatingStatus()">
 									<i class="bi"
-										[ngClass]="course.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'"></i>
+										[ngClass]="course.is_active ? 'bi-slash-circle text-danger' : 'bi-check-circle text-success'">
+									</i>
 								</button>
 
 								<button class="btn-icon danger" title="Eliminar" (click)="onDeleteCourse(course)">
 									<i class="bi bi-trash"></i>
 								</button>
-
 							</div>
 						</td>
 
+					</tr>
+					}
+				</tbody>
+			</table>
 		</div>
-		</td>
-	</div>
-	</td>
 
-	</tr>
-	}
-	</tbody>
-	</table>
-</div>
+		<!-- Footer paginación -->
+		<div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+			<span class="text-muted small">
+				Mostrando <strong>{{ fromRecord }}–{{ toRecord }}</strong> de
+				<strong>{{ totalFiltered }}</strong> curso(s)
+			</span>
 
-<!-- Footer paginación -->
-<div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
-	<span class="text-muted small">
-		Mostrando <strong>{{ fromRecord }}–{{ toRecord }}</strong> de
-		<strong>{{ totalFiltered }}</strong> curso(s)
-	</span>
-
-	@if (totalPages > 1) {
-	<nav>
-		<ul class="pagination pagination-sm mb-0">
-			<li class="page-item" [class.disabled]="currentPage === 1">
-				<a class="page-link" (click)="goToPage(currentPage - 1)" role="button">‹</a>
-			</li>
-			@for (page of pages; track page) {
-			<li class="page-item" [class.active]="page === currentPage">
-				<a class="page-link" (click)="goToPage(page)" role="button">{{ page }}</a>
-			</li>
+			@if (totalPages > 1) {
+			<nav>
+				<ul class="pagination pagination-sm mb-0">
+					<li class="page-item" [class.disabled]="currentPage === 1">
+						<a class="page-link" (click)="goToPage(currentPage - 1)" role="button">‹</a>
+					</li>
+					@for (page of pages; track page) {
+					<li class="page-item" [class.active]="page === currentPage">
+						<a class="page-link" (click)="goToPage(page)" role="button">{{ page }}</a>
+					</li>
+					}
+					<li class="page-item" [class.disabled]="currentPage === totalPages">
+						<a class="page-link" (click)="goToPage(currentPage + 1)" role="button">›</a>
+					</li>
+				</ul>
+			</nav>
 			}
-			<li class="page-item" [class.disabled]="currentPage === totalPages">
-				<a class="page-link" (click)="goToPage(currentPage + 1)" role="button">›</a>
-			</li>
-		</ul>
-	</nav>
-	}
-</div>
-}
+		</div>
+		}
 
-<!-- Empty state -->
-@if (!loading() && pagedCourses.length === 0) {
-<div class="card-body text-center py-5">
-	<i class="bi bi-journal-x display-4 text-muted opacity-50"></i>
+		<!-- Empty state -->
+		@if (!loading() && pagedCourses.length === 0) {
+		<div class="card-body text-center py-5">
+			<i class="bi bi-journal-x display-4 text-muted opacity-50"></i>
 
-	@if (hasActiveFilters) {
-	<p class="text-muted mt-3 mb-0">No se encontraron cursos con los filtros aplicados.</p>
-	<button class="btn btn-outline-secondary btn-sm mt-3" (click)="clearFilters()">
-		<i class="bi bi-x-circle me-1"></i> Limpiar filtros
-	</button>
-	} @else {
-	<p class="text-muted mt-3 mb-0">No hay cursos registrados todavía.</p>
-	<button class="btn btn-primary btn-sm mt-3" (click)="openCreateModal()">
-		<i class="bi bi-plus-circle me-1"></i> Registrar primer curso
-	</button>
-	}
-</div>
-}
+			@if (hasActiveFilters) {
+			<p class="text-muted mt-3 mb-0">No se encontraron cursos con los filtros aplicados.</p>
+			<button class="btn btn-outline-secondary btn-sm mt-3" (click)="clearFilters()">
+				<i class="bi bi-x-circle me-1"></i> Limpiar filtros
+			</button>
+			} @else {
+			<p class="text-muted mt-3 mb-0">No hay cursos registrados todavía.</p>
+			<button class="btn btn-primary btn-sm mt-3" (click)="openCreateModal()">
+				<i class="bi bi-plus-circle me-1"></i> Registrar primer curso
+			</button>
+			}
+		</div>
+		}
 
-</div>
+	</div>
 </div>
 
 <!-- ─── MODAL CURSO ─────────────────────────────────────────────────────────── -->
