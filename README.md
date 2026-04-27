@@ -1,8 +1,21 @@
 # Classfund / Tesoreria Cursos
 
-Aplicacion web para administrar fondos de cursos escolares: colegios, cursos, usuarios, categorias, transacciones, comprobantes y reportes.
+Classfund es una app web para tesorerias de cursos escolares. Permite ordenar la administracion del dinero del curso en un solo lugar: usuarios, colegios, cursos, categorias, ingresos, egresos, comprobantes y reportes.
 
-El proyecto esta orientado al mercado chileno/latinoamericano y usa Angular para el frontend y Supabase como backend.
+La app contempla dos formas principales de uso:
+
+- Administradores: gestionan colegios, cursos, usuarios, catalogos y transacciones globales.
+- Usuarios de curso: trabajan en un contexto especifico de colegio/curso para registrar y consultar movimientos.
+
+El objetivo es tener una herramienta simple para que directivas, tesoreros y apoderados puedan revisar el estado del fondo del curso con mayor claridad.
+
+## App de Prueba
+
+Puedes visitar el ambiente de prueba en GitHub Pages:
+
+[https://maxuber79.github.io/classfound/](https://maxuber79.github.io/classfound/)
+
+Este despliegue sirve para revisar la interfaz desde escritorio, tablet y celulares. Para que login, registro y funciones administrativas operen correctamente, Supabase debe tener esta URL configurada como URL permitida/redirect.
 
 ## Stack
 
