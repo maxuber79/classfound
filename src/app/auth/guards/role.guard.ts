@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, map, take } from 'rxjs';
+import { combineLatest, filter, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 /**
@@ -15,11 +15,14 @@ export const roleGuard: CanActivateFn = () => {
 
   console.log('🔐 [roleGuard] Evaluando rol...');
 
-  // Espera a que el perfil no sea null antes de evaluar
-  return toObservable(authService.profile).pipe(
-    filter(profile => profile !== null), // 👈 espera perfil cargado
+  return combineLatest([
+    toObservable(authService.loading),
+    toObservable(authService.profileLoaded),
+    toObservable(authService.profile)
+  ]).pipe(
+    filter(([loading, profileLoaded]) => !loading && profileLoaded),
     take(1),
-    map(profile => {
+    map(([, , profile]) => {
       const role = profile?.global_role;
       const isAdmin = role === 'admin' || role === 'super_admin';
       console.log('🔐 [roleGuard] global_role:', role);

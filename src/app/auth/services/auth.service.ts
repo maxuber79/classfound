@@ -28,6 +28,7 @@ export class AuthService {
 	 * Se usa para saber cuándo la sesión ya fue consultada.
 	 */
 	private readonly _loading = signal<boolean>(true);
+	private readonly _profileLoaded = signal<boolean>(false);
 
 	/**
 	 * Signal pública de solo lectura que expone la sesión actual.
@@ -43,6 +44,7 @@ export class AuthService {
 	 * Signal pública de solo lectura que indica si el servicio sigue cargando.
 	 */
 	readonly loading = this._loading.asReadonly();
+	readonly profileLoaded = this._profileLoaded.asReadonly();
 
 	/**
 	 * Signal derivada que indica si existe una sesión autenticada.
@@ -144,10 +146,14 @@ export class AuthService {
 			// 👇 cargar perfil
 			if (session?.user) {
 				console.log('[AuthService][onAuthStateChange] Cargando perfil del usuario...');
+				this._profileLoaded.set(false);
+				this._courseProfile.set(null);
 				this.loadProfile(session.user.id);
 			} else {
 				console.log('[AuthService][onAuthStateChange] Sin sesión, limpiando perfil...');
 				this._profile.set(null);
+				this._courseProfile.set(null);
+				this._profileLoaded.set(true);
 			}
 		});
 	}
@@ -255,26 +261,33 @@ export class AuthService {
 	private async loadProfile(userId: string): Promise<void> {
 		console.log('[AuthService][loadProfile] Cargando perfil para userId:', userId);
 
-		const { data, error } = await this.supabaseService.client
-			.from('profiles')
-			.select('*')
-			.eq('id', userId)
-			.single();
+		try {
+			const { data, error } = await this.supabaseService.client
+				.from('profiles')
+				.select('*')
+				.eq('id', userId)
+				.single();
 
-		if (error) {
-			console.error('[AuthService][loadProfile] Error al cargar perfil:', error);
-			this._profile.set(null);
-			return;
-		}
+			if (error) {
+				console.error('[AuthService][loadProfile] Error al cargar perfil:', error);
+				this._profile.set(null);
+				this._courseProfile.set(null);
+				return;
+			}
 
-		console.log('[AuthService][loadProfile] Perfil cargado:', data);
-		console.log('[AuthService][loadProfile] global_role:', data?.global_role);
-		// después
-		this._profile.set(data as AdminUser);
+			console.log('[AuthService][loadProfile] Perfil cargado:', data);
+			console.log('[AuthService][loadProfile] global_role:', data?.global_role);
+			// después
+			this._profile.set(data as AdminUser);
 
-		// Si no es admin, carga membresía de curso
-		if (data?.global_role === 'user') {
-			this.loadCourseProfile(userId);
+			// Si no es admin, carga membresía de curso
+			if (data?.global_role === 'user') {
+				this.loadCourseProfile(userId);
+			} else {
+				this._courseProfile.set(null);
+			}
+		} finally {
+			this._profileLoaded.set(true);
 		}
 	}
 

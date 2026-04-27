@@ -7,18 +7,6 @@ import { ForgotPassword } from './auth/pages/forgot-password/forgot-password';
 import { ResetPassword } from './auth/pages/reset-password/reset-password';
 // Dashboard layout
 import { Dashboard } from './features/dashboard/pages/dashboard/dashboard';
-import { DashboardHome } from './features/dashboard/pages/dashboard-home/dashboard-home';
-import { CategoriesPage } from './features/categories/pages/categories-page/categories-page';
-import { TransactionsPage } from './features/transactions/pages/transactions/transactions';
-import {  SchoolsPage } from './features/schools/pages/schools/schools';
-import { ReceiptsPage } from './features/receipts/pages/receipts-page/receipts-page';
-import { ReportsPage } from './features/reports/pages/reports-page/reports-page';
-
-
-// Módulos actuales
-import { UsersPage } from './features/admin/users/pages/users-page/users-page';
-import { ProfilePage }    from './features/profile/pages/profile-page/profile-page';
-import { CoursePage } from './features/courses/pages/course-page/course';
 
 //Importar guard de autenticación
 import { authGuard } from './auth/guards/auth.guard';
@@ -37,8 +25,8 @@ export const routes: Routes = [
 	 	children: [			
 			{ path: '', pathMatch: 'full', redirectTo: 'home' },
       { path: 'home', loadComponent: () => import('./features/dashboard/pages/dashboard-home/dashboard-home').then(m => m.DashboardHome)},
-      { path: 'admin/users', component: UsersPage, canActivate: [roleGuard]   },
-      { path: 'profile',     component: ProfilePage },
+      { path: 'admin/users', loadComponent: () => import('./features/admin/users/pages/users-page/users-page').then(m => m.UsersPage), canActivate: [roleGuard]   },
+      { path: 'profile', loadComponent: () => import('./features/profile/pages/profile-page/profile-page').then(m => m.ProfilePage) },
 			{ path: 'courses', loadComponent: () => import('./features/courses/pages/course-page/course').then(m => m.CoursePage), canActivate: [roleGuard]},
       { path: 'categories', loadComponent: () => import('./features/categories/pages/categories-page/categories-page').then(m => m.CategoriesPage)},
       { path: 'transactions', loadComponent: () => import('./features/transactions/pages/transactions/transactions').then(m => m.TransactionsPage), canActivate: [roleGuard]},

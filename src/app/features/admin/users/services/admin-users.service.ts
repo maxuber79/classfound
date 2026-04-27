@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { environment } from '../../../../../environments/environment';
 import { SupabaseService } from '../../../../core/services/supabase.service';
 import { AdminUser } from '../models/admin-user.interface';
 import { CreateAdminUserPayload } from '../models/create-admin-user-payload.interface';
@@ -30,6 +29,19 @@ export interface GetUsersResult {
 })
 export class AdminUsersService {
   private readonly supabaseService = inject(SupabaseService);
+
+	private async getAuthorizationHeader(): Promise<{ Authorization: string }> {
+		const { data, error } = await this.supabaseService.client.auth.getSession();
+		const accessToken = data.session?.access_token;
+
+		if (error || !accessToken) {
+			throw new Error('No hay una sesión activa para ejecutar esta acción administrativa.');
+		}
+
+		return {
+			Authorization: `Bearer ${accessToken}`,
+		};
+	}
 
   /**
    * Obtiene la lista de usuarios desde la tabla `profiles`.
@@ -161,9 +173,7 @@ export class AdminUsersService {
         'create-user-admin',
         {
           body: payload,
-          headers: {
-            Authorization: `Bearer ${environment.supabase.supabaseLegacyAnonKey}`
-          }
+          headers: await this.getAuthorizationHeader()
         }
       );
 
@@ -381,9 +391,7 @@ export class AdminUsersService {
 			'delete-user-admin',
 			{
 				body: { user_id: userId },
-				headers: {
-					Authorization: `Bearer ${this.supabaseService.anonKey}`,
-				},
+				headers: await this.getAuthorizationHeader(),
 			}
 		);
 
