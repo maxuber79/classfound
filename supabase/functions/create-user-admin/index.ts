@@ -1,9 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-/**
- * Flag global para activar o desactivar logs.
- */
 const ENABLE_LOGS = true;
 
 /**
@@ -134,49 +131,35 @@ Deno.serve(async (req: Request) => {
     }
 
     const callerToken = getBearerToken(req);
-    if (!callerToken) {
-      return jsonResponse(401, {
-        success: false,
-        message: "No autenticado."
-      });
-    }
 
-    const { data: callerData, error: callerError } =
-      await supabase.auth.getUser(callerToken);
+    if (callerToken && globalRole !== "user") {
+      const { data: callerData, error: callerError } =
+        await supabase.auth.getUser(callerToken);
 
-    if (!callerError && callerData.user) {
-      const { data: callerProfile, error: callerProfileError } = await supabase
-        .from("profiles")
-        .select("global_role,is_active")
-        .eq("id", callerData.user.id)
-        .single();
+      if (!callerError && callerData.user) {
+        const { data: callerProfile, error: callerProfileError } = await supabase
+          .from("profiles")
+          .select("global_role,is_active")
+          .eq("id", callerData.user.id)
+          .single();
 
-      const isAdmin =
-        callerProfile?.is_active === true &&
-        (callerProfile.global_role === "admin" || callerProfile.global_role === "super_admin");
+        const isAdmin =
+          callerProfile?.is_active === true &&
+          (callerProfile.global_role === "admin" || callerProfile.global_role === "super_admin");
 
-      if (callerProfileError || !isAdmin) {
-        log("⛔ Usuario sin permisos para crear usuarios:", {
-          userId: callerData.user.id,
-          callerProfileError,
-          role: callerProfile?.global_role
-        });
+        if (callerProfileError || !isAdmin) {
+          log("⛔ Usuario sin permisos para crear usuarios:", {
+            userId: callerData.user.id,
+            callerProfileError,
+            role: callerProfile?.global_role
+          });
 
-        return jsonResponse(403, {
-          success: false,
-          message: "No tienes permisos para crear usuarios."
-        });
+          return jsonResponse(403, {
+            success: false,
+            message: "No tienes permisos para crear usuarios."
+          });
+        }
       }
-    } else if (globalRole !== "user") {
-      log("⛔ Registro público intentó crear rol no permitido:", {
-        email,
-        globalRole
-      });
-
-      return jsonResponse(403, {
-        success: false,
-        message: "El registro público solo puede crear usuarios normales."
-      });
     }
 
     log("👤 Creando usuario en Auth...");

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../../core/services/supabase.service';
-import { Receipt } from '../models/receipt.interface';
+import { Receipt, ReceiptListItem } from '../models/receipt.interface';
 
 const DEBUG = true;
 
@@ -10,6 +10,72 @@ const DEBUG = true;
 export class ReceiptsService {
   private supabase = inject(SupabaseService);
   private readonly BUCKET = 'receipts';
+
+  async getReceipts(courseId?: string | null): Promise<ReceiptListItem[]> {
+    if (DEBUG) console.log('[ReceiptsService] getReceipts', courseId);
+
+    let query = this.supabase.client
+      .from('receipts')
+      .select(`
+        *,
+        transactions!inner (
+          id,
+          type,
+          amount,
+          description,
+          transaction_date,
+          course_id,
+          categories (
+            name
+          ),
+          courses (
+            id,
+            name,
+            school_year,
+            schools (
+              id,
+              name
+            )
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (courseId) {
+      query = query.eq('transactions.course_id', courseId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return (data ?? []).map((item: any) => {
+      const transaction = item.transactions;
+      const course = transaction?.courses;
+      const school = Array.isArray(course?.schools)
+        ? course.schools[0]
+        : course?.schools;
+
+      return {
+        id: item.id,
+        transaction_id: item.transaction_id,
+        file_path: item.file_path,
+        file_name: item.file_name,
+        mime_type: item.mime_type,
+        file_size: item.file_size,
+        uploaded_by: item.uploaded_by,
+        created_at: item.created_at,
+        transaction_type: transaction?.type ?? 'income',
+        transaction_amount: Number(transaction?.amount ?? 0),
+        transaction_description: transaction?.description ?? null,
+        transaction_date: transaction?.transaction_date ?? item.created_at,
+        course_id: transaction?.course_id ?? '',
+        course_name: course?.name ?? 'Sin curso',
+        school_name: school?.name ?? 'Sin colegio',
+        school_year: course?.school_year ?? null,
+        category_name: transaction?.categories?.name ?? 'Sin categoria',
+      } satisfies ReceiptListItem;
+    });
+  }
 
 	/**
    * Obtiene los comprobantes de una transacción específica.

@@ -242,7 +242,53 @@ export class AuthService {
 		if (error) throw new Error(error.message);
 	}
 
-	// Agregar método al final de la clase:
+	async handleEmailConfirmation(
+		token: string | null,
+		type: string | null,
+		tokenHash: string | null
+	): Promise<{ success: boolean; error?: string }> {
+		if (DEBUG) console.log('[AuthService][handleEmailConfirmation] Params:', { token, type, tokenHash });
+
+		try {
+			const { data, error } = await this.supabaseService.client.auth.getSession();
+
+			if (error) {
+				if (DEBUG) console.error('[AuthService][handleEmailConfirmation] Error getSession:', error);
+				return { success: false, error: error.message };
+			}
+
+			if (data.session?.user) {
+				const emailConfirmed = data.session.user.email_confirmed_at;
+				if (DEBUG) console.log('[AuthService][handleEmailConfirmation] email_confirmed_at:', emailConfirmed);
+
+				if (emailConfirmed) {
+					return { success: true };
+				}
+			}
+
+			if (token && tokenHash) {
+				if (DEBUG) console.log('[AuthService][handleEmailConfirmation] Intentando verifyOtp...');
+				const { data: otpData, error: otpError } = await this.supabaseService.client.auth.verifyOtp({
+					type: 'email_change' as any,
+					token,
+					token_hash: tokenHash
+				});
+
+				if (otpError) {
+					if (DEBUG) console.error('[AuthService][handleEmailConfirmation] verifyOtp error:', otpError);
+				} else if (otpData.session) {
+					if (DEBUG) console.log('[AuthService][handleEmailConfirmation] Otp verificado exitosamente');
+					return { success: true };
+				}
+			}
+
+			return { success: true };
+		} catch (err: any) {
+			if (DEBUG) console.error('[AuthService][handleEmailConfirmation] Exception:', err);
+			return { success: false, error: err.message };
+		}
+	}
+
 	async updatePassword(newPassword: string): Promise<void> {
 		const { error } = await this.supabaseService.client.auth.updateUser({
 			password: newPassword

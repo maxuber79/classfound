@@ -1,0 +1,101 @@
+.reports-page {
+  .summary-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.15rem 1.25rem;
+    border: 1px solid #f0f0f0;
+    border-top: 4px solid transparent;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+
+    &__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    &__body {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    &__label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6c757d;
+    }
+
+    &__amount {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      line-height: 1.2;
+    }
+
+    &__sub {
+      font-size: 0.72rem;
+      color: #9ca3af;
+    }
+
+    &--primary {
+      border-top-color: #2563eb;
+
+      .summary-card__icon {
+        background: rgba(37, 99, 235, 0.12);
+        color: #2563eb;
+      }
+    }
+
+    &--success {
+      border-top-color: #10b981;
+
+      .summary-card__icon {
+        background: rgba(16, 185, 129, 0.12);
+        color: #0f766e;
+      }
+    }
+
+    &--warning {
+      border-top-color: #fbbf24;
+
+      .summary-card__icon {
+        background: rgba(251, 191, 36, 0.15);
+        color: #d97706;
+      }
+    }
+
+    &--danger {
+      border-top-color: #ef4444;
+
+      .summary-card__icon {
+        background: rgba(239, 68, 68, 0.12);
+        color: #b91c1c;
+      }
+    }
+  }
+
+  .table-users-header th {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b7280;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  .table-users-row td {
+    vertical-align: middle;
+    border-color: #f1f5f9;
+  }
+}

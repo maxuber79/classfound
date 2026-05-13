@@ -1,1 +1,168 @@
-<p>receipts-page works!</p>
+<div class="container-fluid px-4 py-4 receipts-page">
+  <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+    <div>
+      <h4 class="fw-bold mb-1">Comprobantes</h4>
+      <p class="text-muted mb-0 small">
+        @if (isAdmin()) {
+          Evidencia adjunta a las transacciones de todos los cursos
+        } @else {
+          Evidencia adjunta a las transacciones de tu curso
+        }
+      </p>
+    </div>
+
+    <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2" type="button" (click)="loadReceipts()" [disabled]="loading()">
+      <i class="bi bi-arrow-clockwise"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-3">
+      <div class="summary-card summary-card--primary">
+        <div class="summary-card__icon"><i class="bi bi-receipt"></i></div>
+        <div class="summary-card__body">
+          <span class="summary-card__label">Comprobantes</span>
+          <span class="summary-card__amount">{{ totalReceipts }}</span>
+          <span class="summary-card__sub">Archivos registrados</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="summary-card summary-card--success">
+        <div class="summary-card__icon"><i class="bi bi-arrow-down-circle-fill"></i></div>
+        <div class="summary-card__body">
+          <span class="summary-card__label">Ingresos</span>
+          <span class="summary-card__amount">{{ incomeReceipts }}</span>
+          <span class="summary-card__sub">Con respaldo</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="summary-card summary-card--warning">
+        <div class="summary-card__icon"><i class="bi bi-arrow-up-circle-fill"></i></div>
+        <div class="summary-card__body">
+          <span class="summary-card__label">Egresos</span>
+          <span class="summary-card__amount">{{ expenseReceipts }}</span>
+          <span class="summary-card__sub">Con respaldo</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="summary-card summary-card--info">
+        <div class="summary-card__icon"><i class="bi bi-wallet2"></i></div>
+        <div class="summary-card__body">
+          <span class="summary-card__label">Balance respaldado</span>
+          <span class="summary-card__amount">{{ formatAmount(totalAmount) }}</span>
+          <span class="summary-card__sub">Ingresos menos egresos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-12 col-md-6">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input class="form-control border-start-0 bg-light" type="text" placeholder="Buscar archivo, curso, colegio o categoria" [(ngModel)]="searchTerm">
+          </div>
+        </div>
+        <div class="col-8 col-md-3">
+          <select class="form-select form-select-sm bg-light" [(ngModel)]="selectedType">
+            <option value="">Todos los tipos</option>
+            <option value="income">Ingreso</option>
+            <option value="expense">Egreso</option>
+          </select>
+        </div>
+        <div class="col-4 col-md-3 text-end">
+          <span class="badge bg-primary rounded-pill">{{ filteredReceipts.length }}</span>
+          @if (searchTerm || selectedType) {
+            <button class="btn btn-link btn-sm text-muted p-0 ms-2" type="button" (click)="clearFilters()" title="Limpiar filtros">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="text-muted mt-2 small">Cargando comprobantes...</p>
+      </div>
+    }
+
+    @if (!loading() && filteredReceipts.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr class="table-users-header">
+              <th class="ps-4">Archivo</th>
+              <th>Curso</th>
+              <th>Transaccion</th>
+              <th>Fecha</th>
+              <th class="text-end">Monto</th>
+              <th class="text-center pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (receipt of filteredReceipts; track receipt.id) {
+              <tr class="table-users-row">
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="receipt-icon"><i class="bi" [ngClass]="receipt.mime_type.includes('pdf') ? 'bi-file-earmark-pdf' : 'bi-file-earmark-image'"></i></span>
+                    <div class="min-width-0">
+                      <div class="fw-semibold small text-truncate">{{ receipt.file_name }}</div>
+                      <div class="text-muted" style="font-size:0.72rem;">{{ formatFileSize(receipt.file_size) }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="fw-semibold small">{{ receipt.course_name }}</div>
+                  <div class="text-muted" style="font-size:0.72rem;">{{ receipt.school_name }} @if (receipt.school_year) { - {{ receipt.school_year }} }</div>
+                </td>
+                <td>
+                  <span class="type-badge" [class.type-badge--income]="receipt.transaction_type === 'income'" [class.type-badge--expense]="receipt.transaction_type === 'expense'">
+                    <i class="bi" [ngClass]="getTypeIcon(receipt.transaction_type)"></i>
+                    {{ getTypeLabel(receipt.transaction_type) }}
+                  </span>
+                  <div class="text-muted mt-1" style="font-size:0.72rem;">{{ receipt.category_name }}</div>
+                </td>
+                <td>
+                  <div class="small">{{ receipt.transaction_date | date:'dd MMM yyyy' }}</div>
+                  <div class="text-muted" style="font-size:0.72rem;">Subido {{ receipt.created_at | date:'dd MMM yyyy' }}</div>
+                </td>
+                <td class="text-end">
+                  <span class="fw-bold" [class.text-success]="receipt.transaction_type === 'income'" [class.text-danger]="receipt.transaction_type === 'expense'">
+                    {{ receipt.transaction_type === 'income' ? '+' : '-' }}{{ formatAmount(receipt.transaction_amount) }}
+                  </span>
+                </td>
+                <td class="text-center pe-4">
+                  <button class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2" type="button" (click)="openReceipt(receipt)" [disabled]="openingReceipt() === receipt.id">
+                    @if (openingReceipt() === receipt.id) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    } @else {
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    }
+                    Abrir
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!loading() && filteredReceipts.length === 0) {
+      <div class="card-body text-center py-5">
+        <i class="bi bi-receipt display-4 text-muted opacity-50"></i>
+        <p class="text-muted mt-3 mb-0">No hay comprobantes para mostrar.</p>
+      </div>
+    }
+  </div>
+</div>

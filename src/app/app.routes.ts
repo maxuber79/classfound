@@ -5,6 +5,7 @@ import { Login } from './auth/pages/login/login';
 import { Register } from './auth/pages/register/register';
 import { ForgotPassword } from './auth/pages/forgot-password/forgot-password';
 import { ResetPassword } from './auth/pages/reset-password/reset-password';
+import { ConfirmEmail } from './auth/pages/confirm-email/confirm-email';
 // Dashboard layout
 import { Dashboard } from './features/dashboard/pages/dashboard/dashboard';
 
@@ -18,7 +19,8 @@ export const routes: Routes = [
   { path: 'login', component: Login, canActivate: [loginGuard] },
   { path: 'register', component: Register, canActivate: [loginGuard] },
   { path: 'forgot-password', component: ForgotPassword, canActivate: [loginGuard] },
-	{ path: 'reset-password', component: ResetPassword },
+  { path: 'reset-password', component: ResetPassword },
+  { path: 'confirm-email', component: ConfirmEmail },
   { path: 'dashboard',
 		component: Dashboard,
 		canActivate: [authGuard],
