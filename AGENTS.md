@@ -61,7 +61,14 @@ Set secrets in Supabase (Edge Functions → select function → Secrets):
 
 - `authGuard` - Protects `/dashboard` routes.
 - `roleGuard` - Waits for `loading=false` AND `profileLoaded=true`. If no admin profile, redirects to `/dashboard/home`.
-- `loginGuard` - Redirects to `/dashboard` if user already has session.
+- `loginGuard` - Redirects to `/dashboard` if user already has session. Also detects `type=recovery` in URL hash and redirects to `/reset-password` (fix for password reset flow from Supabase dashboard).
+
+## Password Reset Flow
+
+- `resetPassword(email)` in AuthService sends reset email with `redirectTo: ${window.location.origin}/reset-password`.
+- `onAuthStateChange` in AuthService detects `PASSWORD_RECOVERY` event and navigates to `/reset-password` inside `NgZone.run()` (required because Supabase callbacks run outside Angular's zone).
+- `loginGuard` also detects `type=recovery` in URL hash as a fallback redirect mechanism.
+- When testing reset from Supabase Dashboard (not from app), Site URL must be set to the app origin (e.g. `http://localhost:4200` for dev) so the link includes the correct host. After reset, Site URL can be restored to production URL.
 
 ## Routes
 

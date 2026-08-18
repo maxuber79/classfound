@@ -1,4 +1,5 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, NgZone, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Session, User } from '@supabase/supabase-js';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { AdminUser } from '../../features/admin/users/models/admin-user.interface';
@@ -9,7 +10,9 @@ const DEBUG = true;
 	providedIn: 'root',
 })
 export class AuthService {
-	private readonly supabaseService = inject(SupabaseService);
+  private readonly supabaseService = inject(SupabaseService);
+  private readonly router = inject(Router);
+  private readonly ngZone = inject(NgZone);
 
 	/**
 	 * Signal interna que almacena la sesión activa de Supabase.
@@ -136,9 +139,13 @@ export class AuthService {
 				this._loading.set(false);
 			}
 
-			if (event === 'PASSWORD_RECOVERY') {
-				this._loading.set(false);
-			}
+		if (event === 'PASSWORD_RECOVERY') {
+			this._loading.set(false);
+			console.log('[AuthService][onAuthStateChange] PASSWORD_RECOVERY detectado, redirigiendo a /reset-password');
+			this.ngZone.run(() => {
+				this.router.navigate(['/reset-password']);
+			});
+		}
 
 			console.log('[AuthService][onAuthStateChange] Session actualizada:', this._session());
 			console.log('[AuthService][onAuthStateChange] User actualizado:', this._user());

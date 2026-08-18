@@ -37,6 +37,7 @@ Este despliegue sirve para revisar la interfaz desde escritorio, tablet y celula
 - Autenticacion, dashboard, usuarios, colegios, cursos, categorias y transacciones estan funcionales.
 - Comprobantes tiene modelo/servicio en avance.
 - Reportes existe como modulo base pendiente de analitica real.
+- Flujo de reset de password arreglado: detección de `PASSWORD_RECOVERY` + redirección automática a `/reset-password` (loginGuard + AuthService con NgZone).
 
 Ultimos checkpoints relevantes:
 
